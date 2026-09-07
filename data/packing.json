@@ -1,0 +1,147 @@
+{
+  "_meta": {
+    "version": "1.0",
+    "updated": "2026-09-06",
+    "note": "打包清單。checked 狀態存 localStorage（key: packing.<id>），清單本身是唯讀資料。deadline 有值的是有期限的事，App 要按日期排序並在逾期時標紅。",
+    "UI": "分組摺疊，每項一個 checkbox。頂部顯示「已完成 n/總數」。deadline 早的排前面。"
+  },
+
+  "groups": [
+
+    {
+      "key": "before",
+      "label": "🗓 出發前要辦的事",
+      "note": "有期限，照日期做",
+      "items": [
+        { "id": "pk-yiman", "text": "役男出境線上申請", "deadline": "2026-09-25",
+          "detail": "出國前 **1 個月內**才能申請，太早系統不受理 → **9/25 之後**才開得了。即時核准。網址 service.dca.moi.gov.tw。**核准通知單印出來放護照裡**。\n⚠️ 已服完兵役／免役／已除役就跳過這項。順便問系辦和指導教授要不要簽出國同意書。",
+          "critical": true },
+        { "id": "pk-card", "text": "開通郵局卡「國外交易功能」", "deadline": "2026-09-30",
+          "detail": "**沒開通在日本會直接被拒刷。**四種方式：郵局實體 ATM、網路 ATM 的「金融卡其他功能」、行動郵局 APP、或臨櫃（帶身分證＋存摺＋原留印鑑）。\n順便確認你記得 **VISA 密碼**（跟晶片密碼可能不同）。",
+          "critical": true },
+        { "id": "pk-sim", "text": "買日本實體 SIM 卡", "deadline": "2026-09-30",
+          "detail": "⚠️ **你的手機不支援 eSIM**（OPPO Reno 10 Pro+ 規格表寫「eSIM：無」），買 eSIM 方案會作廢。\nKlook／KKday 都有，**看清楚商品標題有沒有寫「實體卡」或「SIM Card」**。約 NT$300–500。",
+          "critical": true },
+        { "id": "pk-shinkansen", "text": "訂新幹線早特 7（9/29 上午 10:00 一開賣）", "deadline": "2026-09-29",
+          "detail": "JR 九州網路預約 jrkyushu-kippu.jp。訂這兩班：\n**去程 10/29 博多 07:58 → 熊本 08:36　さくら401**\n**回程 10/29 熊本 17:04 → 博多 17:43　さくら768**\n⚠️ **早特 7 每班便宜座位有限，先賣先得**，晚訂只剩貴的或沒有。QR 無票化，不用取票。",
+          "critical": true },
+        { "id": "pk-nikuichi", "text": "訂薬院焼肉 NIKUICHI（9/28 一開放就訂）", "deadline": "2026-09-28",
+          "detail": "10/28（三）19:30、1 名。用 **TableCheck**（tablecheck.com）——**有英文介面、接受海外電話號碼**，全程線上。" },
+        { "id": "pk-ppt", "text": "簡報檔上傳", "deadline": "2026-10-16",
+          "detail": "**大會硬性規定。**APCCAS 投稿系統。\n投影片每張 20 字以內、字級 18pt 以上。15 分鐘＝講 13 分＋Q&A 2 分。",
+          "critical": true },
+        { "id": "pk-yanagawa", "text": "訂柳川川下り", "deadline": "2026-10-05",
+          "detail": "10/27（二）**10:30 那班**，柳川観光開発。用 **asoview 線上訂**（asoview.com）。\n⚠️ 10 月下旬是旺季，10 月初就要訂。" },
+        { "id": "pk-kumamotojo", "text": "買熊本城門票（線上）", "deadline": "2026-10-10",
+          "detail": "官網線上買，QR 寄 email。\n⚠️ **10 月初再查一次わくわく座有沒有再開**——沒開的話 3 館共通券 ¥1,100 買不到，改買單館 ¥800。順便看熊本城官網有沒有新的入園限制。" },
+        { "id": "pk-dazaifu", "text": "買太宰府散策きっぷ", "deadline": "2026-10-20",
+          "detail": "**my route App 數位版 ¥1,000**（紙本天神站窗口 ¥1,040）。天神⇄太宰府來回 ＋ 梅ヶ枝餅 1 個兌換券。App 裡刷卡，不用現金。\n單買來回要 ¥1,140，所以這張等於車票打 88 折還送一個餅。" },
+        { "id": "pk-insurance", "text": "買旅平險", "deadline": "2026-10-15",
+          "detail": "投保時間要**跨越 10/25 出門到 10/30 回家**，兩頭各多抓半天防班機延誤。\n第一次出國建議含「**不便險**」（行李／班機延誤有理賠）。" },
+        { "id": "pk-hotelcheck", "text": "最後一次飯店比價決策", "deadline": "2026-10-20",
+          "detail": "10/21 扣款、10/23 16:00 免費取消到期。要換就在 10/20 前決定。" },
+        { "id": "pk-vjw", "text": "填 Visit Japan Web", "deadline": "2026-10-24",
+          "detail": "出發前 6 小時以上完成。**QR 截圖存進相簿**——不要只存書籤，沒網路打不開。同一組帳號也能產生免稅 QR。",
+          "critical": true },
+        { "id": "pk-cash", "text": "換日幣現金 ¥40,000–50,000", "deadline": "2026-10-23",
+          "detail": "屋台、小金ちゃん只收現金，神社的御守御朱印也是。不夠可在日本 7-11 的 Seven Bank ATM 領。" }
+      ]
+    },
+
+    {
+      "key": "app",
+      "label": "📱 手機要先弄好的",
+      "note": "全部在出發前用家裡 Wi-Fi 做完",
+      "items": [
+        { "id": "pk-app-pwa", "text": "把這個 App 加到主畫面，並在有網路時開一次", "critical": true,
+          "detail": "⚠️ **第一次開啟必須有網路**，Service Worker 才會把內容快取下來。出發前務必在家先開一次，之後才離線可用。" },
+        { "id": "pk-app-tts", "text": "下載 Google 日文語音包，並測試朗讀", "critical": true,
+          "detail": "設定 → 語言與輸入 → 文字轉語音 → Google 語音服務 → 安裝語音資料 → 日本語。\n**裝完回來這個 App 的句庫按一下朗讀，確認有聲音。**沒裝的話離線唸不出來。" },
+        { "id": "pk-app-maps", "text": "Google Maps 下載福岡＋熊本的離線地圖",
+          "detail": "⚠️ **離線地圖只有開車導航，沒有大眾運輸和步行路線。**所以這只是保險，主要還是靠 SIM 卡的網路。" },
+        { "id": "pk-app-translate", "text": "Google 翻譯下載日文離線包",
+          "detail": "鏡頭即時翻譯離線可用，這是翻菜單的主力。" },
+        { "id": "pk-app-safety", "text": "裝 Safety tips（觀光廳官方防災 App）", "critical": true,
+          "detail": "繁體中文、免費、免註冊、Android 5.0+。推播緊急地震速報與海嘯警報。\n⚠️ **熊本 7/28 才剛地震過，你 10/29 要去，這個一定要裝。**" },
+        { "id": "pk-app-myroute", "text": "裝 my route App 並買好太宰府散策きっぷ",
+          "detail": "Toyota 與西鐵合作的官方 App，數位車票在裡面。" },
+        { "id": "pk-app-jorudan", "text": "裝 Japan Transit Planner（備援轉乘查詢）",
+          "detail": "繁體中文、免費有廣告。福岡市內 Google Maps 就夠，這個是備援——Google Maps 偶爾會漏西鐵的特急班次。" },
+        { "id": "pk-app-payke", "text": "裝 Payke（掃條碼看繁中商品資訊）",
+          "detail": "藥妝、伴手禮很好用。⚠️ **它不是過敏原資料庫，不要拿來判斷有沒有甲殼類。**" }
+      ]
+    },
+
+    {
+      "key": "docs",
+      "label": "🛂 證件與文件",
+      "note": "這一組掉了就是大麻煩",
+      "items": [
+        { "id": "pk-passport", "text": "護照", "critical": true, "detail": "效期要 6 個月以上。" },
+        { "id": "pk-passport-copy", "text": "護照影本 ＋ 大頭照（實體與雲端各一份）", "critical": true,
+          "detail": "遺失時補辦快很多。手機拍一份、Google 雲端存一份、紙本放另一個包。" },
+        { "id": "pk-yiman-paper", "text": "役男出境核准通知單（印出來）", "detail": "放在護照裡。零成本的保險。" },
+        { "id": "pk-ticket", "text": "機票 QR／Email（截圖存相簿）", "critical": true, "detail": "長榮 BR106 去程、BR105 回程。" },
+        { "id": "pk-vjw-qr", "text": "Visit Japan Web QR（截圖存相簿）", "critical": true },
+        { "id": "pk-hotel", "text": "兩家飯店的訂房確認信（截圖）", "detail": "Comfort Inn 福岡天神 ×4 晚、博多火星花園 ×1 晚。" },
+        { "id": "pk-insurance-doc", "text": "旅平險保單（截圖）" },
+        { "id": "pk-conf", "text": "研討會註冊確認信、論文 PDF", "detail": "名牌是照註冊資料印的。" },
+        { "id": "pk-usb", "text": "USB 隨身碟（簡報檔 ＋ PDF 備份）", "critical": true,
+          "detail": "官網規定：主辦提供會場電腦，**你不用帶自己的筆電上台**，但要帶 USB 和 PDF 備份。" }
+      ]
+    },
+
+    {
+      "key": "carryon",
+      "label": "🎒 手提行李（不能託運的）",
+      "items": [
+        { "id": "pk-powerbank", "text": "行動電源", "critical": true,
+          "detail": "⚠️ **只能手提，絕對不能託運。**100Wh 以下沒問題。這是最多人被攔的一項。" },
+        { "id": "pk-simpin", "text": "取卡針", "critical": true,
+          "detail": "**放隨身包外袋**，不要放託運行李。落地要在座位上換 SIM 卡。" },
+        { "id": "pk-charger", "text": "充電器 ＋ 傳輸線",
+          "detail": "日本插座是兩孔扁平 100V，台灣的插頭直接能用，不用轉接頭。" },
+        { "id": "pk-phone", "text": "手機（電充飽）" },
+        { "id": "pk-wallet", "text": "錢包：郵局 VISA ＋ 日幣現金",
+          "detail": "現金分兩處放，不要全部在同一個皮夾。" },
+        { "id": "pk-mask", "text": "口罩、面紙、濕紙巾", "detail": "日本很多店不給濕紙巾。" },
+        { "id": "pk-meds", "text": "個人常備藥", "detail": "腸胃藥、頭痛藥、OK 繃。日本買藥要看日文說明，帶自己習慣的比較快。" },
+        { "id": "pk-jacket", "text": "薄外套（上飛機就要）", "detail": "機艙冷，福岡早晚 18°C 也要。" }
+      ]
+    },
+
+    {
+      "key": "checked",
+      "label": "🧳 託運行李",
+      "note": "去程 2 件 × 23kg，回程只有 1 件 × 23kg",
+      "items": [
+        { "id": "pk-softbag", "text": "一個空的大軟袋（塞在行李箱裡）", "critical": true,
+          "detail": "⭐ **回程託運少一件。**去程只用一個行李箱、空出一個軟袋；回程買的東西裝軟袋當手提，就不用現場加購託運（機場加購很貴）。" },
+        { "id": "pk-clothes", "text": "衣服 6 天份",
+          "detail": "白天 25–26°C、早晚 18°C。洋蔥式：短袖或薄長袖 ＋ 薄外套。\n⚠️ **帶一件有領子的上衣**——10/25 Reception 不用西裝但別穿 T 恤短褲。報告當天照系上規矩穿。" },
+        { "id": "pk-shoes", "text": "好走的鞋", "detail": "六天幾乎全靠走路，10/28 早上還有六個點的散步路線。" },
+        { "id": "pk-toiletries", "text": "盥洗用品（超過 100ml 的要託運）",
+          "detail": "商務飯店有牙刷、牙膏、洗髮精。**建議自備個人保養品，尤其保濕。**" },
+        { "id": "pk-umbrella", "text": "折疊傘", "detail": "10 月下旬福岡雨少，但便利商店的傘也不貴，不想帶就算了。" }
+      ]
+    },
+
+    {
+      "key": "onsite",
+      "label": "📍 到了當地要做的",
+      "items": [
+        { "id": "pk-on-badge", "text": "10/25 領名牌時，當面跟 Registration Desk 講兩件事", "critical": true,
+          "detail": "1. **「我不參加 10/27 的 Excursion，但會自己去御花參加 Keynote 和 Banquet」**——主席明講最終決定要在 Registration Desk 講。這關係到晚宴人數和回程巴士座位\n2. **問回程巴士幾點從御花發車**。他說會安排但沒給時間；晚宴 19:30 結束，推測 19:45–20:00" },
+        { "id": "pk-on-name", "text": "順便再確認一次姓名欄位",
+          "detail": "註冊資料是 First: Hsu／Middle: Sheng／Last: Fang，但 **Hsu 才是姓**。正確是 First: Sheng-Fang／Middle:（空白）／Last: Hsu。名牌照註冊資料印，現在改還來得及。" },
+        { "id": "pk-on-frontdesk", "text": "10/25 check-in 時請櫃台打兩通訂位電話", "critical": true,
+          "detail": "**博多華味鳥**（10/26 18:00、1 名）、**菅乃屋 銀座通り店**（10/29 11:30、1 名、**備註甲殼類過敏、點ステーキ箱膳**）。\n把店名日期時間寫在紙上遞過去，配句庫裡那張大字卡。" },
+        { "id": "pk-on-room", "text": "10/25 check-in 時口頭要求高樓層、遠離吸菸樓層" },
+        { "id": "pk-on-receipt", "text": "10/29 退房時跟櫃台要「領収書」", "critical": true,
+          "detail": "報帳用的正式收據。日文講「領収書（りょうしゅうしょ）」，一般的「レシート」不算。" },
+        { "id": "pk-on-export", "text": "每晚匯出記帳備份", "critical": true,
+          "detail": "⚠️ 記帳和手帳只存在這支手機裡，**清掉瀏覽器資料就全沒了**。每晚睡前按一次匯出。" }
+      ]
+    }
+  ]
+}

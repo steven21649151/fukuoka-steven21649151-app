@@ -1,0 +1,149 @@
+/* Reset + typography + shell */
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+html { color-scheme: light dark; }
+body {
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  padding-bottom: 24px;
+}
+
+/* 桌機上把整個殼收在 640px 中心；手機上維持滿版 */
+.page {
+  max-width: 640px;
+  margin: 0 auto;
+  background: var(--page);
+  min-height: 100vh;
+  box-shadow: 0 0 40px -20px rgba(0,0,0,.1);
+}
+
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+img { max-width: 100%; display: block; }
+ul, ol { margin: 0; padding: 0; list-style: none; }
+h1, h2, h3, h4 { margin: 0; font-family: var(--dis); font-weight: 700; letter-spacing: .01em; }
+p { margin: 0; }
+b, strong { font-weight: 700; color: var(--ink); }
+
+#outlet { min-height: 60vh; }
+
+/* Utility */
+.mono { font-family: var(--mono); font-feature-settings: "tnum"; }
+.faint { color: var(--faint); }
+.ink2  { color: var(--ink2); }
+.tiny  { font-size: 12px; }
+.small { font-size: 13px; }
+
+.wrap { padding: 0 16px; }
+
+/* ================= Hero（背景裝飾用，最上面） ================= */
+.hero {
+  position: relative;
+  height: 188px;
+  overflow: hidden;
+  padding-top: env(safe-area-inset-top, 0);
+}
+.hero[hidden] { display: none; }
+.hero img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
+/* 深色漸層 overlay：讓 hero 標題與底下的 topbar 交界更順、字看得清楚 */
+.hero::before {
+  content: "";
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.15) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,.45) 100%);
+  pointer-events: none;
+}
+.hero-title {
+  position: absolute;
+  left: 16px;
+  bottom: 12px;
+  color: #fff;
+  font-family: var(--dis);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-shadow: 0 2px 10px rgba(0,0,0,.55), 0 0 2px rgba(0,0,0,.6);
+  line-height: 1.15;
+}
+.hero-title .hero-sub {
+  font-size: 15px;
+  font-weight: 400;
+  opacity: .9;
+  letter-spacing: .05em;
+}
+
+/* ================= Topbar（nowbar + tabbar），黏在畫面最上緣 ================= */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: color-mix(in oklab, var(--page) 94%, transparent);
+  backdrop-filter: saturate(1.2) blur(10px);
+  -webkit-backdrop-filter: saturate(1.2) blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+.nowbar {
+  padding: 6px 14px;
+  font-size: 12px;
+  color: var(--ink2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.nowbar .now { font-family: var(--mono); }
+.nowbar .tripstate {
+  color: var(--shu);
+  font-family: var(--dis);
+  font-weight: 700;
+  letter-spacing: .02em;
+  font-size: 12px;
+}
+
+/* Tabbar */
+.tabbar {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr) 1.05fr;
+  gap: 2px;
+  padding: 4px 6px 6px;
+}
+.tabbar a {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 1px;
+  padding: 4px 2px;
+  border-radius: 10px;
+  color: var(--ink2);
+  min-height: 42px;
+}
+.tabbar a[aria-current="page"] {
+  background: var(--soft);
+  color: var(--ink);
+}
+.tabbar .kanji { font-family: var(--dis); font-size: 18px; font-weight: 700; letter-spacing: .02em; line-height: 1.1; }
+.tabbar .date  { font-family: var(--mono); font-size: 10px; color: var(--faint); }
+.tabbar .tools { /* 跟其他六格一樣，只用圖示區分 */ }
+.tabbar .toolicon { font-size: 18px; line-height: 1; }
+.tabbar .toollabel { font-size: 10px; color: inherit; }
+
+/* 導覽箭頭列 */
+.topnav {
+  padding: 10px 0;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 14px; color: var(--ink2);
+  flex-wrap: wrap;
+}
+.topnav .back {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 6px 10px 6px 8px;
+  border-radius: 8px;
+  background: var(--soft);
+}

@@ -1,0 +1,126 @@
+/* ============================================================
+   規格第 3.1 節：設計 token
+   淺色：:root
+   系統深色（跟隨）：@media prefers-color-scheme: dark 且未手動指定 light
+   手動深色：:root[data-theme="dark"]
+   ============================================================ */
+
+:root {
+  /* 底 */
+  --page: #FCFBF7;
+  --card: #FFFFFF;
+  --soft: #F3F0E9;
+
+  /* 字 */
+  --ink:   #26241F;
+  --ink2:  #524E45;
+  --faint: #8B867B;
+  --line:  #E6E1D6;
+
+  /* 主色：朱 */
+  --shu: #C4452F;
+
+  /* 卡片陰影 */
+  --shadow-card: 0 1px 2px rgba(38,36,31,.05), 0 10px 22px -14px rgba(38,36,31,.3);
+
+  /* 字型：M1 先用系統字，等 M5 換 woff2 */
+  --dis:  system-ui, -apple-system, "Segoe UI", "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", sans-serif;
+  --sans: system-ui, -apple-system, "Segoe UI", "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", sans-serif;
+  --mono: ui-monospace, "SF Mono", Consolas, "Courier New", monospace;
+
+  /* 分類色（規格第 3.2 節） */
+  --cat-food-main:  #C4452F;  --cat-food-soft:  #FBEDE9;
+  --cat-sight-main: #4F7A4A;  --cat-sight-soft: #EAF1E7;
+  --cat-venue-main: #3A5A72;  --cat-venue-soft: #E7EDF2;
+  --cat-transit-main: #6E6863; --cat-transit-soft: #F1EFE9;
+  --cat-shop-main:  #A97C1E;  --cat-shop-soft:  #F7F0DC;
+  --cat-hotel-main: #6A5E8C;  --cat-hotel-soft: #EEEBF3;
+
+  /* 「當前」與「接下來」的高亮 */
+  --hl-now-bg:    #FFF7E8;
+  --hl-now-line:  #E8B24F;
+  --hl-next-bg:   #F0F4EE;
+  --hl-next-line: #7FA07A;
+
+  /* 卡片內三段：介紹／小叮嚀／價格 */
+  --tip-line: #E0A040;
+  --tip-ink:  #7A5010;
+  --cost-ink: #6D4E10;
+
+  /* APCCAS 立牌 */
+  --flag-venue-bg:  #3A5A72;
+  --flag-venue-ink: #FFFFFF;
+}
+
+/* 系統深色（沒手動指定 light 才生效） */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --page: #1A1917;
+    --card: #232120;
+    --soft: #2C2A27;
+
+    --ink:   #ECE7DC;
+    --ink2:  #B9B2A4;
+    --faint: #85807A;
+    --line:  #3A3733;
+
+    --shu: #E06B54;
+
+    --shadow-card: 0 1px 2px rgba(0,0,0,.35), 0 12px 24px -14px rgba(0,0,0,.6);
+
+    /* 分類色：主色保持辨識度，淡底改成暗色版 */
+    --cat-food-soft:  #3A2622;
+    --cat-sight-soft: #253022;
+    --cat-venue-soft: #22303B;
+    --cat-transit-soft: #2C2A26;
+    --cat-shop-soft:  #3A3020;
+    --cat-hotel-soft: #2C2837;
+
+    --hl-now-bg:    #3A3222;
+    --hl-now-line:  #C89550;
+    --hl-next-bg:   #253023;
+    --hl-next-line: #6A8F6A;
+
+    --tip-line: #C89550;
+    --tip-ink:  #D4B078;
+    --cost-ink: #C79E5E;
+
+    --flag-venue-bg:  #5A7F9A;
+    --flag-venue-ink: #FFFFFF;
+  }
+}
+
+/* 手動深色（覆蓋系統） */
+:root[data-theme="dark"] {
+  --page: #1A1917;
+  --card: #232120;
+  --soft: #2C2A27;
+
+  --ink:   #ECE7DC;
+  --ink2:  #B9B2A4;
+  --faint: #85807A;
+  --line:  #3A3733;
+
+  --shu: #E06B54;
+
+  --shadow-card: 0 1px 2px rgba(0,0,0,.35), 0 12px 24px -14px rgba(0,0,0,.6);
+
+  --cat-food-soft:  #3A2622;
+  --cat-sight-soft: #253022;
+  --cat-venue-soft: #22303B;
+  --cat-transit-soft: #2C2A26;
+  --cat-shop-soft:  #3A3020;
+  --cat-hotel-soft: #2C2837;
+
+  --hl-now-bg:    #3A3222;
+  --hl-now-line:  #C89550;
+  --hl-next-bg:   #253023;
+  --hl-next-line: #6A8F6A;
+
+  --tip-line: #C89550;
+  --tip-ink:  #D4B078;
+  --cost-ink: #C79E5E;
+
+  --flag-venue-bg:  #5A7F9A;
+  --flag-venue-ink: #FFFFFF;
+}

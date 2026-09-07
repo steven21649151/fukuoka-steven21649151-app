@@ -1,0 +1,15 @@
+# Claude Code 的本機設定，不進 repo
+.claude/
+
+# Windows / macOS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# 編輯器暫存
+*.swp
+*.swo
+*~
+
+# 手帳照片（M4 之後才會有；不該把個人照片推上 GitHub）
+photos/journal/

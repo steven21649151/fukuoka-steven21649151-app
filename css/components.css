@@ -1,0 +1,664 @@
+/* 卡片、時段分隔線、pill、按鈕、詳情頁、流程頁 */
+
+/* ================= 每日頁首 ================= */
+.day-header { padding: 14px 0 8px; }
+.day-topline {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.day-header .k {
+  font-family: var(--dis);
+  font-size: 36px;
+  line-height: 1;
+  color: var(--shu);
+  letter-spacing: .04em;
+}
+.day-header h1 {
+  font-size: 22px;
+  line-height: 1.25;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.day-header .date {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--faint);
+  margin-top: 4px;
+}
+.day-header .summary {
+  color: var(--ink2);
+  font-size: 14px;
+  line-height: 1.7;
+  margin-top: 10px;
+}
+.day-header .cost {
+  margin-top: 12px;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--soft);
+  font-size: 12px;
+  color: var(--ink2);
+}
+.day-header .cost .amt { font-family: var(--mono); color: var(--ink); }
+
+/* ================= 時段分隔線 ================= */
+.segdiv {
+  display: flex; align-items: center; gap: 10px;
+  margin: 20px 0 10px;
+  color: var(--faint);
+  font-size: 12px;
+}
+.segdiv::before,
+.segdiv::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.segdiv .label {
+  font-family: var(--dis);
+  font-size: 13px;
+  color: var(--ink2);
+  letter-spacing: .05em;
+  white-space: nowrap;
+}
+
+/* ================= 移動列（虛線） ================= */
+.transit-row {
+  margin: 6px 20px;
+  padding: 6px 10px;
+  border-left: 2px dashed var(--line);
+  color: var(--faint);
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.transit-row .mode { font-size: 14px; flex-shrink: 0; }
+.transit-row .body { flex: 1; min-width: 0; }
+.transit-row .cost { color: var(--ink2); }
+.transit-row .paychip {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--soft);
+  color: var(--ink2);
+  font-size: 11px;
+  letter-spacing: .02em;
+}
+.transit-row .paychip.free { background: color-mix(in oklab, var(--cat-sight-main) 12%, transparent); color: var(--cat-sight-main); }
+.transit-row .paychip.cash { background: color-mix(in oklab, var(--cat-shop-main) 15%, transparent); color: var(--cat-shop-main); }
+.transit-row .paychip.pass { background: color-mix(in oklab, var(--cat-venue-main) 15%, transparent); color: var(--cat-venue-main); }
+
+/* 只有圖示的 Google Maps 迷你連結（走路列、通勤行、卡片按鈕群） */
+.mapmini {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: var(--soft);
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+.commute .mapmini,
+.transit-row .mapmini { margin-left: auto; }
+.btn.btn-icon {
+  padding: 8px 10px;
+  flex: 0 0 auto;
+  font-size: 16px;
+}
+
+/* ================= 純通勤（transit kind，非 asCard）：一行版 ================= */
+.commute {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px 6px 22px;
+  color: var(--ink2);
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 6px 0;
+  flex-wrap: wrap;
+}
+.commute .mode { font-size: 16px; flex-shrink: 0; }
+.commute .t { font-family: var(--mono); color: var(--faint); flex-shrink: 0; }
+.commute .body { flex: 1; min-width: 0; }
+.commute .body b { font-weight: 600; color: var(--ink); }
+.commute .cost { font-family: var(--mono); color: var(--faint); flex-shrink: 0; }
+.commute .paychip {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--soft);
+  color: var(--ink2);
+  font-size: 11px;
+  font-family: var(--sans);
+  letter-spacing: .02em;
+  margin-left: 4px;
+  flex-shrink: 0;
+}
+.commute .paychip.free { background: color-mix(in oklab, var(--cat-sight-main) 12%, transparent); color: var(--cat-sight-main); }
+.commute .paychip.paid { background: color-mix(in oklab, var(--faint) 15%, transparent); color: var(--ink2); }
+.commute .paychip.cash { background: color-mix(in oklab, var(--cat-shop-main) 15%, transparent); color: var(--cat-shop-main); }
+.commute .paychip.pass { background: color-mix(in oklab, var(--cat-venue-main) 15%, transparent); color: var(--cat-venue-main); }
+
+/* ================= 卡片 ================= */
+.card {
+  position: relative;
+  background: var(--card);
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+  margin: 10px 0;
+  overflow: hidden;
+}
+.card .barleft {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 5px;
+  background: var(--cat-main, var(--faint));
+}
+.card > .inner { padding: 12px 14px 12px 18px; }
+
+/* CJK 內文的斷行禮儀：避免最後一行只剩一兩個字、標點不落行首 */
+.day-header .summary,
+.card .desc,
+.card .tips li .body,
+.section .body,
+.section ul.guide li,
+.story-section p,
+.step .see,
+.step .watch,
+.step .do li,
+.guide-header .lead {
+  text-wrap: pretty;
+  line-break: strict;
+  overflow-wrap: break-word;
+}
+.card .title,
+.day-header h1,
+.spot-header .nameZh,
+.story-title,
+.step h3,
+.guide-header h1 {
+  text-wrap: balance;
+  line-break: strict;
+  overflow-wrap: break-word;
+}
+
+/* 不拆行的 token（金額、時間、短括號） */
+.nw { white-space: nowrap; }
+.approx { color: var(--faint); font-size: .85em; margin-left: 2px; }
+
+/* 「正在進行」與「接下來」的高亮 */
+.card.now  { background: var(--hl-now-bg); }
+.card.now  .barleft { background: var(--hl-now-line); width: 6px; }
+.card.next { background: var(--hl-next-bg); }
+.card.next .barleft { background: var(--hl-next-line); width: 6px; border-right: 1px dashed var(--hl-next-line); }
+
+.card .row1 {
+  display: flex; align-items: baseline; gap: 10px;
+  margin-bottom: 4px;
+}
+/* APCCAS 立牌會蓋到第一行時間，只有這種卡片的 row1 才需要退位 */
+.card[data-apccas] .row1 { padding-right: 72px; }
+.card .time {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ink2);
+  min-width: 44px;
+}
+.card .tags {
+  margin-left: auto;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.card .title {
+  font-family: var(--dis);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.35;
+}
+
+/* 卡片主體三段：介紹／小叮嚀／價格 */
+.card .segs {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+.card .desc {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink2);
+}
+
+/* 小叮嚀：一整塊琥珀底，多條合成一個列 */
+.card .tips {
+  padding: 8px 10px 8px 10px;
+  border-left: 2px solid var(--tip-line);
+  background: color-mix(in oklab, var(--tip-line) 8%, transparent);
+  border-radius: 0 8px 8px 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--tip-ink);
+}
+.card .tips ul {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.card .tips li {
+  display: flex; gap: 6px; align-items: flex-start;
+}
+.card .tips li .lead { flex-shrink: 0; }
+.card .tips li .body { flex: 1; min-width: 0; }
+.card .tips li .body b { color: var(--tip-ink); font-weight: 700; }
+
+.card .allergy-row {
+  display: flex;
+  gap: 8px;
+  padding: 6px 10px 6px 8px;
+  border-left: 2px solid var(--cat-food-main);
+  background: color-mix(in oklab, var(--cat-food-main) 8%, transparent);
+  border-radius: 0 8px 8px 0;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--cat-food-main);
+}
+.card .allergy-row .ico { flex-shrink: 0; }
+.card .cost-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--cost-ink);
+  margin-top: 2px;
+  flex-wrap: wrap;
+}
+.card .cost-row .ico { font-family: var(--sans); }
+.card .cost-row .paychip {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--soft);
+  color: var(--ink2);
+  font-size: 11px;
+  font-family: var(--sans);
+  letter-spacing: .02em;
+  margin-left: 2px;
+}
+.card .cost-row .paychip.free { background: color-mix(in oklab, var(--cat-sight-main) 12%, transparent); color: var(--cat-sight-main); }
+.card .cost-row .paychip.paid { background: color-mix(in oklab, var(--faint) 15%, transparent); color: var(--ink2); }
+.card .cost-row .paychip.cash { background: color-mix(in oklab, var(--cat-shop-main) 15%, transparent); color: var(--cat-shop-main); }
+.card .cost-row .paychip.pass { background: color-mix(in oklab, var(--cat-venue-main) 15%, transparent); color: var(--cat-venue-main); }
+
+.card .actions {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* APCCAS 立牌 */
+.card[data-apccas] {
+  border: 1px solid var(--flag-venue-bg);
+}
+.card[data-apccas]::before {
+  content: attr(data-apccas-label);
+  position: absolute;
+  top: 0; right: 0;
+  padding: 3px 9px 4px;
+  border-radius: 0 16px 0 10px;
+  background: var(--flag-venue-bg);
+  color: var(--flag-venue-ink);
+  font-family: var(--dis);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  z-index: 1;
+}
+.card[data-apccas-highlight]::before {
+  background: var(--shu);
+  letter-spacing: .04em;
+}
+.card[data-apccas-highlight] {
+  border-color: var(--shu);
+}
+
+/* 圖標方框 */
+.iconbox {
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  border: 1.5px solid var(--cat-main, var(--line));
+  background: var(--cat-soft, var(--soft));
+  font-size: 15px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* pill */
+.pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--cat-soft, var(--soft));
+  color: var(--cat-main, var(--ink2));
+  border: 1px solid transparent;
+  letter-spacing: .02em;
+}
+.pill.warn {
+  background: #FFF3E0;
+  color: #B24A00;
+  border-color: #F0C68A;
+}
+.pill.allergy {
+  background: color-mix(in oklab, var(--cat-food-main) 12%, transparent);
+  color: var(--cat-food-main);
+  border-color: color-mix(in oklab, var(--cat-food-main) 25%, transparent);
+}
+.pill.now  { background: var(--hl-now-line);  color: #3a2a10; }
+.pill.next { background: var(--hl-next-line); color: #fff; }
+
+/* 按鈕 */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--soft);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+.btn-primary { background: var(--shu); color: #fff; }
+.btn[disabled],
+.btn[aria-disabled="true"] { opacity: .5; pointer-events: none; }
+
+/* ================= 詳情頁 ================= */
+.spot-photo {
+  width: 100%;
+  max-width: 640px;
+  max-height: 280px;
+  aspect-ratio: 16 / 10;
+  background: var(--soft);
+  object-fit: cover;
+  display: block;
+  margin: 0 auto;
+}
+.spot-photo.placeholder {
+  display: flex; align-items: center; justify-content: center;
+  color: var(--faint);
+  font-size: 32px;
+  height: 180px;
+  max-height: 180px;
+  aspect-ratio: auto;
+}
+.spot-header { padding: 14px 0 4px; }
+.spot-header .nameZh {
+  font-family: var(--dis);
+  font-size: 24px;
+  font-weight: 700;
+}
+.spot-header .name {
+  color: var(--ink2);
+  font-size: 14px;
+  margin-top: 2px;
+}
+.spot-header .reading {
+  color: var(--faint);
+  font-size: 12px;
+  margin-top: 4px;
+}
+.spot-header .oneline {
+  margin-top: 10px;
+  font-size: 15px;
+  color: var(--ink2);
+}
+
+.section { margin-top: 22px; }
+.section > h2 {
+  font-family: var(--dis);
+  font-size: 15px;
+  color: var(--faint);
+  letter-spacing: .1em;
+  border-left: 3px solid var(--shu);
+  padding-left: 8px;
+  margin-bottom: 10px;
+}
+.section .body { color: var(--ink); font-size: 14.5px; line-height: 1.7; }
+.section ul.guide { display: flex; flex-direction: column; gap: 8px; }
+.section ul.guide li {
+  padding: 10px 12px;
+  background: var(--card);
+  border-radius: 12px;
+  box-shadow: var(--shadow-card);
+  font-size: 14.5px;
+  line-height: 1.6;
+}
+.section .facts {
+  background: var(--soft);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 6px 14px;
+  font-size: 13.5px;
+}
+.section .facts .k { color: var(--faint); }
+.section .facts .v { color: var(--ink); }
+.section ul.cautions li {
+  padding: 8px 12px 8px 14px;
+  border-left: 3px solid #B24A00;
+  background: #FFF3E0;
+  color: #7A3E00;
+  border-radius: 0 8px 8px 0;
+  margin-bottom: 6px;
+  font-size: 13.5px;
+}
+
+.actions-row {
+  margin: 22px 0 30px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.actions-row .btn { flex: 1 1 auto; justify-content: center; padding: 12px 14px; font-size: 14px; }
+
+/* ================= 相關攻略 ================= */
+.story-title {
+  font-family: var(--dis);
+  font-size: 22px;
+  margin: 14px 0 4px;
+  line-height: 1.35;
+}
+.story-sub { color: var(--faint); font-size: 12px; margin-bottom: 20px; }
+.story-section { margin-bottom: 22px; }
+.story-section h3 {
+  font-family: var(--dis);
+  font-size: 16px;
+  color: var(--shu);
+  margin-bottom: 8px;
+}
+.story-section p {
+  font-size: 15px;
+  color: var(--ink);
+  line-height: 1.75;
+}
+
+/* ================= 流程頁 ================= */
+.guide-header { padding: 14px 0 6px; }
+.guide-header h1 {
+  font-family: var(--dis);
+  font-size: 22px;
+  line-height: 1.3;
+}
+.guide-header .lead {
+  color: var(--ink2);
+  font-size: 14px;
+  margin-top: 8px;
+  line-height: 1.7;
+}
+.step {
+  margin-top: 22px;
+  padding: 14px 14px 14px 16px;
+  background: var(--card);
+  border-radius: 14px;
+  box-shadow: var(--shadow-card);
+  border-left: 4px solid var(--shu);
+}
+.step .n {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--shu);
+  letter-spacing: .1em;
+}
+.step h3 {
+  font-family: var(--dis);
+  font-size: 17px;
+  margin-top: 4px;
+  margin-bottom: 8px;
+}
+.step .k { color: var(--faint); font-size: 12px; margin-top: 8px; letter-spacing: .05em; }
+.step .see, .step .watch {
+  font-size: 14px;
+  color: var(--ink2);
+  line-height: 1.7;
+  margin-top: 4px;
+}
+.step .do {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+}
+.step .do li {
+  padding-left: 16px;
+  position: relative;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--ink);
+}
+.step .do li::before {
+  content: "→";
+  position: absolute; left: 0; color: var(--shu);
+}
+.step .watch {
+  border-left: 2px solid var(--tip-line);
+  background: color-mix(in oklab, var(--tip-line) 8%, transparent);
+  padding: 6px 10px;
+  color: var(--tip-ink);
+  border-radius: 0 8px 8px 0;
+  margin-top: 8px;
+}
+.guide-faq { margin-top: 30px; }
+.guide-faq h2 {
+  font-family: var(--dis);
+  font-size: 15px;
+  color: var(--faint);
+  letter-spacing: .1em;
+  border-left: 3px solid var(--shu);
+  padding-left: 8px;
+  margin-bottom: 10px;
+}
+.guide-faq .qa { margin-bottom: 12px; font-size: 14px; line-height: 1.7; }
+.guide-faq .qa .q { color: var(--ink); font-weight: 700; }
+.guide-faq .qa .a { color: var(--ink2); margin-top: 2px; }
+
+/* ================= 空狀態 / tool menu ================= */
+.empty {
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--faint);
+  font-size: 14px;
+}
+.tool-menu {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding-top: 14px;
+}
+.tool-menu a {
+  display: flex; flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 16px 14px;
+  background: var(--card);
+  border-radius: 14px;
+  box-shadow: var(--shadow-card);
+}
+.tool-menu .emoji { font-size: 26px; }
+.tool-menu .label { font-family: var(--dis); font-size: 15px; }
+.tool-menu .status { font-size: 11px; color: var(--faint); }
+
+/* ================= 匯率頁 ================= */
+.rate-hero {
+  background: var(--card);
+  border-radius: 14px;
+  box-shadow: var(--shadow-card);
+  padding: 18px 16px;
+  margin-top: 6px;
+}
+.rate-hero .rate-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 12px;
+  font-size: 26px;
+  font-family: var(--dis);
+  margin-bottom: 10px;
+}
+.rate-hero .rate-line .arrow { color: var(--faint); font-size: 20px; }
+.rate-hero .rate-meta {
+  color: var(--ink2);
+  font-size: 13px;
+  line-height: 1.7;
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+.converter {
+  background: var(--soft);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.converter label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--ink2);
+}
+.converter label span { min-width: 78px; }
+.converter input {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 15px;
+  min-width: 0;
+}
+.converter .divider { border-top: 1px dashed var(--line); margin: 8px 0; }
+.converter .approx { font-family: var(--mono); padding-left: 88px; }
+
+/* ================= 分類色套用 ================= */
+[data-cat="food"]    { --cat-main: var(--cat-food-main);    --cat-soft: var(--cat-food-soft); }
+[data-cat="sight"]   { --cat-main: var(--cat-sight-main);   --cat-soft: var(--cat-sight-soft); }
+[data-cat="venue"]   { --cat-main: var(--cat-venue-main);   --cat-soft: var(--cat-venue-soft); }
+[data-cat="transit"] { --cat-main: var(--cat-transit-main); --cat-soft: var(--cat-transit-soft); }
+[data-cat="shop"]    { --cat-main: var(--cat-shop-main);    --cat-soft: var(--cat-shop-soft); }
+[data-cat="hotel"]   { --cat-main: var(--cat-hotel-main);   --cat-soft: var(--cat-hotel-soft); }
