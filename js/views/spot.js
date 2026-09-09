@@ -2,6 +2,15 @@
 import { mdInline, escapeHtml } from '../lib/md.js';
 import { mapsUrl } from '../lib/maps.js';
 import { annotateYenTwd } from '../lib/fmt.js';
+import { getPrevHash } from '../router.js';
+
+const KNOWN_BACK = {
+  '#/tools/tips':    '回攻略',
+  '#/tools/flight':  '回航班',
+  '#/tools/phrases': '回句庫',
+  '#/tools/packing': '回打包清單',
+  '#/tools':         '回小工具',
+};
 
 // 分類 pill 文案
 const CAT_LABEL = {
@@ -35,7 +44,12 @@ export async function render(root, params, ctx) {
 
   const cat = spot.category || 'sight';
   const day = spot.day;
-  const backHref = day ? `#/day/${day}` : '#/';
+
+  const prev = getPrevHash();
+  const prevBase = prev ? prev.split('?')[0] : null;
+  const useKnown = prevBase && KNOWN_BACK[prevBase];
+  const backHref = useKnown ? prev : (day ? `#/day/${day}` : '#/');
+  const backLabel = useKnown ? KNOWN_BACK[prevBase] : `回第 ${day || 1} 天`;
 
   // 飯店：cautions 併進入住注意事項
   const guideItems = cat === 'hotel'
@@ -48,7 +62,7 @@ export async function render(root, params, ctx) {
       ${renderPhoto(spot)}
       <div class="wrap">
         <div class="topnav">
-          <a class="back" href="${backHref}">← 回第 ${day || 1} 天</a>
+          <a class="back" href="${backHref}">← ${escapeHtml(backLabel)}</a>
           <span class="pill">${CAT_LABEL[cat] || cat}</span>
           ${paymentPill(spot)}
         </div>

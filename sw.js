@@ -7,7 +7,7 @@
 // 就把 APP_VERSION 的尾碼 +1。這是 GitHub Pages 上線後，
 // 唯一會讓瀏覽器重跑 install、重抓資源的觸發點——沒 bump 就會拿舊快取。
 
-const APP_VERSION = '1.3.0';
+const APP_VERSION = '1.4.2';
 const CACHE_SHELL = `fukuoka-shell-v${APP_VERSION}`;
 const CACHE_DATA = `fukuoka-data-v${APP_VERSION}`;
 
@@ -24,17 +24,28 @@ const SHELL_ASSETS = [
   './js/lib/md.js',
   './js/lib/maps.js',
   './js/lib/fmt.js',
+  './js/lib/tts.js',
+  './js/lib/bigcard.js',
   './js/views/itinerary.js',
   './js/views/spot.js',
   './js/views/story.js',
   './js/views/tools.js',
   './js/views/guide.js',
   './js/views/rate.js',
+  './js/views/phrases.js',
+  './js/views/tips.js',
+  './js/views/packing.js',
+  './js/views/flight.js',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/maskable-512.png',
   './photos/hero.jpg',
 ];
+
+// 只有 App 點下「更新條」才 skipWaiting；install 裡不放無條件版本。
+self.addEventListener('message', (e) => {
+  if (e.data?.type === 'SKIP_WAITING') self.skipWaiting();
+});
 
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {

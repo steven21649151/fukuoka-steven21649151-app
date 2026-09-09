@@ -2,6 +2,8 @@
 
 import { initRouter } from './router.js';
 import { md } from './lib/fmt.js';
+import { openBigCard } from './lib/bigcard.js';
+import { warmUpJaVoice } from './lib/tts.js';
 
 const DATA_FILES = ['spots', 'days', 'tips', 'phrases', 'packing', 'guides', 'rates'];
 const FALLBACK_RATE = { jpyToTwd: 0.2035, asOf: null, source: null };
@@ -24,8 +26,43 @@ async function boot() {
 
   buildTabbar(data.days);
   startNowClock(data.days);
+  wireAllergyButton(ctx);
+  wireGlobalTipLinks(ctx);
   initRouter(ctx);
+  warmUpJaVoice();
   registerSW();
+}
+
+// 常駐 🦐：打開甲殼類過敏大字卡（scene=allergy，按 priority 排序）
+function wireAllergyButton(ctx) {
+  const btn = document.getElementById('allergyBtn');
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    const list = (ctx.data.phrases || [])
+      .filter(p => p.scene === 'allergy')
+      .sort((a, b) => (a.priority || 99) - (b.priority || 99));
+    if (!list.length) return;
+    openBigCard(list, { startId: list[0].id });
+  });
+}
+
+// 全域：文件中任何 data-tip="<id>" 的元素，點一下跳到那條 tip 並自動展開
+function wireGlobalTipLinks(_ctx) {
+  document.addEventListener('click', (e) => {
+    const el = e.target.closest('[data-tip]');
+    if (!el) return;
+    const id = el.getAttribute('data-tip');
+    if (!id) return;
+    e.preventDefault();
+    location.hash = `#/tools/tips?highlight=${encodeURIComponent(id)}`;
+  });
+  // 行程頁上的過敏列（allergy-row）點下去→打開大字卡
+  document.addEventListener('click', (e) => {
+    const el = e.target.closest('.allergy-row[data-open-allergy]');
+    if (!el) return;
+    e.preventDefault();
+    document.getElementById('allergyBtn')?.click();
+  });
 }
 
 async function loadAllData() {
@@ -109,14 +146,18 @@ function daysBetween(aISO, bISO) {
   return Math.round((b - a) / 86400000);
 }
 
-// 開發期（localhost）不註冊 SW；順便清掉先前註冊過的、清掉舊快取，
-// 避免舊 SW / 舊 cache 卡住新版檔案。離線功能要測時用區網 IP 打開。
-function registerSW() {
+// 開發期預設不註冊 SW，避免舊 SW / 舊 cache 卡住開發迭代。
+// localhost 上加 ?sw=1 或 localStorage.devSW='1' 才註冊，用來測離線。
+// 正式站（GitHub Pages）永遠註冊，並掛上「有新版」提示。
+async function registerSW() {
   if (!('serviceWorker' in navigator)) return;
   if (location.protocol === 'file:') return;
 
   const isDev = ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
-  if (isDev) {
+  const forceSW = new URLSearchParams(location.search).has('sw')
+    || localStorage.getItem('devSW') === '1';
+
+  if (isDev && !forceSW) {
     navigator.serviceWorker.getRegistrations()
       .then(rs => rs.forEach(r => r.unregister()))
       .catch(() => {});
@@ -124,6 +165,54 @@ function registerSW() {
     return;
   }
 
-  navigator.serviceWorker.register('./sw.js', { scope: './' })
-    .catch(err => console.warn('SW register failed', err));
+  let reg;
+  try {
+    reg = await navigator.serviceWorker.register('./sw.js', { scope: './' });
+  } catch (err) {
+    console.warn('SW register failed', err);
+    return;
+  }
+
+  // 換版完成後只重整一次
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (reloaded) return;
+    reloaded = true;
+    location.reload();
+  });
+
+  // 一進來就檢查一次；waiting 已經在了就直接秀更新條
+  if (reg.waiting && navigator.serviceWorker.controller) showUpdateBar(reg);
+
+  reg.addEventListener('updatefound', () => {
+    const sw = reg.installing;
+    if (!sw) return;
+    sw.addEventListener('statechange', () => {
+      if (sw.state === 'installed' && navigator.serviceWorker.controller) {
+        showUpdateBar(reg);
+      }
+    });
+  });
+
+  // 啟動時檢查更新；從背景回前景時再檢查一次
+  try { reg.update(); } catch {}
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      try { reg.update(); } catch {}
+    }
+  });
+}
+
+function showUpdateBar(reg) {
+  if (document.getElementById('updatebar')) return;
+  const bar = document.createElement('button');
+  bar.id = 'updatebar';
+  bar.className = 'updatebar';
+  bar.type = 'button';
+  bar.innerHTML = '<span>行程有更新</span><span class="cta">點一下重新整理</span>';
+  bar.addEventListener('click', () => {
+    bar.disabled = true;
+    reg.waiting?.postMessage({ type: 'SKIP_WAITING' });
+  });
+  document.body.appendChild(bar);
 }

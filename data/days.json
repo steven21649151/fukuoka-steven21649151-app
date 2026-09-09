@@ -36,11 +36,14 @@
           "guideId": "dep-tpe",
           "desc": "第一次搭飛機的完整流程都在下面。",
           "tips": ["長榮在 T2。行李條收好，落地認行李用", "護照和登機證不要收起來", "LED 有沒有改登機門要注意"] },
-        { "id": "d1-03", "time": "08:00", "endTime": "11:15", "segment": "morning", "kind": "flight", "status": "fixed",
+        { "id": "d1-03", "time": "08:00", "endTime": "11:15", "durationMin": 135, "segment": "morning", "kind": "flight", "status": "fixed",
           "title": "長榮 BR106　桃園 T2 → 福岡",
           "guideId": "onboard",
           "desc": "飛 2 小時 15 分，機上有一份簡餐。",
-          "tips": ["**落地前先把日本 SIM 卡和取卡針拿出來放外袋**"],
+          "tips": [
+            "**落地前先把日本 SIM 卡和取卡針拿出來放外袋**",
+            "**日本比台灣快 1 小時。**手機落地後會自動變成日本時間，行程表上 11:15 以後都是日本時間。"
+          ],
           "pay": "paid",
           "booking": { "required": false, "note": "已訂" } },
         { "id": "d1-04", "time": "11:15", "endTime": "12:15", "segment": "noon", "kind": "transit", "status": "normal", "asCard": true,
@@ -456,7 +459,7 @@
           "pay": "ticket" },
         { "id": "d5-18", "time": "17:50", "endTime": "18:10", "segment": "night", "kind": "hotel", "status": "normal",
           "title": "火星花園 check-in、放行李", "spotId": "hotel-mars",
-          "desc": "熊本回來後正式入住，現場結清 ¥14,773。",
+          "desc": "熊本回來後正式入住，入住時現場結清房費。",
           "tips": ["**非 24 小時熱水供應**"],
           "cost": { "min": 14773, "max": 14773 },
           "booking": { "required": false, "note": "入住時現場結清" } },
@@ -525,9 +528,11 @@
           "guideId": "dep-fuk",
           "desc": "回程的機場流程在下面。",
           "tips": ["起飛前 2h45 到，第一次出國抓寬", "機場免稅店的博多通りもん常缺貨，**不要把伴手禮留到今天**"] },
-        { "id": "d6-08", "time": "12:15", "endTime": "13:50", "segment": "noon", "kind": "flight", "status": "fixed",
+        { "id": "d6-08", "time": "12:15", "endTime": "13:50", "durationMin": 155, "segment": "noon", "kind": "flight", "status": "fixed",
           "title": "長榮 BR105　福岡 → 桃園 T2",
           "guideId": "onboard",
+          "desc": "飛 2 小時 35 分。",
+          "tips": ["**回到台灣時間，慢 1 小時。**手機落地後會自動變成台灣時間。"],
           "pay": "paid",
           "booking": { "required": false, "note": "已訂" } }
       ]

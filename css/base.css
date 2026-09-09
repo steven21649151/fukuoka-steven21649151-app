@@ -95,7 +95,6 @@ b, strong { font-weight: 700; color: var(--ink); }
   font-size: 12px;
   color: var(--ink2);
   display: flex;
-  justify-content: space-between;
   align-items: center;
   gap: 8px;
 }
@@ -106,7 +105,24 @@ b, strong { font-weight: 700; color: var(--ink); }
   font-weight: 700;
   letter-spacing: .02em;
   font-size: 12px;
+  margin-left: auto;
 }
+.nowbar .allergy-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--shu) 14%, transparent);
+  color: var(--shu);
+  font-size: 18px;
+  line-height: 1;
+  border: 1px solid color-mix(in oklab, var(--shu) 35%, transparent);
+  flex-shrink: 0;
+}
+.nowbar .allergy-btn:hover { background: color-mix(in oklab, var(--shu) 22%, transparent); }
+.nowbar .allergy-btn:active { transform: scale(.96); }
 
 /* Tabbar */
 .tabbar {
@@ -133,6 +149,38 @@ b, strong { font-weight: 700; color: var(--ink); }
 .tabbar .tools { /* 跟其他六格一樣，只用圖示區分 */ }
 .tabbar .toolicon { font-size: 18px; line-height: 1; }
 .tabbar .toollabel { font-size: 10px; color: inherit; }
+
+/* 「有新版」提示條 */
+.updatebar {
+  position: fixed;
+  left: 50%;
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  z-index: 60;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: var(--shu);
+  color: #fff;
+  font-family: var(--dis);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  box-shadow: 0 6px 24px -8px rgba(0,0,0,.35), 0 2px 6px rgba(0,0,0,.15);
+  border: 0;
+  cursor: pointer;
+  max-width: calc(100vw - 24px);
+}
+.updatebar .cta {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.18);
+  font-size: 12px;
+  font-weight: 600;
+}
+.updatebar[disabled] { opacity: .7; cursor: default; }
 
 /* 導覽箭頭列 */
 .topnav {

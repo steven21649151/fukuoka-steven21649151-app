@@ -1,5 +1,12 @@
 // 流程頁 — 給第一次搭飛機的人照著走
 import { mdInline, escapeHtml } from '../lib/md.js';
+import { getPrevHash } from '../router.js';
+
+// 從這些頁面來的，返回就回去那裡（比 guide.backTo 準）
+const KNOWN_BACK = {
+  '#/tools/flight': '回航班',
+  '#/tools/tips':   '回攻略',
+};
 
 export async function render(root, params, ctx) {
   const guide = (ctx.data.guides || []).find(g => g.id === params.id);
@@ -12,8 +19,10 @@ export async function render(root, params, ctx) {
     return;
   }
 
-  const backHref = guide.backTo || '#/';
-  const backLabel = guide.backLabel || '回行程';
+  const prev = getPrevHash();
+  const prevKey = prev && matchKnown(prev);
+  const backHref  = prevKey ? prev : (guide.backTo || '#/');
+  const backLabel = prevKey ? KNOWN_BACK[prevKey] : (guide.backLabel || '回行程');
 
   root.innerHTML = `
     <div class="wrap">
@@ -38,6 +47,12 @@ export async function render(root, params, ctx) {
       ` : ''}
     </div>
   `;
+}
+
+// 忽略 query string 比對
+function matchKnown(hash) {
+  const base = hash.split('?')[0];
+  return KNOWN_BACK[base] ? base : null;
 }
 
 function renderStep(s) {

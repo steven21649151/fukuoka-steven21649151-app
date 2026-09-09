@@ -7,6 +7,10 @@ import { render as renderStory }     from './views/story.js';
 import { render as renderTools }     from './views/tools.js';
 import { render as renderGuide }     from './views/guide.js';
 import { render as renderRate }      from './views/rate.js';
+import { render as renderPhrases }   from './views/phrases.js';
+import { render as renderTips }      from './views/tips.js';
+import { render as renderPacking }   from './views/packing.js';
+import { render as renderFlight }    from './views/flight.js';
 
 const VIEWS = {
   home:    renderItinerary,
@@ -17,21 +21,46 @@ const VIEWS = {
   tools:   renderTools,
   toolsub: renderTools,
   rate:    renderRate,
+  phrases: renderPhrases,
+  tips:    renderTips,
+  packing: renderPacking,
+  flight:  renderFlight,
+};
+
+const TOOL_VIEWS = {
+  rate: 'rate',
+  phrases: 'phrases',
+  tips: 'tips',
+  packing: 'packing',
+  flight: 'flight',
 };
 
 export function parseHash(hash) {
-  const h = (hash || '').replace(/^#/, '').replace(/^\/+/, '');
-  if (!h) return { view: 'home', params: {} };
+  const raw = (hash || '').replace(/^#/, '').replace(/^\/+/, '');
+  if (!raw) return { view: 'home', params: {} };
 
-  const parts = h.split('/').filter(Boolean);
+  // 拆掉 query
+  const [path, queryStr] = raw.split('?');
+  const query = {};
+  if (queryStr) {
+    for (const kv of queryStr.split('&')) {
+      if (!kv) continue;
+      const [k, v = ''] = kv.split('=');
+      query[decodeURIComponent(k)] = decodeURIComponent(v);
+    }
+  }
+
+  const parts = path.split('/').filter(Boolean);
   const [head, a] = parts;
 
-  if (head === 'day')   return { view: 'day',   params: { n: Number(a) || 1 } };
-  if (head === 'spot')  return { view: 'spot',  params: { id: a } };
-  if (head === 'story') return { view: 'story', params: { id: a } };
-  if (head === 'guide') return { view: 'guide', params: { id: a } };
-  if (head === 'tools' && a === 'rate') return { view: 'rate', params: {} };
-  if (head === 'tools') return { view: a ? 'toolsub' : 'tools', params: { sub: a || null } };
+  if (head === 'day')   return { view: 'day',   params: { n: Number(a) || 1, query } };
+  if (head === 'spot')  return { view: 'spot',  params: { id: a, query } };
+  if (head === 'story') return { view: 'story', params: { id: a, query } };
+  if (head === 'guide') return { view: 'guide', params: { id: a, query } };
+  if (head === 'tools') {
+    if (a && TOOL_VIEWS[a]) return { view: TOOL_VIEWS[a], params: { query } };
+    return { view: a ? 'toolsub' : 'tools', params: { sub: a || null, query } };
+  }
   return { view: 'home', params: {} };
 }
 
@@ -40,8 +69,12 @@ if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 
 const scrollMemory = new Map();   // hash → scrollY
 let lastHash = location.hash || '#/';
+let prevHash = null;              // 上一頁的 hash（給返回鍵決定要回哪）
 
 function normalizeHash(h) { return h || '#/'; }
+
+// 給 view 用：拿到「進到這頁之前的那個 hash」——比 backTo 精準
+export function getPrevHash() { return prevHash; }
 
 export function initRouter(ctx) {
   const outlet = document.getElementById('outlet');
@@ -60,6 +93,7 @@ export function initRouter(ctx) {
       scrollMemory.delete(currentHash);
     }
 
+    if (currentHash !== lastHash) prevHash = lastHash;
     lastHash = currentHash;
 
     const showHero = route.view === 'home' || route.view === 'day';
@@ -94,7 +128,9 @@ function updateTabbar(route) {
     route.view === 'day' ? route.params.n :
     route.view === 'home' ? (window.__currentDay || 1) :
     null;
-  const isTools = route.view === 'tools' || route.view === 'toolsub' || route.view === 'rate';
+  const isTools = route.view === 'tools' || route.view === 'toolsub'
+    || route.view === 'rate' || route.view === 'phrases' || route.view === 'tips'
+    || route.view === 'packing' || route.view === 'flight';
 
   tabs.forEach((a) => {
     a.removeAttribute('aria-current');

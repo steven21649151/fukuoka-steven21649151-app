@@ -55,6 +55,7 @@ export async function render(root, params, ctx, opts = {}) {
     <div class="wrap">
       ${renderDayHeader(day, ctx)}
       ${renderItems(day, nowInfo, ctx)}
+      ${renderTodayTips(day, ctx)}
     </div>
   `;
 
@@ -183,7 +184,7 @@ function renderCard(it, nowInfo, ctx) {
   const desc = it.desc || spot?.oneLine || '';
   const tipsHtml = renderTipsBlock(it.tips);
   const allergyHtml = it.allergy === 'ask'
-    ? `<div class="allergy-row"><span class="ico">🦐</span><span class="body">甲殼類：入座後先跟店家講一次</span></div>`
+    ? `<a href="#" class="allergy-row" data-open-allergy role="button" aria-label="打開過敏大字卡"><span class="ico">🦐</span><span class="body">甲殼類：入座後先跟店家講一次 · 點開大字卡</span></a>`
     : '';
   const costHtml = renderCostRow(it, ctx);
 
@@ -225,6 +226,32 @@ function renderCard(it, nowInfo, ctx) {
   `;
 }
 
+// 每日底部：今天要注意的 N 條（用 tips.days 過濾，days=null 不算）
+function renderTodayTips(day, ctx) {
+  const tips = ctx.data.tips || [];
+  const today = day.n;
+  const list = tips.filter(t => Array.isArray(t.days) && t.days.includes(today));
+  if (!list.length) return '';
+  const RANK = { critical: 0, important: 1, info: 2 };
+  list.sort((a, b) => (RANK[a.severity] ?? 9) - (RANK[b.severity] ?? 9));
+  const items = list.map(t => {
+    const sev = t.severity || 'info';
+    return `
+      <li class="sev-${sev === 'critical' ? 'crit' : sev === 'important' ? 'imp' : 'info'}">
+        <span class="dot" aria-hidden="true"></span>
+        <a class="text" href="#/tools/tips?highlight=${encodeURIComponent(t.id)}">${escapeHtml(t.title || '')}</a>
+        <span class="chev">›</span>
+      </li>
+    `;
+  }).join('');
+  return `
+    <section class="today-tips">
+      <div class="head">💡 今天要注意的 ${list.length} 條</div>
+      <ul>${items}</ul>
+    </section>
+  `;
+}
+
 function renderTipsBlock(tips) {
   if (!Array.isArray(tips) || tips.length === 0) return '';
   const items = tips.map((t, i) => `
@@ -251,7 +278,11 @@ function renderPayChip(pay) {
   const spec = PAY_CHIP[pay];
   if (!spec) return '';
   const cls = spec.cls ? ` ${spec.cls}` : '';
-  return `<span class="paychip${cls}"${spec.tipId ? ` data-tip="${spec.tipId}"` : ''}>${spec.text}</span>`;
+  if (spec.tipId) {
+    // 有 tip 的：做成鍵盤可達的 <button>，全域 handler 抓 data-tip 跳到那條
+    return `<button type="button" class="paychip${cls}" data-tip="${spec.tipId}" aria-label="${spec.text}｜點看攻略">${spec.text}</button>`;
+  }
+  return `<span class="paychip${cls}">${spec.text}</span>`;
 }
 
 // ================= 當前時段判定 =================
