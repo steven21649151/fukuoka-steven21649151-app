@@ -23,12 +23,20 @@ export function md(dateStr) {
 }
 
 // 台幣：twd(4500, 0.2035) → "NT$920"
-// ≥100 元四捨五入到十位，<100 元四捨五入到個位
+// ≥100 元四捨五入到十位，<100 元四捨五入到個位。
+// **粗估用**：行程／景點頁的預估價格，進位到 10 讀起來俐落。
+// 記帳、匯率換算等**要精確到 1 元**的地方用 twdExact()。
 export function twd(jpy, rate) {
   if (jpy == null || !rate) return '';
   const v = jpy * rate;
   const rounded = v >= 100 ? Math.round(v / 10) * 10 : Math.round(v);
   return 'NT$' + rounded.toLocaleString('en-US');
+}
+
+// 台幣，四捨五入到 1 元。**記帳／匯率換算專用**——數字要對得上信用卡帳單。
+export function twdExact(jpy, rate) {
+  if (jpy == null || !rate) return '';
+  return 'NT$' + Math.round(jpy * rate).toLocaleString('en-US');
 }
 
 // 「NT$920–1,120」

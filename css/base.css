@@ -123,6 +123,22 @@ b, strong { font-weight: 700; color: var(--ink); }
 }
 .nowbar .allergy-btn:hover { background: color-mix(in oklab, var(--shu) 22%, transparent); }
 .nowbar .allergy-btn:active { transform: scale(.96); }
+.nowbar .rate-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--cat-shop-main) 12%, transparent);
+  color: var(--cat-shop-main);
+  font-size: 16px;
+  line-height: 1;
+  border: 1px solid color-mix(in oklab, var(--cat-shop-main) 30%, transparent);
+  flex-shrink: 0;
+}
+.nowbar .rate-btn:hover { background: color-mix(in oklab, var(--cat-shop-main) 20%, transparent); }
+.nowbar .rate-btn:active { transform: scale(.96); }
 
 /* Tabbar */
 .tabbar {

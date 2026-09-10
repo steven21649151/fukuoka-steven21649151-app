@@ -4,6 +4,8 @@ import { initRouter } from './router.js';
 import { md } from './lib/fmt.js';
 import { openBigCard } from './lib/bigcard.js';
 import { warmUpJaVoice } from './lib/tts.js';
+import { initRate, getRate, onChange as onRateChange } from './lib/rate.js';
+import { openRateOverlay } from './lib/rate_overlay.js';
 
 const DATA_FILES = ['spots', 'days', 'tips', 'phrases', 'packing', 'guides', 'rates'];
 const FALLBACK_RATE = { jpyToTwd: 0.2035, asOf: null, source: null };
@@ -24,13 +26,27 @@ async function boot() {
   const ctx = { data };
   window.__ctx = ctx;
 
+  // 匯率活動來源：先立即拿到（override/cache/base），背景抓 API
+  // 每次變動就把值同步回 ctx.data.rate（既有 views 讀的路徑）
+  const baseFromJson = data.rate;
+  const first = initRate(baseFromJson);
+  Object.assign(data.rate, first);
+  onRateChange((r) => Object.assign(data.rate, r));
+
   buildTabbar(data.days);
   startNowClock(data.days);
   wireAllergyButton(ctx);
+  wireRateButton(ctx);
   wireGlobalTipLinks(ctx);
   initRouter(ctx);
   warmUpJaVoice();
   registerSW();
+}
+
+function wireRateButton(ctx) {
+  const btn = document.getElementById('rateBtn');
+  if (!btn) return;
+  btn.addEventListener('click', () => openRateOverlay(ctx));
 }
 
 // 常駐 🦐：打開甲殼類過敏大字卡（scene=allergy，按 priority 排序）

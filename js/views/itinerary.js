@@ -2,6 +2,7 @@
 import { mdInline, escapeHtml } from '../lib/md.js';
 import { yen, yenRange, md, twdIfBig } from '../lib/fmt.js';
 import { mapsUrl } from '../lib/maps.js';
+import { computeNowInDay, todayISO } from '../lib/nowitem.js';
 
 const KIND_CAT = {
   flight: 'transit', transit: 'transit', meal: 'food', sight: 'sight',
@@ -33,9 +34,6 @@ const PAY_CHIP = {
   free:   { text: '免費',       cls: 'free',  tipId: null },
   paid:   { text: '已付',       cls: 'paid',  tipId: null },
 };
-
-const TRIP_START = '2026-10-25';
-const TRIP_END   = '2026-10-30';
 
 export async function render(root, params, ctx, opts = {}) {
   const { days } = ctx.data;
@@ -285,44 +283,3 @@ function renderPayChip(pay) {
   return `<span class="paychip${cls}">${spec.text}</span>`;
 }
 
-// ================= 當前時段判定 =================
-
-function todayISO() {
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${dd}`;
-}
-
-function computeNowInDay(day, todayStr) {
-  if (todayStr !== day.date) return { nowId: null, nextId: null, highlightId: null };
-  if (todayStr < TRIP_START || todayStr > TRIP_END) return { nowId: null, nextId: null, highlightId: null };
-
-  const now = new Date();
-  const nowMin = now.getHours() * 60 + now.getMinutes();
-
-  const items = (day.items || []).filter(it => it.time);
-  const spans = items.map((it, i) => {
-    const start = toMin(it.time);
-    let end = it.endTime ? toMin(it.endTime) : null;
-    if (end == null) {
-      const next = items[i + 1];
-      end = next ? toMin(next.time) : Math.min(24 * 60 - 1, start + 60);
-    }
-    return { it, start, end };
-  });
-
-  const cur = spans.find(s => s.start <= nowMin && nowMin < s.end);
-  if (cur) return { nowId: cur.it.id, nextId: null, highlightId: cur.it.id };
-
-  const next = spans.find(s => s.start > nowMin);
-  if (next) return { nowId: null, nextId: next.it.id, highlightId: next.it.id };
-
-  return { nowId: null, nextId: null, highlightId: null };
-}
-
-function toMin(hhmm) {
-  const [h, m] = hhmm.split(':').map(Number);
-  return h * 60 + m;
-}

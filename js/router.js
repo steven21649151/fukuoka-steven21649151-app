@@ -11,6 +11,7 @@ import { render as renderPhrases }   from './views/phrases.js';
 import { render as renderTips }      from './views/tips.js';
 import { render as renderPacking }   from './views/packing.js';
 import { render as renderFlight }    from './views/flight.js';
+import { render as renderLedger }    from './views/ledger.js';
 
 const VIEWS = {
   home:    renderItinerary,
@@ -25,6 +26,7 @@ const VIEWS = {
   tips:    renderTips,
   packing: renderPacking,
   flight:  renderFlight,
+  ledger:  renderLedger,
 };
 
 const TOOL_VIEWS = {
@@ -33,6 +35,7 @@ const TOOL_VIEWS = {
   tips: 'tips',
   packing: 'packing',
   flight: 'flight',
+  ledger: 'ledger',
 };
 
 export function parseHash(hash) {
@@ -130,7 +133,7 @@ function updateTabbar(route) {
     null;
   const isTools = route.view === 'tools' || route.view === 'toolsub'
     || route.view === 'rate' || route.view === 'phrases' || route.view === 'tips'
-    || route.view === 'packing' || route.view === 'flight';
+    || route.view === 'packing' || route.view === 'flight' || route.view === 'ledger';
 
   tabs.forEach((a) => {
     a.removeAttribute('aria-current');

@@ -1,6 +1,8 @@
 // 小工具選單
 import { escapeHtml } from '../lib/md.js';
 import { pendingBeforeStats } from './packing.js';
+import { todayLedgerYen } from './ledger.js';
+import { yen } from '../lib/fmt.js';
 
 const TOOLS = [
   { key: 'allergy', emoji: '🦐', label: '過敏卡',    action: 'allergy', urgent: true },
@@ -8,8 +10,8 @@ const TOOLS = [
   { key: 'tips',    emoji: '💡', label: '攻略 Tips' },
   { key: 'packing', emoji: '🎒', label: '打包清單' },
   { key: 'flight',  emoji: '✈️', label: '航班' },
+  { key: 'ledger',  emoji: '💰', label: '記帳' },
   { key: 'rate',    emoji: '💱', label: '匯率' },
-  { key: 'ledger',  emoji: '💰', label: '記帳',      soon: true },
   { key: 'journal', emoji: '📷', label: '手帳',      soon: true },
   { key: 'settings',emoji: '⚙️', label: '設定',      soon: true },
 ];
@@ -23,6 +25,7 @@ export async function render(root, params, ctx) {
     const packingTotal = packing.reduce((n, g) => n + (g.items?.length || 0), 0);
     const packingDone = countPackingDone(packing);
     const tipCount = (ctx.data.tips || []).length;
+    const ledgerToday = await todayLedgerYen(); // null → 不可用；0 → 沒紀錄
 
     const stats = pendingBeforeStats(ctx);
     const reminder = renderReminder(stats);
@@ -33,7 +36,7 @@ export async function render(root, params, ctx) {
         <h1 style="font-family:var(--dis);font-size:22px;margin:14px 0 6px">小工具</h1>
         ${reminder}
         <div class="tool-menu">
-          ${TOOLS.map(t => renderTile(t, { packingDone, packingTotal, tipCount })).join('')}
+          ${TOOLS.map(t => renderTile(t, { packingDone, packingTotal, tipCount, ledgerToday })).join('')}
         </div>
       </div>
     `;
@@ -70,6 +73,11 @@ function renderTile(t, s) {
   let meta = '';
   if (t.key === 'packing') meta = `<span class="meta">${s.packingDone} / ${s.packingTotal}</span>`;
   else if (t.key === 'tips') meta = `<span class="meta">${s.tipCount} 條</span>`;
+  else if (t.key === 'ledger') {
+    if (s.ledgerToday == null)   meta = '';
+    else if (s.ledgerToday === 0) meta = `<span class="meta">還沒記帳</span>`;
+    else                          meta = `<span class="meta">今日 ${yen(s.ledgerToday)}</span>`;
+  }
   return `
     <a href="${href}"${t.action ? ` data-tool-action="${escapeHtml(t.action)}"` : ''}
        class="tool-tile${t.urgent ? ' urgent' : ''}">
