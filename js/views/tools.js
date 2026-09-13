@@ -11,9 +11,9 @@ const TOOLS = [
   { key: 'packing', emoji: '🎒', label: '打包清單' },
   { key: 'flight',  emoji: '✈️', label: '航班' },
   { key: 'ledger',  emoji: '💰', label: '記帳' },
+  { key: 'journal', emoji: '📷', label: '手帳' },
   { key: 'rate',    emoji: '💱', label: '匯率' },
-  { key: 'journal', emoji: '📷', label: '手帳',      soon: true },
-  { key: 'settings',emoji: '⚙️', label: '設定',      soon: true },
+  { key: 'settings',emoji: '⚙️', label: '設定' },
 ];
 
 export async function render(root, params, ctx) {

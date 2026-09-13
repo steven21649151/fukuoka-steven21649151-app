@@ -7,7 +7,7 @@
 // 就把 APP_VERSION 的尾碼 +1。這是 GitHub Pages 上線後，
 // 唯一會讓瀏覽器重跑 install、重抓資源的觸發點——沒 bump 就會拿舊快取。
 
-const APP_VERSION = '1.5.1';
+const APP_VERSION = '1.6.1';
 const CACHE_SHELL = `fukuoka-shell-v${APP_VERSION}`;
 const CACHE_DATA = `fukuoka-data-v${APP_VERSION}`;
 
@@ -30,6 +30,9 @@ const SHELL_ASSETS = [
   './js/lib/db.js',
   './js/lib/rate.js',
   './js/lib/rate_overlay.js',
+  './js/lib/theme.js',
+  './js/lib/zip.js',
+  './js/lib/journal_capture.js',
   './js/views/itinerary.js',
   './js/views/spot.js',
   './js/views/story.js',
@@ -41,6 +44,8 @@ const SHELL_ASSETS = [
   './js/views/packing.js',
   './js/views/flight.js',
   './js/views/ledger.js',
+  './js/views/journal.js',
+  './js/views/settings.js',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/maskable-512.png',

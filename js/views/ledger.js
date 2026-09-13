@@ -460,7 +460,7 @@ function csvField(v) {
   if (/[",\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
   return s;
 }
-function buildCSV(list, days) {
+export function buildCSV(list, days) {
   const header = ['日期','時間','分類','日圓','台幣','當時匯率','關聯行程','可報帳','備註'];
   const lines = [header.map(csvField).join(',')];
   // 用日期＋時間排序，早的在前

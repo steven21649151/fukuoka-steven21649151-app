@@ -1,12 +1,13 @@
-// IndexedDB 極小 Promise 包裝——只給 ledger 用
-// db: fukuoka  version: 1
-// store: ledger  keyPath: id  index: byDate on 'date'
+// IndexedDB 極小 Promise 包裝
+// db: fukuoka
+//   v1: 建 ledger（keyPath id, index byDate）
+//   v2: 新增 journal（keyPath id, index byDay + bySpot）——不動 ledger
 //
 // 隱私模式或 iOS 極端情況下開不了 db，try/catch 到 open()。
 // 上層 view 用 isAvailable() 檢查，開不了就顯示替代訊息。
 
 const DB_NAME = 'fukuoka';
-const DB_VER  = 1;
+const DB_VER  = 2;
 let _dbPromise = null;
 let _lastError = null;
 
@@ -17,11 +18,20 @@ function open() {
     let req;
     try { req = indexedDB.open(DB_NAME, DB_VER); }
     catch (e) { reject(e); return; }
-    req.onupgradeneeded = () => {
+    req.onupgradeneeded = (ev) => {
       const db = req.result;
-      if (!db.objectStoreNames.contains('ledger')) {
+      // v0 → v1：建 ledger（新使用者第一次開）
+      if (ev.oldVersion < 1) {
         const s = db.createObjectStore('ledger', { keyPath: 'id' });
         s.createIndex('byDate', 'date', { unique: false });
+      }
+      // v1 → v2：只新增 journal，不動 ledger
+      if (ev.oldVersion < 2) {
+        if (!db.objectStoreNames.contains('journal')) {
+          const j = db.createObjectStore('journal', { keyPath: 'id' });
+          j.createIndex('byDay',  'day',    { unique: false });
+          j.createIndex('bySpot', 'spotId', { unique: false });
+        }
       }
     };
     req.onsuccess = () => resolve(req.result);
@@ -81,4 +91,42 @@ export async function getLedger(id) {
   const row = await req2promise(store.get(id));
   await done;
   return row;
+}
+
+// ================= journal =================
+
+export async function putJournal(row) {
+  const { store, done } = await tx('journal', 'readwrite');
+  store.put(row);
+  await done;
+  return row;
+}
+
+export async function deleteJournal(id) {
+  const { store, done } = await tx('journal', 'readwrite');
+  store.delete(id);
+  await done;
+}
+
+export async function getAllJournal() {
+  const { store, done } = await tx('journal', 'readonly');
+  const rows = await req2promise(store.getAll());
+  await done;
+  return rows;
+}
+
+export async function getJournal(id) {
+  const { store, done } = await tx('journal', 'readonly');
+  const row = await req2promise(store.get(id));
+  await done;
+  return row;
+}
+
+// 計算某景點目前有幾張手帳（拍照命名流水號用）
+export async function countJournalBySpot(spotId) {
+  const { store, done } = await tx('journal', 'readonly');
+  const idx = store.index('bySpot');
+  const n = await req2promise(idx.count(IDBKeyRange.only(spotId)));
+  await done;
+  return n;
 }

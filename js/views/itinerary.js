@@ -193,6 +193,8 @@ function renderCard(it, nowInfo, ctx) {
     if (spot.mapQuery) {
       actions.push(`<a class="btn btn-icon" href="${mapsUrl(spot.mapQuery)}" target="_blank" rel="noopener" aria-label="用 Google Maps 導航">🗺</a>`);
     }
+    // 手帳：小圖示按鈕，跟 🗺 並排
+    actions.push(`<button type="button" class="btn btn-icon" data-jrn-spot="${escapeHtml(it.spotId)}" data-jrn-day="${it.dayN || ''}" aria-label="拍照記錄">📷</button>`);
   }
   if (it.guideId) {
     actions.push(`<a class="btn" href="#/guide/${encodeURIComponent(it.guideId)}">✈️ 流程怎麼走 →</a>`);

@@ -82,6 +82,7 @@ export async function render(root, params, ctx) {
         <div class="actions-row">
           <a class="btn btn-primary" href="${mapsUrl(spot.mapQuery || spot.address || spot.name)}"
              target="_blank" rel="noopener" id="mapbtn">🗺 Google Maps 導航</a>
+          <button type="button" class="btn" data-jrn-spot="${escapeHtml(spot.id)}">📷 記錄</button>
           ${spot.story ? `<a class="btn" href="#/story/${encodeURIComponent(spot.id)}">相關攻略 →</a>` : ''}
         </div>
       </div>

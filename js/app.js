@@ -6,6 +6,7 @@ import { openBigCard } from './lib/bigcard.js';
 import { warmUpJaVoice } from './lib/tts.js';
 import { initRate, getRate, onChange as onRateChange } from './lib/rate.js';
 import { openRateOverlay } from './lib/rate_overlay.js';
+import { initTheme } from './lib/theme.js';
 
 const DATA_FILES = ['spots', 'days', 'tips', 'phrases', 'packing', 'guides', 'rates'];
 const FALLBACK_RATE = { jpyToTwd: 0.2035, asOf: null, source: null };
@@ -14,6 +15,8 @@ const WEEKDAY_ZH = ['日', '一', '二', '三', '四', '五', '六'];
 boot();
 
 async function boot() {
+  initTheme(); // 越早越好，避免亮到深色的閃爍
+  requestPersist();
   const outlet = document.getElementById('outlet');
   let data;
   try {
@@ -38,9 +41,20 @@ async function boot() {
   wireAllergyButton(ctx);
   wireRateButton(ctx);
   wireGlobalTipLinks(ctx);
+  wireGlobalJournalButtons(ctx);
   initRouter(ctx);
   warmUpJaVoice();
   registerSW();
+}
+
+// storage persist：申請一次就好，被拒也不打擾使用者
+async function requestPersist() {
+  try {
+    if (navigator.storage?.persist) {
+      const already = await navigator.storage.persisted?.();
+      if (!already) await navigator.storage.persist();
+    }
+  } catch {}
 }
 
 function wireRateButton(ctx) {
@@ -59,6 +73,20 @@ function wireAllergyButton(ctx) {
       .sort((a, b) => (a.priority || 99) - (b.priority || 99));
     if (!list.length) return;
     openBigCard(list, { startId: list[0].id });
+  });
+}
+
+// 全域：任何 data-jrn-spot="<spotId>" 的按鈕，點下去開手帳拍照流程
+function wireGlobalJournalButtons(ctx) {
+  document.addEventListener('click', async (e) => {
+    const btn = e.target.closest('[data-jrn-spot]');
+    if (!btn) return;
+    e.preventDefault();
+    const spotId = btn.getAttribute('data-jrn-spot');
+    const dayN = Number(btn.getAttribute('data-jrn-day')) || null;
+    const spot = spotId ? (ctx.data.spots || []).find(s => s.id === spotId) : null;
+    const { openCapture } = await import('./lib/journal_capture.js');
+    openCapture({ spot, dayN });
   });
 }
 
