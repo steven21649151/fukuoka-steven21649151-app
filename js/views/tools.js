@@ -6,6 +6,9 @@ import { yen } from '../lib/fmt.js';
 
 const TOOLS = [
   { key: 'allergy', emoji: '🦐', label: '過敏卡',    action: 'allergy', urgent: true },
+  { key: 'talk',    emoji: '🎤', label: '我的報告' },
+  { key: 'sos',     emoji: '🚨', label: '出事了' },
+  { key: 'tickets', emoji: '🎫', label: '票券' },
   { key: 'phrases', emoji: '🗣', label: '中日句庫' },
   { key: 'tips',    emoji: '💡', label: '攻略 Tips' },
   { key: 'packing', emoji: '🎒', label: '打包清單' },
@@ -38,6 +41,40 @@ export async function render(root, params, ctx) {
         <div class="tool-menu">
           ${TOOLS.map(t => renderTile(t, { packingDone, packingTotal, tipCount, ledgerToday })).join('')}
         </div>
+
+        <section style="margin-top:24px">
+          <div class="set-h" style="margin-bottom:8px">🔗 常用 App</div>
+          <div class="ext-row">
+            <a class="ext-btn" href="https://translate.google.com/?sl=ja&tl=zh-TW&op=translate" target="_blank" rel="noopener">
+              <span class="ico">🌐</span><span class="lbl">Google 翻譯</span>
+              <span class="ext-hint">會開 App 或網頁版</span>
+            </a>
+            <a class="ext-btn" href="https://services.digital.go.jp/visit-japan-web/" target="_blank" rel="noopener">
+              <span class="ico">🛂</span><span class="lbl">Visit Japan Web</span>
+              <span class="ext-hint">會開 App 或網頁版</span>
+            </a>
+            <a class="ext-btn" href="https://www.myroute.fun/" target="_blank" rel="noopener">
+              <span class="ico">🚌</span><span class="lbl">my route</span>
+              <span class="ext-hint">會開 App 或網頁版</span>
+            </a>
+            <a class="ext-btn" href="https://world.jorudan.co.jp/mln/zh-TW/" target="_blank" rel="noopener">
+              <span class="ico">🚆</span><span class="lbl">Jorudan 轉乘</span>
+              <span class="ext-hint">網頁版</span>
+            </a>
+            <a class="ext-btn" href="https://line.me/R/ti/p/@yatai_fukuoka" target="_blank" rel="noopener">
+              <span class="ico">💬</span><span class="lbl">LINE 福岡屋台</span>
+              <span class="ext-hint">會開 App 或網頁版</span>
+            </a>
+          </div>
+          <a class="tk-safety-card" href="https://play.google.com/store/apps/details?id=jp.co.rcsc.safetytips.android" target="_blank" rel="noopener">
+            <div class="ico">⚠️</div>
+            <div class="body">
+              <div class="ttl">下載 Safety tips</div>
+              <div class="det">日本觀光廳官方防災 App，地震警報用</div>
+            </div>
+            <div class="chev">›</div>
+          </a>
+        </section>
       </div>
     `;
 

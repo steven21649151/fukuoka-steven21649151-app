@@ -1210,6 +1210,368 @@ body.cap-open { overflow: hidden; }
 .set-seg { padding: 4px 0 0; }
 .set-seg .chip { padding: 10px 16px; }
 
+/* ================= 通用外部 App 連結 ================= */
+.ext-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ext-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--soft);
+  color: var(--ink);
+  font-size: 14px;
+  font-family: inherit;
+  border: 1px solid var(--line);
+  min-height: 44px;
+}
+.ext-btn .ico { font-size: 18px; line-height: 1; }
+.ext-btn .lbl { font-weight: 600; }
+.ext-btn .ext-hint {
+  font-size: 11px;
+  color: var(--faint);
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--card);
+  margin-left: 2px;
+}
+
+.tk-safety-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  margin-top: 10px;
+  background: var(--card);
+  border-radius: 12px;
+  box-shadow: var(--shadow-card);
+  color: var(--ink);
+  border-left: 3px solid var(--shu);
+}
+.tk-safety-card .ico { font-size: 22px; flex-shrink: 0; }
+.tk-safety-card .body { flex: 1; }
+.tk-safety-card .ttl { font-family: var(--dis); font-size: 15px; font-weight: 700; }
+.tk-safety-card .det { color: var(--ink2); font-size: 13px; margin-top: 2px; }
+.tk-safety-card .chev { color: var(--faint); font-size: 18px; }
+
+/* ================= 我的報告頁 ================= */
+.talk-count {
+  padding: 16px 18px;
+  background: var(--card);
+  border-radius: 14px;
+  box-shadow: var(--shadow-card);
+  border-left: 3px solid var(--shu);
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.talk-count .k { font-size: 13px; color: var(--faint); flex: 0 0 60px; }
+.talk-count .v { font-family: var(--dis); font-size: 22px; font-weight: 700; color: var(--shu); }
+
+.talk-block {
+  margin: 14px 0;
+  padding: 12px 14px;
+  background: var(--card);
+  border-radius: 12px;
+  box-shadow: var(--shadow-card);
+}
+.talk-h {
+  font-family: var(--dis);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--faint);
+  letter-spacing: .06em;
+  margin-bottom: 8px;
+}
+
+.talk-time-bar {
+  display: flex;
+  height: 34px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--soft);
+}
+.talk-time-bar .seg {
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+}
+.talk-time-bar .seg.talk { background: var(--cat-sight-main); }
+.talk-time-bar .seg.qa   { background: var(--shu); }
+
+.talk-mile { display: flex; flex-direction: column; gap: 8px; }
+.talk-mile-item {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 12px;
+  padding: 8px 0;
+  border-top: 1px solid var(--line);
+}
+.talk-mile-item:first-child { border-top: 0; padding-top: 4px; }
+.talk-mile-item.past .body { opacity: .55; }
+.talk-mile-item.past .body .ttl { text-decoration: line-through; }
+.talk-mile-item .stamp {
+  font-size: 12px; color: var(--faint);
+  padding-top: 4px;
+}
+.talk-mile-item .ttl { font-family: var(--dis); font-size: 14.5px; font-weight: 700; color: var(--ink); }
+.talk-mile-item .det { color: var(--ink2); font-size: 13.5px; line-height: 1.6; margin-top: 3px; }
+
+.talk-check { display: flex; flex-direction: column; gap: 6px; }
+.talk-check-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.talk-check-row input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--shu); flex-shrink: 0; }
+.talk-check-row .text { flex: 1; font-size: 14px; color: var(--ink); }
+.talk-check-row .star { color: var(--shu); flex-shrink: 0; }
+.talk-check-row.done .text { text-decoration: line-through; color: var(--faint); }
+.talk-check-row.crit { background: color-mix(in oklab, var(--shu) 6%, transparent); }
+
+.qa-list { display: flex; flex-direction: column; gap: 8px; }
+.qa-card {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--soft);
+  border-left: 3px solid var(--cat-venue-main);
+}
+.qa-card .zh { font-size: 13px; color: var(--ink2); }
+.qa-card .en {
+  font-size: 15px; font-weight: 600; color: var(--ink);
+  margin-top: 4px; line-height: 1.5;
+  -webkit-user-select: text; user-select: text;
+}
+.qa-card .note { font-size: 12px; color: var(--faint); margin-top: 4px; }
+.qa-card .acts { margin-top: 6px; }
+.qa-speak.speaking { background: var(--shu); color: #fff; }
+
+/* ================= 出事了頁 ================= */
+.sos-card {
+  margin: 12px 0;
+  padding: 12px 14px;
+  background: var(--card);
+  border-radius: 12px;
+  box-shadow: var(--shadow-card);
+  border-left: 4px solid var(--shu);
+}
+.sos-h {
+  font-family: var(--dis);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--shu);
+  margin-bottom: 8px;
+}
+.sos-steps {
+  counter-reset: sos;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.sos-steps > li {
+  padding-left: 34px;
+  position: relative;
+  font-size: 14px;
+  color: var(--ink);
+  line-height: 1.7;
+  counter-increment: sos;
+}
+.sos-steps > li::before {
+  content: counter(sos);
+  position: absolute; left: 0; top: 2px;
+  width: 24px; height: 24px;
+  border-radius: 999px;
+  background: var(--shu);
+  color: #fff;
+  font-family: var(--dis);
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.sos-line {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin-top: 6px;
+  font-size: 13.5px; color: var(--ink2);
+}
+.sos-line .lbl { color: var(--faint); }
+.sos-line .tel {
+  font-family: var(--mono);
+  font-weight: 700;
+  color: var(--shu);
+  background: color-mix(in oklab, var(--shu) 12%, transparent);
+  padding: 5px 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.sos-line-block { margin-top: 6px; }
+.sos-addr { margin-top: 2px; }
+.sos-sub {
+  padding-left: 20px;
+  margin-top: 4px;
+  list-style: disc;
+  color: var(--ink2);
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+
+/* ================= 票券頁 ================= */
+.tk-warn {
+  padding: 12px 14px;
+  margin: 8px 0 14px;
+  background: color-mix(in oklab, var(--tip-line) 12%, var(--card));
+  border-left: 3px solid var(--tip-line);
+  border-radius: 0 12px 12px 0;
+  font-size: 13px;
+  color: var(--tip-ink);
+  line-height: 1.7;
+}
+
+.tk-list { display: flex; flex-direction: column; gap: 14px; }
+.tk-day {
+  background: var(--card);
+  border-radius: 12px;
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+.tk-day-head {
+  padding: 8px 14px;
+  background: var(--soft);
+  font-family: var(--dis);
+  font-weight: 700;
+  color: var(--ink);
+  font-size: 13.5px;
+}
+.tk-day-body { display: flex; flex-direction: column; }
+.tk-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--line);
+  cursor: pointer;
+}
+.tk-row:first-child { border-top: 0; }
+.tk-thumb {
+  flex: 0 0 auto;
+  width: 56px; height: 56px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--soft);
+  display: flex; align-items: center; justify-content: center;
+}
+.tk-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.tk-noimg { color: var(--faint); font-size: 22px; }
+.tk-body { flex: 1; min-width: 0; }
+.tk-title { font-family: var(--dis); font-size: 14.5px; font-weight: 700; color: var(--ink); }
+.tk-code-inline, .tk-how-inline {
+  font-size: 12.5px;
+  color: var(--ink2);
+  margin-top: 2px;
+}
+.tk-code-inline .k { color: var(--faint); margin-right: 4px; }
+.tk-code-inline code { font-family: var(--mono); background: var(--soft); padding: 1px 6px; border-radius: 4px; }
+.tk-how-inline.warn { color: var(--shu); font-weight: 700; }
+.tk-row .chev { color: var(--faint); font-size: 18px; flex-shrink: 0; }
+
+.tk-form .cap-field .k { font-size: 11px; color: var(--faint); letter-spacing: .05em; }
+.tk-form .cap-field select {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--page);
+  color: var(--ink);
+  font-size: 14px;
+  min-width: 0; max-width: 100%;
+}
+.tk-img-slot { margin: 4px 0; font-size: 13px; color: var(--faint); display: flex; align-items: center; }
+
+.tk-detail-img {
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 8px 0 4px;
+  display: flex; align-items: center; justify-content: center;
+  min-height: 200px;
+  cursor: zoom-in;
+}
+.tk-detail-img img { max-width: 100%; max-height: 400px; display: block; }
+.tk-code { padding: 6px 0; font-size: 13.5px; }
+.tk-code .k { color: var(--faint); margin-right: 8px; }
+.tk-code code { font-family: var(--mono); background: var(--soft); padding: 4px 10px; border-radius: 6px; font-size: 15px; }
+.tk-how {
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: color-mix(in oklab, var(--cat-sight-main) 10%, transparent);
+  color: var(--cat-sight-main);
+  font-size: 13px;
+  font-weight: 700;
+  display: inline-block;
+}
+.tk-how.warn { background: color-mix(in oklab, var(--shu) 12%, transparent); color: var(--shu); }
+.tk-note { padding: 6px 0; font-size: 13.5px; color: var(--ink); line-height: 1.6; }
+.tk-link { margin-top: 6px; }
+
+/* 出示模式（票券全螢幕） */
+.tk-present {
+  position: fixed; inset: 0; z-index: 105;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: env(safe-area-inset-top, 0) 8px env(safe-area-inset-bottom, 0);
+}
+.tk-present-tip {
+  position: absolute;
+  top: calc(10px + env(safe-area-inset-top, 0px));
+  left: 50%; transform: translateX(-50%);
+  color: rgba(255,255,255,.65);
+  font-size: 12px;
+  background: rgba(0,0,0,.3);
+  padding: 4px 10px;
+  border-radius: 999px;
+  z-index: 1;
+}
+.tk-present-body {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; height: 100%;
+  padding: 60px 4px 60px;
+}
+.tk-present-body img {
+  max-width: 100%; max-height: 100%; object-fit: contain;
+  background: #fff;   /* QR 需要白底掃 */
+  border-radius: 4px;
+}
+.tk-present-code {
+  position: absolute;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  left: 50%; transform: translateX(-50%);
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 15px;
+  background: rgba(0,0,0,.5);
+  padding: 6px 14px;
+  border-radius: 8px;
+}
+.tk-present .bc-close {
+  position: absolute;
+  top: calc(12px + env(safe-area-inset-top, 0px));
+  right: calc(12px + env(safe-area-inset-right, 0px));
+  width: 44px; height: 44px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.15);
+  color: #fff;
+  border: 0;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 2;
+}
+
 /* ================= 分類色套用 ================= */
 [data-cat="food"]    { --cat-main: var(--cat-food-main);    --cat-soft: var(--cat-food-soft); }
 [data-cat="sight"]   { --cat-main: var(--cat-sight-main);   --cat-soft: var(--cat-sight-soft); }

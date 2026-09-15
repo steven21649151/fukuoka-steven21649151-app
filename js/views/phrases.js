@@ -25,6 +25,13 @@ export async function render(root, params, ctx) {
       <p class="small faint" style="margin-bottom:10px">
         點 🔊 朗讀；點 <b>大字卡</b> 進黑底白字模式，把手機轉過去給店員看。
       </p>
+      <div class="ext-row" style="margin-bottom:10px">
+        <a class="ext-btn" href="https://translate.google.com/?sl=ja&tl=zh-TW&op=translate" target="_blank" rel="noopener">
+          <span class="ico">🌐</span>
+          <span class="lbl">Google 翻譯</span>
+          <span class="ext-hint">會開 App 或網頁版</span>
+        </a>
+      </div>
 
       <nav class="chiprow" id="sceneChips" aria-label="場景切換">
         ${orderedScenes.map(s => `

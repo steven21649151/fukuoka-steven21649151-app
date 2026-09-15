@@ -2,12 +2,13 @@
 // db: fukuoka
 //   v1: 建 ledger（keyPath id, index byDate）
 //   v2: 新增 journal（keyPath id, index byDay + bySpot）——不動 ledger
+//   v3: 新增 tickets（keyPath id, index byDay）——不動 ledger/journal
 //
 // 隱私模式或 iOS 極端情況下開不了 db，try/catch 到 open()。
 // 上層 view 用 isAvailable() 檢查，開不了就顯示替代訊息。
 
 const DB_NAME = 'fukuoka';
-const DB_VER  = 2;
+const DB_VER  = 3;
 let _dbPromise = null;
 let _lastError = null;
 
@@ -31,6 +32,14 @@ function open() {
           const j = db.createObjectStore('journal', { keyPath: 'id' });
           j.createIndex('byDay',  'day',    { unique: false });
           j.createIndex('bySpot', 'spotId', { unique: false });
+        }
+      }
+      // v2 → v3：只新增 tickets，不動 ledger/journal
+      if (ev.oldVersion < 3) {
+        if (!db.objectStoreNames.contains('tickets')) {
+          const tk = db.createObjectStore('tickets', { keyPath: 'id' });
+          tk.createIndex('byDay',    'dayN',   { unique: false });
+          tk.createIndex('byItem',   'itemId', { unique: false });
         }
       }
     };
@@ -129,4 +138,38 @@ export async function countJournalBySpot(spotId) {
   const n = await req2promise(idx.count(IDBKeyRange.only(spotId)));
   await done;
   return n;
+}
+
+// ================= tickets =================
+
+export async function putTicket(row) {
+  const { store, done } = await tx('tickets', 'readwrite');
+  store.put(row);
+  await done;
+  return row;
+}
+export async function deleteTicket(id) {
+  const { store, done } = await tx('tickets', 'readwrite');
+  store.delete(id);
+  await done;
+}
+export async function getAllTickets() {
+  const { store, done } = await tx('tickets', 'readonly');
+  const rows = await req2promise(store.getAll());
+  await done;
+  return rows;
+}
+export async function getTicket(id) {
+  const { store, done } = await tx('tickets', 'readonly');
+  const row = await req2promise(store.get(id));
+  await done;
+  return row;
+}
+// 拿到「哪些 itemId 有票」的 Set——行程頁渲染卡片時查 🎫 圖示要不要顯示
+// index.getAllKeys() 回的是「符合索引的主鍵」不是「索引值本身」，所以走 getAll() 撈 itemId
+export async function ticketedItemIds() {
+  const { store, done } = await tx('tickets', 'readonly');
+  const rows = await req2promise(store.getAll());
+  await done;
+  return new Set(rows.map(r => r.itemId).filter(Boolean));
 }

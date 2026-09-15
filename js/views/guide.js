@@ -32,6 +32,15 @@ export async function render(root, params, ctx) {
         ${guide.lead ? `<p class="lead">${mdInline(guide.lead)}</p>` : ''}
       </header>
 
+      ${params.id === 'arr-fuk' ? `
+        <div class="ext-row" style="margin:8px 0 16px">
+          <a class="ext-btn" href="https://services.digital.go.jp/visit-japan-web/" target="_blank" rel="noopener">
+            <span class="ico">🛂</span><span class="lbl">Visit Japan Web</span>
+            <span class="ext-hint">會開 App 或網頁版</span>
+          </a>
+        </div>
+      ` : ''}
+
       ${(guide.steps || []).map(renderStep).join('')}
 
       ${Array.isArray(guide.faq) && guide.faq.length ? `

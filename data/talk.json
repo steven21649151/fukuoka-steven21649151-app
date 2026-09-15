@@ -1,0 +1,71 @@
+{
+  "_meta": {
+    "note": "報告頁的內容。不要放論文摘要或投影片內容——那些他自己記憶最清楚，App 幫不上忙。",
+    "updated": "2026-09-13"
+  },
+
+  "target": {
+    "iso": "2026-10-28T14:15",
+    "sessionStartIso": "2026-10-28T13:15",
+    "reportIso": "2026-10-28T13:00",
+    "session": "Session C4L-E",
+    "room": "ACROS 6F Room 607",
+    "paperId": "Paper 2377",
+    "order": 5,
+    "durationMin": 15,
+    "talkMin": 13,
+    "qaMin": 2
+  },
+
+  "milestones": [
+    { "iso": "2026-10-16", "title": "簡報檔上傳", "detail": "大會硬性規定，過了不受理。投影片每張 20 字內、字級 18pt 以上。" },
+    { "iso": "2026-10-25T18:00", "title": "Welcome Reception 領名牌", "detail": "順便到 Registration Desk 講兩件事：(1) 10/27 不參加 Excursion，但會自己去御花參加 Keynote 和 Banquet (2) 問回程巴士幾點從御花發車" },
+    { "iso": "2026-10-28T13:00", "title": "到 Room 607 向 session chair 報到", "detail": "官網規定講者要在開場前 15 分鐘到。把 USB 插上、PDF 備份放旁邊，叫出檔案確認在會場電腦上開得起來。" },
+    { "iso": "2026-10-28T13:15", "title": "Session 開始（前 4 位講者）", "detail": "坐下來當觀眾，看他們怎麼講、怎麼答 Q&A。不要一直複習自己的稿。" },
+    { "iso": "2026-10-28T14:15", "title": "🎤 你上台", "detail": "15 分鐘：講 13 分＋Q&A 2 分。時間到會被主席打斷，控制節奏比講完更重要。" }
+  ],
+
+  "checklist": [
+    { "id": "tk-slide-upload", "text": "10/16 前把簡報上傳大會系統", "critical": true },
+    { "id": "tk-usb",          "text": "USB 隨身碟放進手提包", "critical": true },
+    { "id": "tk-pdf",          "text": "簡報 PDF 備份存進手機、雲端各一份" },
+    { "id": "tk-attire",       "text": "報告當天穿系上要求的服裝" },
+    { "id": "tk-badge",        "text": "10/25 領名牌後掛在身上進會場" },
+    { "id": "tk-report-1300",  "text": "10/28 13:00 到 Room 607 向 session chair 報到、叫檔案確認", "critical": true },
+    { "id": "tk-stay",         "text": "整場 session 待到最後（教授要求）", "critical": true },
+    { "id": "tk-water",        "text": "上台前喝一口水" }
+  ],
+
+  "qa": [
+    { "id": "qa-01", "zh": "不好意思，可以再說一次嗎？",
+      "en": "Sorry, could you repeat the question, please?",
+      "note": "沒聽清楚——這是最需要的一句" },
+    { "id": "qa-02", "zh": "所以你的意思是…是嗎？",
+      "en": "So if I understand correctly, you're asking … Is that right?",
+      "note": "確認理解，把問題重述一次爭取思考時間" },
+    { "id": "qa-03", "zh": "這超出這個研究的範圍，我們沒有涵蓋到。",
+      "en": "That's beyond the scope of this study; we didn't cover it here.",
+      "note": "問題不在你的射程內時" },
+    { "id": "qa-04", "zh": "我們還沒有測試那個情境。",
+      "en": "We haven't tested that scenario yet.",
+      "note": "誠實比亂答好——會後可以補做" },
+    { "id": "qa-05", "zh": "這是很好的問題，是我們未來的工作。",
+      "en": "That's a great question, and it's part of our future work.",
+      "note": "萬用回答之一，但一場只能用一次" },
+    { "id": "qa-06", "zh": "我手邊沒有這個數字，會後可以跟你討論。",
+      "en": "I don't have those numbers on hand, but I'd be happy to discuss it with you after the session.",
+      "note": "被問到具體數字時" },
+    { "id": "qa-07", "zh": "謝謝你的建議，我們會考慮。",
+      "en": "Thank you for the suggestion; we'll take that into consideration.",
+      "note": "被建議修改方向時" },
+    { "id": "qa-08", "zh": "可以請你解釋一下這個名詞嗎？",
+      "en": "Could you clarify what you mean by that term?",
+      "note": "對方用了你不熟的縮寫或術語" },
+    { "id": "qa-09", "zh": "我同意——確實是這個方向要更完整。",
+      "en": "I agree—that's exactly the direction we need to strengthen.",
+      "note": "被問到的正是弱點時，坦然承認比辯解好" },
+    { "id": "qa-10", "zh": "謝謝主席，時間到了。",
+      "en": "Thank you, Chair. That's my time.",
+      "note": "如果主席示意時間到，收尾用" }
+  ]
+}

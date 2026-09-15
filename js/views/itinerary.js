@@ -3,6 +3,7 @@ import { mdInline, escapeHtml } from '../lib/md.js';
 import { yen, yenRange, md, twdIfBig } from '../lib/fmt.js';
 import { mapsUrl } from '../lib/maps.js';
 import { computeNowInDay, todayISO } from '../lib/nowitem.js';
+import { ticketedItemIds, isAvailable as dbAvailable } from '../lib/db.js';
 
 const KIND_CAT = {
   flight: 'transit', transit: 'transit', meal: 'food', sight: 'sight',
@@ -48,6 +49,13 @@ export async function render(root, params, ctx, opts = {}) {
 
   const day = days.find(d => d.n === n) || days[0];
   const nowInfo = computeNowInDay(day, today);
+
+  // 拿一次「哪些 item 有票」，渲染卡片時決定是否顯示 🎫
+  let tkSet = new Set();
+  try {
+    if (await dbAvailable()) tkSet = await ticketedItemIds();
+  } catch {}
+  ctx.__ticketedItemIds = tkSet;
 
   root.innerHTML = `
     <div class="wrap">
@@ -195,6 +203,14 @@ function renderCard(it, nowInfo, ctx) {
     }
     // 手帳：小圖示按鈕，跟 🗺 並排
     actions.push(`<button type="button" class="btn btn-icon" data-jrn-spot="${escapeHtml(it.spotId)}" data-jrn-day="${it.dayN || ''}" aria-label="拍照記錄">📷</button>`);
+  }
+  // 🎫：這個 item 有票券 → 跳到 tickets 頁
+  if (ctx.__ticketedItemIds && ctx.__ticketedItemIds.has(it.id)) {
+    actions.push(`<a class="btn btn-icon" href="#/tools/tickets" aria-label="打開票券頁">🎫</a>`);
+  }
+  // 特定行程項目的外部 App 連結
+  if (it.id === 'd1-14') {
+    actions.push(`<a class="btn btn-icon" href="https://line.me/R/ti/p/@yatai_fukuoka" target="_blank" rel="noopener" aria-label="LINE 福岡屋台官方帳號">💬</a>`);
   }
   if (it.guideId) {
     actions.push(`<a class="btn" href="#/guide/${encodeURIComponent(it.guideId)}">✈️ 流程怎麼走 →</a>`);

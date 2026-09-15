@@ -44,7 +44,15 @@
           "detail": "出發前 6 小時以上完成。**QR 截圖存進相簿**——不要只存書籤，沒網路打不開。同一組帳號也能產生免稅 QR。",
           "critical": true },
         { "id": "pk-cash", "text": "換日幣現金", "deadline": "2026-10-23",
-          "detail": "屋台、小金ちゃん只收現金，神社的御守御朱印也是。不夠可在日本 7-11 的 Seven Bank ATM 領。" }
+          "detail": "屋台、小金ちゃん只收現金，神社的御守御朱印也是。不夠可在日本 7-11 的 Seven Bank ATM 領。" },
+        { "id": "pk-hanamidori-booking", "text": "請飯店代訂 博多華味鳥 博多駅前店", "deadline": "2026-09-26",
+          "detail": "**10/26 晚 18:00、1 名、註明甲殼類過敏**。\n走 **Trip.com 訂單的『聯絡住宿』或飯店 email** 寄給 Comfort Inn 天神——**不要拖到 10/25 check-in**，那只剩 1 天緩衝、被拒就沒有 plan B。\n備援 **KKday**（中文介面，天神店／川端通り店，¥440/人 取消費、3 天前免費取消）。",
+          "critical": true },
+        { "id": "pk-suganoya-booking", "text": "線上訂 菅乃屋 銀座通り店", "deadline": "2026-09-30",
+          "detail": "**10/29 午 11:30 或 12:00 那批、1 名、註明甲殼類過敏、點ステーキ箱膳**。\n兩個管道都可以自己訂——\n- 一休.comレストラン：restaurant.ikyu.com/119718\n- HotPepper：hotpepper.jp/strJ000113312\n介面日文但表單不難。訂不成才走 10/25 Comfort Inn 櫃台代打（10/25 訂 10/29 有 4 天緩衝、夠用）。",
+          "critical": true },
+        { "id": "pk-recheck-bookings", "text": "確認華味鳥、菅乃屋訂位還在", "deadline": "2026-10-20",
+          "detail": "**兩件都要看**：訂位還在、**過敏備註有進系統**。\n- 線上訂的：翻確認信\n- 飯店代訂的：10/25 check-in 時當場再問一次" }
       ]
     },
 

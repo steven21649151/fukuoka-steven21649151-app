@@ -151,8 +151,11 @@ function renderItem(it, today) {
   }
   const dlText = dl ? formatMD(dl) : '';
   const critBadge = it.critical ? `<span class="pk-crit" title="重要">⭐</span>` : '';
-  const detailHtml = it.detail
-    ? `<div class="pk-detail"><span class="ico">💡</span><div class="body">${mdInline(it.detail)}</div></div>`
+  const extLinks = renderPackingExt(it.id);
+  // 只有 pk-more 展開時 detail 才會出來——沒 detail 但有 extLinks 也要能展
+
+  const detailHtml = (it.detail || extLinks)
+    ? `<div class="pk-detail"><span class="ico">💡</span><div class="body">${it.detail ? mdInline(it.detail) : ''}${extLinks}</div></div>`
     : '';
   return `
     <div class="pk-item" data-id="${escapeHtml(it.id)}"${flag ? ` data-flag="${flag}"` : ''}>
@@ -162,10 +165,31 @@ function renderItem(it, today) {
       </label>
       ${dl ? `<span class="pk-deadline nw">${escapeHtml(dlText)}</span>` : ''}
       ${critBadge}
-      ${it.detail ? `<button type="button" class="pk-more" aria-label="展開說明">▾</button>` : ''}
+      ${(it.detail || extLinks) ? `<button type="button" class="pk-more" aria-label="展開說明">▾</button>` : ''}
       ${detailHtml}
     </div>
   `;
+}
+
+// 特定打包項目附上外部 App 連結（只對這幾條做，不做成資料驅動）
+function renderPackingExt(id) {
+  if (id === 'pk-dazaifu') {
+    return `<div class="ext-row" style="margin-top:8px">
+      <a class="ext-btn" href="https://www.myroute.fun/" target="_blank" rel="noopener">
+        <span class="ico">🚌</span><span class="lbl">my route</span>
+        <span class="ext-hint">會開 App 或網頁版</span>
+      </a>
+    </div>`;
+  }
+  if (id === 'pk-vjw') {
+    return `<div class="ext-row" style="margin-top:8px">
+      <a class="ext-btn" href="https://services.digital.go.jp/visit-japan-web/" target="_blank" rel="noopener">
+        <span class="ico">🛂</span><span class="lbl">Visit Japan Web</span>
+        <span class="ext-hint">會開 App 或網頁版</span>
+      </a>
+    </div>`;
+  }
+  return '';
 }
 
 function formatMD(iso) {
