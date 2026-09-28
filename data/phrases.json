@@ -100,7 +100,7 @@
       "zh": "這個怎麼吃？",
       "ja": "これはどうやって食べますか？",
       "romaji": "Kore wa dōyatte tabemasu ka?",
-      "note": "水炊き、せいろ蒸し 有吃法順序，問了店員會教你" },
+      "note": "牛まぶし（三種吃法）、せいろ蒸し 有吃法順序，問了店員會教你" },
 
     { "id": "rs-08", "scene": "restaurant", "priority": 8,
       "zh": "請結帳",
@@ -212,7 +212,7 @@
       "zh": "（請櫃台代訂餐廳）不好意思，我不會說日文，可以請您幫我打電話訂位嗎？店名和日期時間寫在這裡",
       "ja": "すみません、日本語が話せないので、レストランの予約のお電話をお願いできますでしょうか。お店の名前と日時はこちらに書いてあります。一名でお願いします。",
       "romaji": "Sumimasen, nihongo ga hanasenai node, resutoran no yoyaku no o-denwa o onegai dekimasu deshō ka. O-mise no namae to nichiji wa kochira ni kaite arimasu. Ichimei de onegai shimasu.",
-      "note": "⭐⭐ 10/25 check-in 時用。要訂兩家：博多華味鳥（10/26 18:00）、菅乃屋 銀座通り店（10/29 11:30）。記得補一句過敏（下一則）" },
+      "note": "⭐ 10/25 到飯店時用：暁（10/26 17:30、1 名）想保險就請櫃台訂；菅乃屋（10/29 11:30）沒在網路訂成也用這句。記得補一句過敏（ht-06）" },
 
     { "id": "ht-06", "scene": "hotel", "priority": 6,
       "zh": "（訂位時補充）請幫我備註：甲殼類過敏",
