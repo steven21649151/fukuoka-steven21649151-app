@@ -1,5 +1,5 @@
 // 行程列表（首頁）
-import { mdInline, escapeHtml } from '../lib/md.js';
+import { mdInline, escapeHtml, phraseWrap } from '../lib/md.js';
 import { yen, yenRange, md, twdIfBig } from '../lib/fmt.js';
 import { mapsUrl } from '../lib/maps.js';
 import { computeNowInDay, todayISO } from '../lib/nowitem.js';
@@ -82,7 +82,7 @@ function renderDayHeader(day, ctx) {
     <header class="day-header">
       <div class="day-topline">
         <div class="k">${escapeHtml(day.kanji)}</div>
-        <h1>${escapeHtml(day.title || '')}</h1>
+        <h1>${phraseWrap(day.title || '')}</h1>
       </div>
       <div class="date">${escapeHtml(md(day.date))}（${escapeHtml(day.weekday || '')}）</div>
       ${day.summary ? `<p class="summary">${mdInline(day.summary)}</p>` : ''}
@@ -115,8 +115,9 @@ function renderItems(day, nowInfo, ctx) {
     }
 
     // 走路／移動列的導航目的地＝當前這張卡片的 spot
-    if (it.transit && it.kind !== 'transit') {
-      const spot = it.spotId ? ctx.data.spots.find(s => s.id === it.spotId) : null;
+    if (it.transit && (it.kind !== 'transit' || it.asCard)) {
+      const spot = it.spotId ? ctx.data.spots.find(s => s.id === it.spotId)
+                 : (it.mapQuery ? { mapQuery: it.mapQuery } : null);
       parts.push(renderTransit(it.transit, spot));
     }
     parts.push(renderCard(it, nowInfo, ctx));
@@ -131,9 +132,9 @@ function renderCommute(it, ctx) {
   const title = escapeHtml(it.title || '');
   const detail = it.transit?.detail;
   const suffix = detail
-    ? ` · ${escapeHtml(detail)}`
+    ? ` · ${mdInline(detail)}`
     : (it.transit?.minutes ? ` · ${it.transit.minutes} 分` : '');
-  const costText = yenRange(it.cost);
+  const costText = (it.pay === 'free' && it.cost && it.cost.max === 0) ? '' : yenRange(it.cost);
   const twdText = twdIfBig(it.cost, ctx.data.rate?.jpyToTwd, 500);
   const costParts = costText ? `<span class="cost nw">${costText}</span>` : '';
   const twdSpan = twdText ? ` <span class="approx">≈ ${twdText}</span>` : '';
@@ -141,13 +142,14 @@ function renderCommute(it, ctx) {
   const nav = it.mapQuery
     ? `<a class="mapmini" href="${mapsUrl(it.mapQuery, it.transit?.mode)}" target="_blank" rel="noopener" aria-label="用 Google Maps 導航">🗺</a>`
     : '';
+  const meta = (costParts || twdSpan || pay) ? `<span class="meta">${costParts}${twdSpan}${pay}</span>` : '';
 
   return `
     <div class="commute" data-item-id="${escapeHtml(it.id)}"${it.pay ? ` data-pay="${escapeHtml(it.pay)}"` : ''}>
       <span class="mode" aria-hidden="true">${modeIcon}</span>
       <span class="t">${t}</span>
-      <span class="body"><b>${title}</b>${suffix}</span>
-      ${costParts}${twdSpan}${pay}${nav}
+      <span class="body"><b>${title}</b>${suffix}${meta}</span>
+      ${nav}
     </div>
   `;
 }
@@ -163,9 +165,8 @@ function renderTransit(t, destSpot) {
   return `
     <div class="transit-row">
       <span class="mode">${modeIcon}</span>
-      <span class="body">${escapeHtml(body)}</span>
-      ${costText ? `<span class="cost mono nw">${costText}</span>` : ''}
-      ${pay}${nav}
+      <span class="body">${mdInline(body)}${(costText || pay) ? `<span class="meta">${costText ? `<span class="cost mono nw">${costText}</span>` : ''}${pay}</span>` : ''}</span>
+      ${nav}
     </div>
   `;
 }
@@ -229,7 +230,7 @@ function renderCard(it, nowInfo, ctx) {
           <span class="iconbox" aria-hidden="true">${icon}</span>
           <span class="tags">${tags.join('')}</span>
         </div>
-        <div class="title">${escapeHtml(it.title || '')}</div>
+        <div class="title">${phraseWrap(it.title || '')}</div>
         <div class="segs">
           ${desc ? `<div class="desc">${mdInline(desc)}</div>` : ''}
           ${tipsHtml}

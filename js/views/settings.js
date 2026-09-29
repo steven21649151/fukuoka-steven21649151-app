@@ -148,7 +148,7 @@ async function wireVersion(root) {
     if (r.ok) ver = await r.json();
   } catch {}
   box.innerHTML = ver
-    ? `目前版本：<span class="mono">${escapeHtml(ver.app || '?')}</span> · 資料更新於 <span class="mono">${escapeHtml(ver.data || '?')}</span>`
+    ? `目前版本：<span class="mono">${escapeHtml(ver.app || '?')}</span> · 資料更新於 <span class="mono">${escapeHtml((ver.data || '?').replace('T', ' '))}</span>`
     : '<span class="faint">讀取版本失敗</span>';
 
   const btn = root.querySelector('#setCheckUpd');

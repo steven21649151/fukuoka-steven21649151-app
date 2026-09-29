@@ -171,7 +171,7 @@ function startNowClock(days) {
     const today = `${d.getFullYear()}-${m}-${dd}`;
     const day = days.find(x => x.date === today);
     if (day) {
-      stateEl.textContent = `第 ${day.n} 天 · ${md(day.date)}（${day.weekday}）`;
+      stateEl.textContent = `第 ${day.n} 天`;
     } else if (days.length) {
       const first = days[0];
       const diff = daysBetween(today, first.date);

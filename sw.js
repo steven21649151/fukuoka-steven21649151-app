@@ -7,7 +7,7 @@
 // 就把 APP_VERSION 的尾碼 +1。這是 GitHub Pages 上線後，
 // 唯一會讓瀏覽器重跑 install、重抓資源的觸發點——沒 bump 就會拿舊快取。
 
-const APP_VERSION = '1.7.2';
+const APP_VERSION = '1.7.3';
 const CACHE_SHELL = `fukuoka-shell-v${APP_VERSION}`;
 const CACHE_DATA = `fukuoka-data-v${APP_VERSION}`;
 

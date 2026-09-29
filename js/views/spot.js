@@ -1,5 +1,5 @@
 // 詳情頁（景點／餐廳／店家／會場／飯店）
-import { mdInline, escapeHtml } from '../lib/md.js';
+import { mdInline, escapeHtml, phraseWrap } from '../lib/md.js';
 import { mapsUrl } from '../lib/maps.js';
 import { annotateYenTwd } from '../lib/fmt.js';
 import { getPrevHash } from '../router.js';
@@ -68,7 +68,7 @@ export async function render(root, params, ctx) {
         </div>
 
         <header class="spot-header">
-          <div class="nameZh">${escapeHtml(spot.nameZh || spot.name || '')}</div>
+          <div class="nameZh">${phraseWrap(spot.nameZh || spot.name || '')}</div>
           ${spot.name && spot.name !== spot.nameZh ? `<div class="name">${escapeHtml(spot.name)}</div>` : ''}
           ${spot.reading ? `<div class="reading mono">${escapeHtml(spot.reading)}</div>` : ''}
           ${cat !== 'hotel' && spot.oneLine ? `<p class="oneline">${mdInline(spot.oneLine)}</p>` : ''}

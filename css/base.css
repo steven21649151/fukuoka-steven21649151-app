@@ -98,13 +98,14 @@ b, strong { font-weight: 700; color: var(--ink); }
   align-items: center;
   gap: 8px;
 }
-.nowbar .now { font-family: var(--mono); }
+.nowbar .now { font-family: var(--mono); white-space: nowrap; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .nowbar .tripstate {
   color: var(--shu);
   font-family: var(--dis);
   font-weight: 700;
   letter-spacing: .02em;
   font-size: 12px;
+  white-space: nowrap;
   margin-left: auto;
 }
 .nowbar .allergy-btn {

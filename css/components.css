@@ -126,6 +126,9 @@
 .commute .mode { font-size: 16px; flex-shrink: 0; }
 .commute .t { font-family: var(--mono); color: var(--faint); flex-shrink: 0; }
 .commute .body { flex: 1; min-width: 0; }
+.commute, .transit-row { flex-wrap: nowrap; }
+.commute .body .meta, .transit-row .body .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin-top: 2px; }
+.commute .mapmini, .transit-row .mapmini { flex-shrink: 0; align-self: center; }
 .commute .body b { font-weight: 600; color: var(--ink); }
 .commute .cost { font-family: var(--mono); color: var(--faint); flex-shrink: 0; }
 .commute .paychip {
@@ -193,7 +196,7 @@ button.paychip {
 .story-title,
 .step h3,
 .guide-header h1 {
-  text-wrap: balance;
+  text-wrap: pretty;
   line-break: strict;
   overflow-wrap: break-word;
 }
@@ -2260,7 +2263,9 @@ body.bigcard-open { overflow: hidden; }
   color: #fff;
   font-weight: 700;
   letter-spacing: .01em;
-  text-wrap: balance;
+  text-wrap: pretty;
+  line-break: strict;
+  word-break: auto-phrase;
   -webkit-user-select: text;
   user-select: text;
 }
@@ -2323,4 +2328,9 @@ body.bigcard-open { overflow: hidden; }
 @media (max-width: 480px) {
   .bigcard .bc-prev,
   .bigcard .bc-next { width: 44px; height: 60px; font-size: 30px; }
+  .bigcard .bc-body { padding-inline: 16px; }
+  .bigcard .bc-prev,
+  .bigcard .bc-next { top: auto; transform: none; bottom: calc(44px + env(safe-area-inset-bottom, 0px)); }
 }
+
+.ph { display: inline-block; max-width: 100%; }

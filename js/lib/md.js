@@ -27,3 +27,20 @@ export function mdInline(s) {
   out = out.replace(/\n/g, '<br>');
   return out;
 }
+
+// 標題用：把字串切成「詞組」，每組包成 inline-block，讓換行只發生在詞組之間。
+// 空白保留成普通空白（放在 span 外面，才不會被 inline-block 吃掉）。
+// 切點：（ ( 「 ＋ → 的前面；） ) 」 ： ， 、 的後面。不用 lookbehind，舊版 iOS 也能跑。
+export function phraseWrap(s) {
+  return String(s ?? '').split(/(\s+)/).map(tok => {
+    if (!tok) return '';
+    if (/^\s+$/.test(tok)) return ' ';
+    return tok
+      .replace(/([（(「＋→])/g, '\u0000$1')
+      .replace(/([）)」：，、])/g, '$1\u0000')
+      .split('\u0000')
+      .filter(Boolean)
+      .map(c => `<span class="ph">${escapeHtml(c)}</span>`)
+      .join('');
+  }).join('');
+}

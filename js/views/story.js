@@ -1,5 +1,5 @@
 // 相關攻略頁 — 獨立一頁
-import { mdInline, escapeHtml } from '../lib/md.js';
+import { mdInline, escapeHtml, phraseWrap } from '../lib/md.js';
 import { getPrevHash } from '../router.js';
 
 const KNOWN_BACK = {
@@ -34,7 +34,7 @@ export async function render(root, params, ctx) {
         <a class="back" href="${backHref}">← ${escapeHtml(backLabel)}</a>
       </div>
 
-      <h1 class="story-title">${escapeHtml(story.title || '')}</h1>
+      <h1 class="story-title">${phraseWrap(story.title || '')}</h1>
       <div class="story-sub">關於 · ${escapeHtml(spot.nameZh || spot.name)}</div>
 
       ${(story.sections || []).map(sec => `

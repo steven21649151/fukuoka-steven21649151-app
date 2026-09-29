@@ -1,5 +1,5 @@
 // 流程頁 — 給第一次搭飛機的人照著走
-import { mdInline, escapeHtml } from '../lib/md.js';
+import { mdInline, escapeHtml, phraseWrap } from '../lib/md.js';
 import { getPrevHash } from '../router.js';
 
 // 從這些頁面來的，返回就回去那裡（比 guide.backTo 準）
@@ -28,7 +28,7 @@ export async function render(root, params, ctx) {
     <div class="wrap">
       <div class="topnav"><a class="back" href="${escapeHtml(backHref)}">← ${escapeHtml(backLabel)}</a></div>
       <header class="guide-header">
-        <h1>${escapeHtml(guide.title || '')}</h1>
+        <h1>${phraseWrap(guide.title || '')}</h1>
         ${guide.lead ? `<p class="lead">${mdInline(guide.lead)}</p>` : ''}
       </header>
 
