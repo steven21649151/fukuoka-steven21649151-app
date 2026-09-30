@@ -116,8 +116,8 @@ function renderIntroSection(cat, intro) {
 function renderPhoto(spot) {
   const src = `./photos/${spot.id}.jpg`;
   return `
-    <img class="spot-photo" src="${src}" alt=""
-      onerror="this.outerHTML='<div class=&quot;spot-photo placeholder&quot;>📷</div>'">
+    <img class="spot-photo" src="${src}" alt="" loading="eager" decoding="async"
+      onerror="this.remove()">
   `;
 }
 

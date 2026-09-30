@@ -6,8 +6,9 @@
 // ⚠️ 更版紀律：只要動到 SHELL_ASSETS 清單裡的任一檔案，
 // 就把 APP_VERSION 的尾碼 +1。這是 GitHub Pages 上線後，
 // 唯一會讓瀏覽器重跑 install、重抓資源的觸發點——沒 bump 就會拿舊快取。
+// 新增或替換 photos/ 裡的照片也要 bump APP_VERSION，舊照片才會被換掉。
 
-const APP_VERSION = '1.7.3';
+const APP_VERSION = '1.7.4';
 const CACHE_SHELL = `fukuoka-shell-v${APP_VERSION}`;
 const CACHE_DATA = `fukuoka-data-v${APP_VERSION}`;
 
@@ -69,6 +70,16 @@ self.addEventListener('install', (event) => {
       try { await cache.add(new Request(url, { cache: 'reload' })); }
       catch (e) { /* photos/icons 可能缺，忽略 */ }
     }));
+
+    // 景點照片：照 spots.json 的 id 逐張預存，缺圖或讀不到清單都只跳過
+    try {
+      const res = await fetch(new Request('./data/spots.json', { cache: 'reload' }));
+      const ids = (await res.json()).spots.map(s => s.id);
+      await Promise.all(ids.map(async (id) => {
+        try { await cache.add(new Request(`./photos/${id}.jpg`, { cache: 'reload' })); }
+        catch (e) { /* 缺圖就跳過 */ }
+      }));
+    } catch (e) { /* spots.json 讀不到，只跳過照片 */ }
   })());
 });
 

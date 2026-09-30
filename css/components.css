@@ -408,14 +408,6 @@ button.paychip {
   display: block;
   margin: 0 auto;
 }
-.spot-photo.placeholder {
-  display: flex; align-items: center; justify-content: center;
-  color: var(--faint);
-  font-size: 32px;
-  height: 180px;
-  max-height: 180px;
-  aspect-ratio: auto;
-}
 .spot-header { padding: 14px 0 4px; }
 .spot-header .nameZh {
   font-family: var(--dis);
