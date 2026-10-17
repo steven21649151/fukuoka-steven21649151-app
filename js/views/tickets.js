@@ -47,8 +47,8 @@ export async function render(root, params, ctx) {
       <div class="tk-warn">
         <b>這裡存的是副本，方便你隨時查。</b>
         機票 QR、熊本城電子票這類固定的 QR 通常可以直接出示；
-        <b>但 my route 的太宰府柳川數位票有「啟用後 2 天內有效」的狀態，
-        很可能必須在 my route App 裡叫出來才有效，截圖不一定過得了閘門。</b>
+        <b>但 my route 的太宰府散策きっぷ、Trip.com 的新幹線票這類「App 內才有效」的票，
+        很可能必須在原本的 App 裡叫出來才有效，截圖不一定過得了閘門。</b>
         每一張票的「怎麼用」欄位請照實填，不確定的出發前先問清楚。
       </div>
 

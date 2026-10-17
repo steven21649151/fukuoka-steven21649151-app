@@ -31,6 +31,7 @@ const PAY_CHIP = {
   ic:     { text: '嗶卡／Suica', cls: 'touch', tipId: 'tp-kumamoto-ic' },
   pass:   { text: '一日券',     cls: 'pass',  tipId: 'tp-kumamoto-ic' },
   ticket: { text: '車站取票',   cls: '',       tipId: null },
+  qr:     { text: 'App QR 碼',  cls: '',       tipId: null },
   cash:   { text: '現金',       cls: 'cash',  tipId: 'tp-cash' },
   free:   { text: '免費',       cls: 'free',  tipId: null },
   paid:   { text: '已付',       cls: 'paid',  tipId: null },
