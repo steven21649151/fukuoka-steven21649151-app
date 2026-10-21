@@ -196,6 +196,7 @@ function renderCard(it, nowInfo, ctx) {
     ? `<a href="#" class="allergy-row" data-open-allergy role="button" aria-label="打開過敏大字卡"><span class="ico">🦐</span><span class="body">甲殼類：入座後先跟店家講一次 · 點開大字卡</span></a>`
     : '';
   const costHtml = renderCostRow(it, ctx);
+  const buyHtml = renderBuyLine(it, spot);
 
   const actions = [];
   if (it.spotId && spot) {
@@ -235,6 +236,7 @@ function renderCard(it, nowInfo, ctx) {
         <div class="title">${phraseWrap(it.title || '')}</div>
         <div class="segs">
           ${desc ? `<div class="desc">${mdInline(desc)}</div>` : ''}
+          ${buyHtml}
           ${tipsHtml}
           ${allergyHtml}
           ${costHtml}
@@ -304,3 +306,11 @@ function renderPayChip(pay) {
   return `<span class="paychip${cls}">${spec.text}</span>`;
 }
 
+
+// 🛍 推薦：把 spot.buy 每項的短名接成一行，整行連到內頁（不顯示件數、不做勾選）
+function renderBuyLine(it, spot) {
+  const buy = Array.isArray(spot?.buy) ? spot.buy : [];
+  if (!it.spotId || buy.length === 0) return '';
+  const names = buy.map(b => b.zh || b.name).filter(Boolean).join('、');
+  return `<a class="buy-line" href="#/spot/${encodeURIComponent(it.spotId)}">🛍 推薦：${escapeHtml(names)}</a>`;
+}

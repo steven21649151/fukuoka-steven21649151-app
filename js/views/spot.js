@@ -75,6 +75,7 @@ export async function render(root, params, ctx) {
         </header>
 
         ${renderIntroSection(cat, spot.intro)}
+        ${renderBuy(spot, ctx.data.rate)}
         ${section(GUIDE_TITLE[cat] || '重點', renderList(guideItems))}
         ${section('基本資料', renderFacts(spot, ctx.data.rate))}
         ${showCautions ? section('注意事項', renderCautions(spot.cautions)) : ''}
@@ -167,3 +168,22 @@ function payLabel(arr) {
 }
 
 export { BACK_LABEL };
+
+// 🛍 推薦買這些：只顯示推薦，不做勾選、不顯示件數
+function renderBuy(spot, rate) {
+  const buy = Array.isArray(spot.buy) ? spot.buy : [];
+  if (buy.length === 0) return '';
+  const items = buy.map(b => {
+    const ja = b.name && b.name !== b.zh ? `<span class="buy-ja">${escapeHtml(b.name)}</span>` : '';
+    return `
+      <div class="buy-item">
+        <div class="buy-name"><b>${escapeHtml(b.zh || b.name || '')}</b>${ja}</div>
+        ${b.price ? `<div class="buy-price">${escapeHtml(annotateYenTwd(b.price, rate?.jpyToTwd))}</div>` : ''}
+        ${b.why ? `<div class="buy-why">${mdInline(b.why)}</div>` : ''}
+        ${b.where ? `<div class="buy-where">📍 ${mdInline(b.where)}</div>` : ''}
+        ${b.note ? `<div class="buy-note">${mdInline(b.note)}</div>` : ''}
+      </div>`;
+  }).join('');
+  const note = spot.buyNote ? `<div class="buy-sub">${escapeHtml(spot.buyNote)}</div>` : '';
+  return section('🛍 推薦買這些', `${note}<div class="buy-list">${items}</div>`);
+}

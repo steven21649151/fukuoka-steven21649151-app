@@ -220,6 +220,12 @@
       "romaji": "Yoyaku no sai ni 'kōkakurui arerugī' to o-tsutae itadakemasu ka.",
       "note": "⭐ 菅乃屋的「寿司箱膳」可能配到蝦握壽司，一定要備註" },
 
+    { "id": "ht-07", "scene": "hotel", "priority": 7, "bigCard": true,
+      "zh": "不好意思，可以幫我處理掉這雙舊鞋嗎？",
+      "ja": "すみません、この古い靴を処分していただけますか？",
+      "romaji": "Sumimasen, kono furui kutsu o shobun shite itadakemasu ka?",
+      "note": "⭐ 10/30 退房時跟櫃台說。不要不講就丟在房間——房務可能當成遺失物保管" },
+
 
     { "id": "bs-01", "scene": "basic", "priority": 1,
       "zh": "謝謝",
