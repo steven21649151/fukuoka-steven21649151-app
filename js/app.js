@@ -76,7 +76,7 @@ function wireAllergyButton(ctx) {
   });
 }
 
-// 全域：任何 data-jrn-spot="<spotId>" 的按鈕，點下去開手帳拍照流程
+// 全域：任何 data-jrn-spot="<spotId>" 的按鈕，點下去跳「拍照／從相簿加入」選單
 function wireGlobalJournalButtons(ctx) {
   document.addEventListener('click', async (e) => {
     const btn = e.target.closest('[data-jrn-spot]');
@@ -86,7 +86,7 @@ function wireGlobalJournalButtons(ctx) {
     const dayN = Number(btn.getAttribute('data-jrn-day')) || null;
     const spot = spotId ? (ctx.data.spots || []).find(s => s.id === spotId) : null;
     const { openCapture } = await import('./lib/journal_capture.js');
-    openCapture({ spot, dayN });
+    openCapture({ spot, dayN, data: ctx.data });
   });
 }
 

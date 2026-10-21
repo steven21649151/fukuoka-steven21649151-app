@@ -124,3 +124,19 @@
   --flag-venue-bg:  #5A7F9A;
   --flag-venue-ink: #FFFFFF;
 }
+
+/* 霞鶩文楷 TC（SIL OFL 1.1，子集化）：只有手帳疊字、拼貼、分享輸出用，一般 UI 不換字 */
+@font-face {
+  font-family: 'WenKaiTC';
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url('../fonts/wenkai-tc-regular.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'WenKaiTC';
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url('../fonts/wenkai-tc-bold.woff2') format('woff2');
+}

@@ -1,147 +1,349 @@
-// 手帳拍照流程：開相機 → resize → 命名 sheet → 存 IDB
+// 手帳加入照片：📷 拍照／🖼 從相簿加入 → 讀拍攝時間、自動對到第幾天與景點 → 命名表單 → 存 IDB
+// 照片不壓縮：存進 IDB 的 blob 就是使用者選的原始 File；另外產生長邊 480 的縮圖只給清單用。
 import { escapeHtml } from './md.js';
-import { putJournal, countJournalBySpot, isAvailable } from './db.js';
-import { todayISO } from './nowitem.js';
+import { putJournal, getAllJournal, isAvailable } from './db.js';
+import { getTakenAt, matchItinerary, jstParts } from './exif.js';
+import { loadBitmap, srcW, srcH, freeCanvas } from './overlay.js';
+import { showProgress, toast, downloadBlob, safeName } from './ui.js';
 
-const MAX_EDGE = 1600;
-const JPEG_Q   = 0.8;
+export const THUMB_EDGE = 480;
+const THUMB_Q = 0.8;
+export const AUTOSAVE_KEY = 'jrn.autoSave';
 
-// opts: { spot?: { id, nameZh }, dayN?: number }
+export function autoSaveEnabled() {
+  try { return localStorage.getItem(AUTOSAVE_KEY) !== '0'; } catch { return true; }
+}
+
+// ---------------------------------------------------------------
+// 縮圖
+export async function makeThumb(bmp) {
+  const sw = srcW(bmp), sh = srcH(bmp);
+  const s = Math.min(1, THUMB_EDGE / Math.max(sw, sh));
+  const c = document.createElement('canvas');
+  c.width = Math.max(1, Math.round(sw * s));
+  c.height = Math.max(1, Math.round(sh * s));
+  c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+  const blob = await new Promise(res => c.toBlob(res, 'image/jpeg', THUMB_Q));
+  freeCanvas(c);
+  return blob;
+}
+
+// 舊資料沒有 thumb：第一次顯示時現場產生並回寫
+export async function ensureThumb(row) {
+  if (row.thumb) return row.thumb;
+  try {
+    const bmp = await loadBitmap(row.blob, THUMB_EDGE * 2, row.w, row.h);
+    row.thumb = await makeThumb(bmp);
+    bmp.close?.();
+    await putJournal(row);
+  } catch { /* 做不出縮圖就先用原圖 */ }
+  return row.thumb || null;
+}
+
+// ---------------------------------------------------------------
+// 入口：data-jrn-spot 按鈕與手帳頁都從這裡進來
+// opts: { spot?: { id, nameZh }, dayN?: number, data: { days, spots } }
 export async function openCapture(opts = {}) {
-  const ok = await isAvailable();
-  if (!ok) { alert('這個瀏覽器不允許儲存（可能是隱私模式）。手帳無法使用。'); return; }
+  if (!(await ensureAvailable())) return;
+  showSourceMenu(opts);
+}
+export async function pickCamera(opts = {}) {
+  if (!(await ensureAvailable())) return;
+  startPick('camera', opts);
+}
+export async function pickAlbum(opts = {}) {
+  if (!(await ensureAvailable())) return;
+  startPick('album', opts);
+}
 
-  // 讓使用者選相機
+async function ensureAvailable() {
+  const ok = await isAvailable();
+  if (!ok) alert('這個瀏覽器不允許儲存（可能是隱私模式）。手帳無法使用。');
+  return ok;
+}
+
+function showSourceMenu(opts) {
+  const ov = document.createElement('div');
+  ov.className = 'cap-overlay cap-menu';
+  ov.innerHTML = `
+    <div class="cap-sheet" role="dialog" aria-modal="true" aria-label="加入照片">
+      <div class="cap-title">${opts.spot ? escapeHtml(opts.spot.nameZh || opts.spot.name || '') + ' · ' : ''}加入照片</div>
+      <button type="button" class="btn btn-primary cap-menu-btn" data-src="camera">📷 拍照</button>
+      <button type="button" class="btn cap-menu-btn" data-src="album">🖼 從相簿加入</button>
+      <button type="button" class="btn" data-src="">取消</button>
+    </div>`;
+  document.body.appendChild(ov);
+  document.body.classList.add('cap-open');
+  const close = () => { ov.remove(); document.body.classList.remove('cap-open'); };
+  ov.addEventListener('click', (e) => {
+    if (e.target === ov) return close();
+    const b = e.target.closest('[data-src]');
+    if (!b) return;
+    const src = b.getAttribute('data-src');
+    close();
+    // 要在同一次點擊裡呼叫 input.click()，瀏覽器才肯開相機／相簿
+    if (src) startPick(src, opts);
+  });
+}
+
+// ---------------------------------------------------------------
+// 開檔案選擇器（⚠️ 要在使用者點擊的同一個 tick 裡呼叫）
+function startPick(source, opts) {
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = 'image/*';
-  // ⚠️ 一定要用 setAttribute。HTMLInputElement.capture 這個 IDL property 不是每個瀏覽器都實作，
-  // 手機判斷「直接開相機」看的是 HTML 屬性——用 property 設在部分環境上會沒作用。
-  input.setAttribute('capture', 'environment');
+  if (source === 'camera') {
+    // ⚠️ 一定要用 setAttribute：手機判斷「直接開相機」看的是 HTML 屬性，
+    // 部分瀏覽器沒實作 capture 這個 IDL property。
+    input.setAttribute('capture', 'environment');
+  } else {
+    input.multiple = true;      // 相簿：不要 capture，可多選
+  }
   input.style.display = 'none';
   document.body.appendChild(input);
 
-  const file = await new Promise((res) => {
-    input.addEventListener('change', () => res(input.files?.[0] || null), { once: true });
-    // Safari 上 cancel 不會觸發 change，這裡沒辦法 100% 檢測——如果久了都沒回應就當作放棄
-    input.click();
-  });
-  input.remove();
-  if (!file) return;
-
-  const { blob, w, h } = await resizeToBlob(file);
-  await showNamingSheet({ blob, w, h, spot: opts.spot, dayN: opts.dayN });
+  let handled = false;
+  const finish = async () => {
+    if (handled) return;
+    handled = true;
+    const files = [...(input.files || [])];
+    input.remove();
+    if (files.length) await processFiles(files, source, opts);
+  };
+  input.addEventListener('change', finish, { once: true });
+  input.addEventListener('cancel', () => { handled = true; input.remove(); }, { once: true });
+  input.click();
 }
 
-// 把 File 縮到長邊 MAX_EDGE、輸出 JPEG q=0.8
-async function resizeToBlob(file) {
-  const bmpOrImg = await loadImage(file);
-  const iw = bmpOrImg.width  ?? bmpOrImg.naturalWidth;
-  const ih = bmpOrImg.height ?? bmpOrImg.naturalHeight;
-  const scale = Math.min(1, MAX_EDGE / Math.max(iw, ih));
-  const w = Math.round(iw * scale);
-  const h = Math.round(ih * scale);
-  const canvas = document.createElement('canvas');
-  canvas.width = w; canvas.height = h;
-  canvas.getContext('2d').drawImage(bmpOrImg, 0, 0, w, h);
-  const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', JPEG_Q));
-  bmpOrImg.close?.();
-  return { blob, w, h };
+async function processFiles(files, source, opts) {
+  const prog = showProgress(files.length > 1 ? `處理中 0/${files.length}` : '處理中…');
+  const items = [];
+  try {
+    for (let i = 0; i < files.length; i++) {
+      prog.update(files.length > 1 ? `處理中 ${i + 1}/${files.length}` : '處理中…');
+      try { items.push(await prepare(files[i], source, opts)); }
+      catch { /* 讀不了的檔案（例如不是圖片）略過 */ }
+    }
+  } finally { prog.close(); }
+  if (!items.length) { alert('這些檔案讀不了，請選 JPEG 或 PNG 照片。'); return; }
+  await showCaptureSheet(items, source, opts);
 }
 
-async function loadImage(file) {
-  if ('createImageBitmap' in window) {
-    try { return await createImageBitmap(file); } catch { /* fall through */ }
+async function prepare(file, source, opts) {
+  const takenAt = await getTakenAt(file);
+  const bmp = await loadBitmap(file);
+  const w = srcW(bmp), h = srcH(bmp);
+  const thumb = await makeThumb(bmp);
+  bmp.close?.();
+  let { day, spotId } = matchItinerary(takenAt, opts.data?.days, opts.data?.spots);
+  if (opts.spot?.id) {            // 從景點按鈕進來：以那個景點為準
+    spotId = opts.spot.id;
+    day = opts.dayN ?? opts.spot.day ?? day;
   }
-  return new Promise((res, rej) => {
-    const url = URL.createObjectURL(file);
-    const img = new Image();
-    img.onload = () => { URL.revokeObjectURL(url); res(img); };
-    img.onerror = (e) => { URL.revokeObjectURL(url); rej(e); };
-    img.src = url;
-  });
+  return { file, thumb, w, h, takenAt, source, day: day ?? null, spotId: spotId ?? null, note: '', name: '' };
 }
 
-async function showNamingSheet({ blob, w, h, spot, dayN }) {
-  // 產生預填檔名
-  let prefill;
-  const today = todayISO();
-  if (spot?.id) {
-    const n = (await countJournalBySpot(spot.id)) + 1;
-    prefill = `${spot.nameZh || spot.id}_${n}`;
-  } else {
-    // 規格 7.5：<MM-DD>_<流水號>，例 10-27_1
-    const mmdd = today.slice(5);
-    prefill = `${mmdd}_1`;
+// ---------------------------------------------------------------
+// 天／景點選單
+function dayOptions(data, cur) {
+  const opts = [`<option value="">不指定</option>`];
+  for (const d of data?.days || []) {
+    opts.push(`<option value="${d.n}"${cur === d.n ? ' selected' : ''}>第 ${d.n} 天 · ${escapeHtml(String(d.date || '').slice(5).replace('-', '/'))}</option>`);
   }
+  return opts.join('');
+}
+function spotOptions(data, dayN, cur) {
+  const seen = new Set();
+  const list = [];
+  const day = (data?.days || []).find(d => d.n === dayN);
+  for (const it of day?.items || []) {
+    if (!it.spotId || seen.has(it.spotId)) continue;
+    const sp = (data?.spots || []).find(s => s.id === it.spotId);
+    if (!sp) continue;
+    seen.add(it.spotId);
+    list.push({ id: sp.id, label: `${it.time || ''} ${sp.nameZh || sp.name || sp.id}`.trim() });
+  }
+  if (cur && !seen.has(cur)) {
+    const sp = (data?.spots || []).find(s => s.id === cur);
+    if (sp) list.push({ id: sp.id, label: sp.nameZh || sp.name || sp.id });
+  }
+  return `<option value="">不指定</option>` + list.map(o =>
+    `<option value="${escapeHtml(o.id)}"${cur === o.id ? ' selected' : ''}>${escapeHtml(o.label)}</option>`).join('');
+}
+export function placeSummary(day, spotId, data) {
+  const parts = [];
+  if (day) parts.push(`第 ${day} 天`);
+  const sp = spotId ? (data?.spots || []).find(s => s.id === spotId) : null;
+  if (sp) parts.push(sp.nameZh || sp.name || sp.id);
+  return parts.length ? `📅 ${parts.join(' · ')}` : '📅 未指定天與景點';
+}
 
-  const previewUrl = URL.createObjectURL(blob);
+// 把「摘要按鈕＋可展開的兩個下拉」綁到一個容器上。item 需有 day / spotId。
+export function wirePlacePicker(box, item, data, onChange) {
+  const sum = box.querySelector('[data-ds-sum]');
+  const pick = box.querySelector('[data-ds-pick]');
+  const dsel = box.querySelector('[data-ds-day]');
+  const ssel = box.querySelector('[data-ds-spot]');
+  const refresh = () => { sum.textContent = placeSummary(item.day, item.spotId, data) + ' ▾'; };
+  sum.addEventListener('click', () => { pick.hidden = !pick.hidden; });
+  dsel.addEventListener('change', () => {
+    item.day = dsel.value ? Number(dsel.value) : null;
+    if (item.spotId) {
+      const day = (data?.days || []).find(d => d.n === item.day);
+      const stillThere = (day?.items || []).some(it => it.spotId === item.spotId);
+      if (!stillThere) item.spotId = null;
+    }
+    ssel.innerHTML = spotOptions(data, item.day, item.spotId);
+    ssel.disabled = !item.day;
+    refresh(); onChange?.();
+  });
+  ssel.addEventListener('change', () => { item.spotId = ssel.value || null; refresh(); onChange?.(); });
+  refresh();
+}
+export function placePickerHtml(item, data) {
+  return `
+    <div class="ds-box">
+      <button type="button" class="ds-sum" data-ds-sum></button>
+      <div class="ds-pick" data-ds-pick hidden>
+        <label class="cap-field"><span class="k">天</span>
+          <select data-ds-day>${dayOptions(data, item.day)}</select></label>
+        <label class="cap-field"><span class="k">景點</span>
+          <select data-ds-spot${item.day ? '' : ' disabled'}>${spotOptions(data, item.day, item.spotId)}</select></label>
+      </div>
+    </div>`;
+}
+
+// ---------------------------------------------------------------
+// 命名表單（單張／多張）
+async function makeNamer(data) {
+  const rows = await getAllJournal().catch(() => []);
+  const bySpot = new Map();
+  const byDate = new Map();
+  for (const r of rows) {
+    if (r.spotId) bySpot.set(r.spotId, (bySpot.get(r.spotId) || 0) + 1);
+    const p = jstParts(r.takenAt || r.createdAt || '');
+    if (p) byDate.set(p.mmdd.replace('/', '-'), (byDate.get(p.mmdd.replace('/', '-')) || 0) + 1);
+  }
+  const used = { spot: new Map(), date: new Map() };
+  return (item) => {
+    if (item.spotId) {
+      const sp = (data?.spots || []).find(s => s.id === item.spotId);
+      const n = (bySpot.get(item.spotId) || 0) + (used.spot.get(item.spotId) || 0) + 1;
+      used.spot.set(item.spotId, (used.spot.get(item.spotId) || 0) + 1);
+      return `${sp?.nameZh || item.spotId}_${n}`;
+    }
+    const p = jstParts(item.takenAt);
+    const key = p ? p.mmdd.replace('/', '-') : 'photo';
+    const n = (byDate.get(key) || 0) + (used.date.get(key) || 0) + 1;
+    used.date.set(key, (used.date.get(key) || 0) + 1);
+    return `${key}_${n}`;
+  };
+}
+
+async function showCaptureSheet(items, source, opts) {
+  const data = opts.data || {};
+  const namer = await makeNamer(data);
+  const multi = items.length > 1;
+  const urls = [];
+  const mkUrl = (b) => { const u = URL.createObjectURL(b); urls.push(u); return u; };
+
   const overlay = document.createElement('div');
   overlay.className = 'cap-overlay';
+  let body;
+  if (!multi) {
+    const it = items[0];
+    it.name = namer(it);
+    body = `
+      <div class="cap-preview"><img alt="要加入的照片" src="${mkUrl(it.file)}"></div>
+      <div data-row="0">${placePickerHtml(it, data)}</div>
+      <label class="cap-field"><span class="k">檔名</span>
+        <input data-name maxlength="80" value="${escapeHtml(it.name)}"></label>
+      <label class="cap-field"><span class="k">備註（選填）</span>
+        <input data-note maxlength="120" placeholder="這張想記什麼"></label>
+      ${source === 'camera' && autoSaveEnabled() ? `<div class="small faint">這張也會存一份到手機的 Download 資料夾</div>` : ''}`;
+  } else {
+    body = `<div class="cap-multi">` + items.map((it, i) => {
+      return `
+        <div class="cap-mrow" data-row="${i}">
+          <img class="cap-mthumb" alt="" src="${mkUrl(it.thumb)}">
+          <div class="cap-mmain">
+            ${placePickerHtml(it, data)}
+            <input data-note maxlength="120" placeholder="備註（選填）">
+          </div>
+        </div>`;
+    }).join('') + `</div>`;
+  }
+
   overlay.innerHTML = `
     <div class="cap-sheet" role="dialog" aria-modal="true" aria-labelledby="capTitle">
       <div class="cap-head">
-        <div class="cap-title" id="capTitle">命名這張</div>
+        <div class="cap-title" id="capTitle">${multi ? `加入 ${items.length} 張照片` : '命名這張'}</div>
         <button type="button" class="cap-close" aria-label="關閉">✕</button>
       </div>
-      <div class="cap-preview"><img alt="剛拍的照片" src="${previewUrl}"></div>
-      <label class="cap-field">
-        <span class="k">檔名</span>
-        <input id="capName" maxlength="80" value="${escapeHtml(prefill)}">
-      </label>
-      <label class="cap-field">
-        <span class="k">備註（選填）</span>
-        <input id="capNote" maxlength="120" placeholder="這張想記什麼">
-      </label>
+      ${body}
       <div class="cap-actions">
         <button type="button" class="btn" data-r="0">取消</button>
-        <button type="button" class="btn btn-primary" data-r="1" id="capSave">存起來</button>
+        <button type="button" class="btn btn-primary" data-r="1" id="capSave">${multi ? '全部存起來' : '存起來'}</button>
       </div>
-    </div>
-  `;
+    </div>`;
   document.body.appendChild(overlay);
   document.body.classList.add('cap-open');
 
-  const nameInput = overlay.querySelector('#capName');
-  const noteInput = overlay.querySelector('#capNote');
-  const closeBtn  = overlay.querySelector('.cap-close');
-  const cancelBtn = overlay.querySelector('button[data-r="0"]');
-  const saveBtn   = overlay.querySelector('#capSave');
+  items.forEach((it, i) => {
+    const box = overlay.querySelector(`[data-row="${i}"]`);
+    wirePlacePicker(box, it, data, () => {});
+  });
 
-  setTimeout(() => nameInput.focus({ preventScroll: true }), 30);
-
+  const saveBtn = overlay.querySelector('#capSave');
   return new Promise((resolve) => {
     function cleanup() {
-      URL.revokeObjectURL(previewUrl);
+      urls.forEach(u => URL.revokeObjectURL(u));
       overlay.remove();
       document.body.classList.remove('cap-open');
       document.removeEventListener('keydown', onKey);
     }
-    function onKey(e) { if (e.key === 'Escape') { close(false); } }
+    function onKey(e) { if (e.key === 'Escape') close(false); }
     async function close(saved) {
       if (saved) {
-        const name = (nameInput.value || prefill).trim() || prefill;
-        const row = {
-          id: cryptoUUID(),
-          name,
-          note: (noteInput.value || '').trim(),
-          spotId: spot?.id || null,
-          day: dayN ?? null,
-          createdAt: new Date().toISOString(),
-          blob, w, h,
-          synced: false,
-        };
-        saveBtn.disabled = true;
-        try { await putJournal(row); }
-        catch (e) { alert('儲存失敗：' + (e.message || e)); saveBtn.disabled = false; return; }
-        // 通知手帳頁重繪
-        window.dispatchEvent(new CustomEvent('journal-added', { detail: row }));
+        if (saveBtn.dataset.busy === '1') return;
+        saveBtn.dataset.busy = '1'; saveBtn.disabled = true;
+        try {
+          const now = new Date().toISOString();
+          const rows = [];
+          items.forEach((it, i) => {
+            const box = overlay.querySelector(`[data-row="${i}"]`);
+            const note = (multi ? box.querySelector('[data-note]') : overlay.querySelector('[data-note]')).value.trim();
+            let name;
+            if (!multi) name = (overlay.querySelector('[data-name]').value || it.name).trim() || it.name;
+            else name = namer(it);
+            rows.push({
+              id: cryptoUUID(), name, note,
+              spotId: it.spotId || null, day: it.day ?? null,
+              createdAt: now, takenAt: it.takenAt,
+              blob: it.file, thumb: it.thumb, w: it.w, h: it.h,
+              source: it.source, overlay: null, synced: false,
+            });
+          });
+          for (const r of rows) await putJournal(r);
+          window.dispatchEvent(new CustomEvent('journal-added', { detail: rows }));
+          // 拍照的不會自動進相簿 → 存一份到手機的 Download
+          if (source === 'camera' && autoSaveEnabled()) {
+            const r = rows[0];
+            const ext = /png/i.test(r.blob.type) ? 'png' : 'jpg';
+            downloadBlob(r.blob, `${safeName(r.name)}.${ext}`);
+          }
+          toast(multi ? `已加入 ${rows.length} 張` : '已存起來');
+        } catch (e) {
+          alert('儲存失敗：' + (e.message || e));
+          saveBtn.dataset.busy = ''; saveBtn.disabled = false;
+          return;
+        }
       }
       cleanup();
       resolve(saved);
     }
-    closeBtn.addEventListener('click', () => close(false));
-    cancelBtn.addEventListener('click', () => close(false));
+    overlay.querySelector('.cap-close').addEventListener('click', () => close(false));
+    overlay.querySelector('button[data-r="0"]').addEventListener('click', () => close(false));
     saveBtn.addEventListener('click', () => close(true));
     overlay.addEventListener('click', (e) => { if (e.target === overlay) close(false); });
     document.addEventListener('keydown', onKey);

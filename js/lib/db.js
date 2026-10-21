@@ -131,6 +131,13 @@ export async function getJournal(id) {
   return row;
 }
 
+export async function getJournalBySpot(spotId) {
+  const { store, done } = await tx('journal', 'readonly');
+  const rows = await req2promise(store.index('bySpot').getAll(IDBKeyRange.only(spotId)));
+  await done;
+  return rows;
+}
+
 // 計算某景點目前有幾張手帳（拍照命名流水號用）
 export async function countJournalBySpot(spotId) {
   const { store, done } = await tx('journal', 'readonly');

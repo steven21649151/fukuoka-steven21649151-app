@@ -77,18 +77,21 @@ export async function render(root, params, ctx) {
         ${renderIntroSection(cat, spot.intro)}
         ${renderBuy(spot, ctx.data.rate)}
         ${section(GUIDE_TITLE[cat] || '重點', renderList(guideItems))}
+        <div id="spotPhotos"></div>
         ${section('基本資料', renderFacts(spot, ctx.data.rate))}
         ${showCautions ? section('注意事項', renderCautions(spot.cautions)) : ''}
 
         <div class="actions-row">
           <a class="btn btn-primary" href="${mapsUrl(spot.mapQuery || spot.address || spot.name)}"
              target="_blank" rel="noopener" id="mapbtn">🗺 Google Maps 導航</a>
-          <button type="button" class="btn" data-jrn-spot="${escapeHtml(spot.id)}">📷 記錄</button>
+          <button type="button" class="btn" data-jrn-spot="${escapeHtml(spot.id)}">📷 加照片</button>
           ${spot.story ? `<a class="btn" href="#/story/${encodeURIComponent(spot.id)}">相關攻略 →</a>` : ''}
         </div>
       </div>
     </div>
   `;
+
+  loadSpotPhotos(spot, ctx);
 
   const mapbtn = document.getElementById('mapbtn');
   const setMapState = () => {
@@ -186,4 +189,64 @@ function renderBuy(spot, rate) {
   }).join('');
   const note = spot.buyNote ? `<div class="buy-sub">${escapeHtml(spot.buyNote)}</div>` : '';
   return section('🛍 推薦買這些', `${note}<div class="buy-list">${items}</div>`);
+}
+
+// 📷 我的照片：這個景點有手帳照片才顯示。橫向縮圖列＋分享這個景點／拼貼
+async function loadSpotPhotos(spot, ctx) {
+  const slot = document.getElementById('spotPhotos');
+  if (!slot) return;
+  const urls = [];
+  const cleanup = () => { urls.splice(0).forEach(u => URL.revokeObjectURL(u)); };
+
+  async function refresh() {
+    let rows = [];
+    try {
+      const db = await import('../lib/db.js');
+      if (await db.isAvailable()) rows = await db.getJournalBySpot(spot.id);
+    } catch { rows = []; }
+    cleanup();
+    if (!document.body.contains(slot)) return;
+    if (!rows.length) { slot.innerHTML = ''; return; }
+    const { sortByTaken } = await import('./share_sheet.js');
+    const { ensureThumb } = await import('../lib/journal_capture.js');
+    rows = sortByTaken(rows);
+    const thumbs = await Promise.all(rows.map(async r => r.thumb || await ensureThumb(r) || r.blob));
+    if (!document.body.contains(slot)) return;
+    slot.innerHTML = `
+      <section class="section">
+        <h2>📷 我的照片</h2>
+        <div class="spot-photos-strip">
+          ${rows.map((r, i) => {
+            const u = URL.createObjectURL(thumbs[i]); urls.push(u);
+            return `<button type="button" class="spot-photo-thumb" data-i="${i}" aria-label="${escapeHtml(r.name || '照片')}"><img alt="" src="${u}"></button>`;
+          }).join('')}
+        </div>
+        <div class="spot-photos-acts">
+          <button type="button" class="btn" data-a="share">📤 分享這個景點</button>
+          <button type="button" class="btn" data-a="collage">🧩 拼貼</button>
+        </div>
+      </section>`;
+    slot.onclick = async (e) => {
+      const t = e.target.closest('button');
+      if (!t) return;
+      if (t.dataset.i != null) {
+        const { openPhotoSheet } = await import('./journal_detail.js');
+        openPhotoSheet(rows[Number(t.dataset.i)], { data: ctx.data, onChange: refresh });
+      } else if (t.dataset.a === 'share') {
+        const { openShareSheet } = await import('./share_sheet.js');
+        openShareSheet({ rows, data: ctx.data, title: spot.nameZh || spot.name || '分享照片' });
+      } else if (t.dataset.a === 'collage') {
+        const { openCollageEditor } = await import('./collage_editor.js');
+        openCollageEditor({ rows, data: ctx.data, kind: 'spot', spot });
+      }
+    };
+  }
+
+  const onAdded = () => refresh();
+  window.addEventListener('journal-added', onAdded);
+  window.addEventListener('hashchange', () => {
+    window.removeEventListener('journal-added', onAdded);
+    cleanup();
+  }, { once: true });
+  await refresh();
 }

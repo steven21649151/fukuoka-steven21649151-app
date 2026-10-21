@@ -22,6 +22,12 @@ export async function render(root, params, ctx) {
       </section>
 
       <section class="set-block">
+        <div class="set-h">📷 手帳照片</div>
+        <label class="set-check"><input type="checkbox" id="setAutoSave"> 📷 拍照後自動存一份到手機</label>
+        <div class="small faint">照片存原檔、不壓縮。用相機拍的照片不會自動進相簿，打開這個就會多存一份到手機的 Download 資料夾。</div>
+      </section>
+
+      <section class="set-block">
         <div class="set-h">💱 匯率覆寫</div>
         <div class="set-body" id="rateBox"></div>
         <div class="set-row">
@@ -64,10 +70,23 @@ export async function render(root, params, ctx) {
   `;
 
   wireTheme(root);
+  wireAutoSave(root);
   wireRate(root, ctx);
   await wireStorage(root);
   await wireVersion(root);
   wireExport(root, ctx);
+}
+
+// ============ 拍照後自動存一份到手機 ============
+function wireAutoSave(root) {
+  const box = root.querySelector('#setAutoSave');
+  if (!box) return;
+  let on = true;
+  try { on = localStorage.getItem('jrn.autoSave') !== '0'; } catch {}
+  box.checked = on;
+  box.addEventListener('change', () => {
+    try { localStorage.setItem('jrn.autoSave', box.checked ? '1' : '0'); } catch {}
+  });
 }
 
 // ============ 主題 ============
@@ -200,13 +219,17 @@ async function buildAllZip(ctx) {
   if (await isAvailable()) {
     try { journalRows = await getAllJournal(); } catch {}
   }
+  // 照片是原檔、不壓縮：總量太大一次包會讓手機記憶體不足，超過 120 MB 就只放 CSV，照片請到手帳頁按天匯出
+  const jTotal = journalRows.reduce((s, r) => s + (r.blob?.size || 0), 0);
+  const withPhotos = jTotal <= 120 * 1024 * 1024;
   const jHeader = ['檔名','日期','景點','備註'];
   const jLines = [jHeader.join(',')];
   for (const r of journalRows) {
     const fname = `${(r.name || r.id)}.jpg`;
-    zip.addFile(`手帳/${safe(fname)}`, r.blob);
-    jLines.push([safe(fname), (r.createdAt||'').slice(0,10), r.spotId || '', csvSafe(r.note)].join(','));
+    if (withPhotos) zip.addFile(`手帳/${safe(fname)}`, r.blob);
+    jLines.push([safe(fname), (r.takenAt || r.createdAt || '').slice(0,10), r.spotId || '', csvSafe(r.note)].join(','));
   }
+  if (!withPhotos) zip.addString('手帳/照片沒放進來.txt', '手帳照片是原檔，總量太大，一次打包會讓手機記憶體不足。請到 App 的「手帳」頁，按「匯出」一天一天匯出。');
   zip.addString('手帳/手帳.csv', '﻿' + jLines.join('\r\n'));
 
   // 打包清單（含勾選狀態）
