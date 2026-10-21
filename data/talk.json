@@ -19,7 +19,7 @@
 
   "milestones": [
     { "iso": "2026-10-16", "title": "簡報檔上傳", "detail": "大會硬性規定，過了不受理。投影片每張 20 字內、字級 18pt 以上。" },
-    { "iso": "2026-10-25T18:00", "title": "Welcome Reception 領名牌", "detail": "順便到 Registration Desk 講兩件事：(1) 10/27 不參加 Excursion，但會自己去御花參加 Keynote 和 Banquet (2) 問回程巴士幾點從御花發車" },
+    { "iso": "2026-10-25T18:00", "title": "Welcome Reception 領名牌", "detail": "領名牌和 Welcome Reception 票。跟 Registration Desk 講兩件事：(1) 10/27 不參加 Excursion，會自己去御花參加 Keynote 和 Banquet (2) 問回程巴士幾點從御花發車" },
     { "iso": "2026-10-28T13:00", "title": "到 Room 607 向 session chair 報到", "detail": "官網規定講者要在開場前 15 分鐘到。把 USB 插上、PDF 備份放旁邊，叫出檔案確認在會場電腦上開得起來。" },
     { "iso": "2026-10-28T13:15", "title": "Session 開始（前 4 位講者）", "detail": "坐下來當觀眾，看他們怎麼講、怎麼答 Q&A。不要一直複習自己的稿。" },
     { "iso": "2026-10-28T14:15", "title": "🎤 你上台", "detail": "15 分鐘：講 13 分＋Q&A 2 分。時間到會被主席打斷，控制節奏比講完更重要。" }
