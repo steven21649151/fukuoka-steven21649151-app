@@ -134,6 +134,12 @@ function renderFlight({ day, it }) {
           </div>
         </div>
       ` : ''}
+      ${it.seat || it.pnr ? `
+        <div class="fl-seat">
+          ${it.seat ? `<span>座位 <b>${escapeHtml(it.seat)}</b></span>` : ''}
+          ${it.pnr ? `<span>訂位代號 <b class="mono">${escapeHtml(it.pnr)}</b></span>` : ''}
+        </div>
+      ` : ''}
       ${it.guideId ? `
         <a class="fl-card-link" href="#/guide/${encodeURIComponent(it.guideId)}">看流程 →</a>
       ` : ''}

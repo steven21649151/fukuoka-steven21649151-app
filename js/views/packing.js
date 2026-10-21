@@ -173,14 +173,6 @@ function renderItem(it, today) {
 
 // 特定打包項目附上外部 App 連結（只對這幾條做，不做成資料驅動）
 function renderPackingExt(id) {
-  if (id === 'pk-dazaifu') {
-    return `<div class="ext-row" style="margin-top:8px">
-      <a class="ext-btn" href="https://www.myroute.fun/" target="_blank" rel="noopener">
-        <span class="ico">🚌</span><span class="lbl">my route</span>
-        <span class="ext-hint">會開 App 或網頁版</span>
-      </a>
-    </div>`;
-  }
   if (id === 'pk-vjw') {
     return `<div class="ext-row" style="margin-top:8px">
       <a class="ext-btn" href="https://services.digital.go.jp/visit-japan-web/" target="_blank" rel="noopener">

@@ -2070,6 +2070,8 @@ body.cap-open { overflow: hidden; }
 }
 .fl-line .dash { flex: 1; border-top: 1px dashed var(--line); }
 .fl-line .dur { font-family: var(--mono); font-size: 11px; color: var(--faint); white-space: nowrap; }
+.fl-seat { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 10px; font-size: 12px; color: var(--ink2); }
+.fl-seat b { color: var(--ink); }
 .fl-card-link {
   display: inline-block;
   margin-top: 10px;

@@ -28,6 +28,7 @@ const SPOT_BTN = {
 // pay 對照表：文字、樣式、對應 tip
 const PAY_CHIP = {
   touch:  { text: '嗶卡',       cls: 'touch', tipId: 'tp-touchcap' },
+  card:   { text: '刷卡感應',   cls: 'touch', tipId: null },
   ic:     { text: '嗶卡／Suica', cls: 'touch', tipId: 'tp-kumamoto-ic' },
   pass:   { text: '一日券',     cls: 'pass',  tipId: 'tp-kumamoto-ic' },
   ticket: { text: '車站取票',   cls: '',       tipId: null },
