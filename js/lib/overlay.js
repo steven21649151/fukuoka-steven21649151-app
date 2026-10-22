@@ -118,7 +118,7 @@ export function hexToRgb(hex) {
 
 // ---------- 字級範圍 ----------
 export const SIZE_MIN = 0.06;
-export const SIZE_MAX = 0.20;
+export const SIZE_MAX = 0.13;
 export const SIZE_DEFAULT = 0.09;
 const MAX_LINES = 3;
 
@@ -208,7 +208,7 @@ export function layoutText(ctx, row, data, ovIn, W, H) {
   if (!main && !meta) return null;
   const base = Math.min(W, H);
   const maxW = W * 0.88;
-  const lh = 1.3;
+  const lh = 1.1;
   const minPx = Math.max(8, SIZE_MIN * base);
   let px = Math.max(minPx, ov.size * base);
 
@@ -225,21 +225,25 @@ export function layoutText(ctx, row, data, ovIn, W, H) {
     mainLines[MAX_LINES - 1] = mainLines[MAX_LINES - 1].replace(/.$/, '…');
   }
   let bw = 0;
-  for (const l of mainLines) bw = Math.max(bw, ctx.measureText(l).width);
+  const mainWidths = [];
+  for (const l of mainLines) { const w = ctx.measureText(l).width; mainWidths.push(w); bw = Math.max(bw, w); }
 
   const px2 = px * 0.55;
   ctx.font = `400 ${px2}px ${FONT_FAMILY}`;
   let metaText = meta;
+  let metaWidth = 0;
   if (metaText) {
     while (metaText.length > 1 && ctx.measureText(metaText).width > maxW) metaText = metaText.slice(0, -1);
     if (metaText !== meta) metaText = metaText.slice(0, -1) + '…';
-    bw = Math.max(bw, ctx.measureText(metaText).width);
+    metaWidth = ctx.measureText(metaText).width;
+    bw = Math.max(bw, metaWidth);
   }
   ctx.restore();
 
-  const gap = mainLines.length && metaText ? px * 0.1 : 0;
+  const gap = mainLines.length && metaText ? px * 0.05 : 0;
   const bh = mainLines.length * px * lh + (metaText ? px2 * lh + gap : 0);
-  return { mainLines, metaText, px, px2, lh, gap, bw, bh, pad: px * 0.4 };
+  // pad：夾在圖片內的邊距；padX／padY：底帶只比字多出一點點，剛好把字包住
+  return { mainLines, mainWidths, metaText, metaWidth, px, px2, lh, gap, bw, bh, pad: px * 0.3, padX: px * 0.2, padY: px * 0.07 };
 }
 
 // 把錨點換成文字區左上角，並夾在圖片裡
@@ -313,17 +317,29 @@ export function drawOverlay(ctx, W, H, row, ovIn, data, an) {
   const isLight = !ink && relLum(hexToRgb(color)) > 0.3;
 
   ctx.save();
-  ctx.textBaseline = 'top';
+  ctx.textBaseline = 'alphabetic';
   ctx.textAlign = ov.align === 'center' ? 'center' : ov.align === 'right' ? 'right' : 'left';
   const tx = ov.align === 'center' ? box.x + box.w / 2 : ov.align === 'right' ? box.x + box.w : box.x;
+  const BASE = 0.86;      // 中文字的基線大約在字高 86% 的位置
+  const leftOf = (w) => ov.align === 'center' ? box.x + (box.w - w) / 2 : ov.align === 'right' ? box.x + box.w - w : box.x;
+
+  // 每一行的垂直位置（字的上緣）
+  const rows = [];
+  let yy = box.y;
+  lay.mainLines.forEach((l, i) => { rows.push({ y: yy, h: lay.px, w: lay.mainWidths[i] }); yy += lay.px * lay.lh; });
+  if (lay.metaText) { yy += lay.gap; rows.push({ y: yy, h: lay.px2, w: lay.metaWidth }); }
 
   if (band) {
-    const p = lay.pad;
-    ctx.fillStyle = isLight ? 'rgba(0,0,0,.35)' : 'rgba(252,251,247,.6)';
-    roundRect(ctx, box.x - p, box.y - p, box.w + p * 2, box.h + p * 2, p * 0.8);
-    ctx.fill();
+    // 底帶只包住字：每一行各畫一塊，貼著那一行的寬度，上下左右只多一點點
+    const bf = bandFill(color);
+    ctx.fillStyle = bf;
+    const r = lay.px * 0.16;
+    for (const rw of rows) {
+      roundRect(ctx, leftOf(rw.w) - lay.padX, rw.y - lay.padY, rw.w + lay.padX * 2, rw.h + lay.padY * 2, r);
+      ctx.fill();
+    }
   }
-  if (ov.shadow !== false) {
+  if (ov.shadow !== false && !band) {
     ctx.shadowColor = isLight ? 'rgba(0,0,0,.45)' : 'rgba(255,255,255,.55)';
     ctx.shadowBlur = lay.px * (isLight ? 0.18 : 0.2);
     ctx.shadowOffsetY = isLight ? lay.px * 0.03 : 0;
@@ -332,21 +348,27 @@ export function drawOverlay(ctx, W, H, row, ovIn, data, an) {
   ctx.strokeStyle = color;
   ctx.lineJoin = 'round';
 
-  let y = box.y;
   ctx.font = `700 ${lay.px}px ${FONT_FAMILY}`;
   ctx.lineWidth = lay.px * 0.022;       // 讓粗體字重更明顯
-  for (const line of lay.mainLines) {
-    ctx.strokeText(line, tx, y);
-    ctx.fillText(line, tx, y);
-    y += lay.px * lay.lh;
-  }
+  lay.mainLines.forEach((line, i) => {
+    const by = rows[i].y + lay.px * BASE;
+    ctx.strokeText(line, tx, by);
+    ctx.fillText(line, tx, by);
+  });
   if (lay.metaText) {
-    y += lay.gap;
+    const rw = rows[rows.length - 1];
     ctx.font = `400 ${lay.px2}px ${FONT_FAMILY}`;
-    ctx.fillText(lay.metaText, tx, y);
+    ctx.fillText(lay.metaText, tx, rw.y + lay.px2 * BASE);
   }
   ctx.restore();
   return { box, color, band, pad: lay.pad };
+}
+
+// 底帶顏色：在黑底與米白底之間挑跟文字對比比較高的，並且夠不透明，字才看得清楚
+export function bandFill(textHex) {
+  const t = hexToRgb(textHex);
+  const dark = [20, 18, 16], cream = [252, 251, 247];
+  return contrast(t, dark) >= contrast(t, cream) ? 'rgba(20,18,16,.8)' : 'rgba(252,251,247,.85)';
 }
 
 export function roundRect(ctx, x, y, w, h, r) {
