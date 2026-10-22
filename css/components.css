@@ -2467,3 +2467,11 @@ body.bigcard-open { overflow: hidden; }
 .cap-field select { width: 100%; min-width: 0; max-width: 100%; text-overflow: ellipsis; }
 .cap-mmain .ds-pick { grid-template-columns: minmax(0, 1fr); }
 .cap-mmain .cap-field { min-width: 0; }
+
+/* R15：加字控制項（8 色、日期／景點、換行／接在後面）與拼貼加字 */
+.ove-colors { gap: 5px; }
+.ove-chip { padding: 5px 9px; }
+.ove-tg:disabled { opacity: .4; cursor: default; }
+.col-textmode .col-main { display: none; }
+.col-text-tools { display: flex; flex-direction: column; gap: 8px; }
+.col-text-tools[hidden] { display: none; }

@@ -1,13 +1,24 @@
-// 拼貼編輯器：選 1–9 張、換版型、三種比例、點兩格交換、分享／存到手機
+// 拼貼編輯器：選 1–9 張、換版型、三種比例、點兩格交換、✍️ 加字、分享／存到手機
+// 拼貼鋪滿照片，沒有標題列與印章；要加字就按「✍️ 加字」，用跟單張一樣的控制項自己找位置放。
+// 加字設定只存在這次編輯的記憶體裡（關掉拼貼就重來），不寫 IndexedDB。
 import { escapeHtml } from '../lib/md.js';
-import { loadBitmap, srcW, srcH, freeCanvas, ensureFonts } from '../lib/overlay.js';
+import { loadBitmap, freeCanvas, ensureFonts, normalizeOverlay } from '../lib/overlay.js';
 import { jstParts } from '../lib/exif.js';
 import { RATIOS, OUT_SCALE, MAX_PHOTOS, renderCollage, variantCount } from '../lib/collage.js';
 import { showProgress, toast, withLock, downloadBlob, shareFiles, safeName } from '../lib/ui.js';
 import { sortByTaken } from './share_sheet.js';
+import { toolsHtml, wireOverlayTools, attachTextPointer } from './overlay_editor.js';
 
 const WEEK = '日一二三四五六';
 const PREVIEW_W = 720;
+
+// 'YYYY-MM-DD' → '10/26（一）'；不是日期就回空字串（不會出現空的「（）」）
+function fmtDate(iso) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
+  if (!m) return '';
+  const wd = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])).getUTCDay();
+  return `${m[2]}/${m[3]}（${WEEK[wd]}）`;
+}
 
 // opts: { rows, data, kind: 'day' | 'spot', day?, spot? }
 export async function openCollageEditor({ rows, data, kind, day, spot }) {
@@ -24,6 +35,28 @@ export async function openCollageEditor({ rows, data, kind, day, spot }) {
   const cache = new Map();    // id → 預覽用 ImageBitmap
   const urls = [];
 
+  // ---- 加字（記憶體內）----
+  const txt = {
+    on: false,                // 有沒有加字
+    panel: false,             // 加字控制項是否展開
+    note: kind === 'day' ? (day?.title || '') : (spot?.nameZh || spot?.name || ''),
+    st: { ...normalizeOverlay(null), auto: true },
+  };
+  function dateText() {
+    if (kind === 'day' && day && /^\d{4}-\d{2}-\d{2}$/.test(day.date || '')) return fmtDate(day.date);
+    const first = byId.get(order[0]);
+    const p = jstParts(first?.takenAt || first?.createdAt || '');
+    return p ? fmtDate(p.date) : '';
+  }
+  function textSpec() {
+    if (!txt.on) return null;
+    const first = byId.get(order[0]);
+    return {
+      st: txt.st, data,
+      row: { note: txt.note, takenAt: first?.takenAt, createdAt: first?.createdAt, spotId: null, metaOverride: { date: dateText(), spot: '' } },
+    };
+  }
+
   const root = document.createElement('div');
   root.className = 'ove-overlay col-overlay';
   root.innerHTML = `
@@ -34,19 +67,27 @@ export async function openCollageEditor({ rows, data, kind, day, spot }) {
     </div>
     <div class="ove-stage"><canvas class="ove-canvas"></canvas></div>
     <div class="ove-tools">
-      <div class="ove-row">
+      <div class="col-text-tools" hidden>
+        ${toolsHtml({ note: txt.note, notePlaceholder: '文字（可以改、可以清空）', size: txt.st.size })}
+        <div class="ove-row">
+          <button type="button" class="ove-tg" data-a="text-done">完成</button>
+          <button type="button" class="ove-tg" data-a="text-remove">✕ 不加字</button>
+        </div>
+      </div>
+      <div class="ove-row col-main">
         ${Object.entries(RATIOS).map(([k, v]) => `<button type="button" class="ove-tg${k === ratio ? ' on' : ''}" data-ratio="${k}">${escapeHtml(v.label)}</button>`).join('')}
         <span class="ove-sep"></span>
         <button type="button" class="ove-tg" data-a="variant">🔀 換版型</button>
-        <span class="small faint col-hint">點一格再點另一格可交換</span>
+        <button type="button" class="ove-tg" data-a="text">✍️ 加字</button>
       </div>
-      <div class="col-strip">
+      <div class="small faint col-hint col-main">點一格再點另一格可交換</div>
+      <div class="col-strip col-main">
         ${all.map(r => {
           const u = URL.createObjectURL(r.thumb || r.blob); urls.push(u);
           return `<label class="col-pick"><img alt="" src="${u}"><input type="checkbox" data-id="${escapeHtml(r.id)}" ${order.includes(r.id) ? 'checked' : ''} aria-label="選取 ${escapeHtml(r.name || '')}"></label>`;
         }).join('')}
       </div>
-      <div class="cap-actions">
+      <div class="cap-actions col-main">
         <button type="button" class="btn btn-primary" data-a="share">📤 分享</button>
         <button type="button" class="btn" data-a="save">💾 存到手機</button>
       </div>
@@ -58,18 +99,15 @@ export async function openCollageEditor({ rows, data, kind, day, spot }) {
   const stage = root.querySelector('.ove-stage');
   const canvas = root.querySelector('canvas');
   const status = root.querySelector('.col-status');
+  const textTools = root.querySelector('.col-text-tools');
 
-  function titleSpec() {
-    const first = byId.get(order[0]);
-    const p = jstParts(first?.takenAt || first?.createdAt || '');
-    if (kind === 'day' && day) {
-      const mmdd = String(day.date || '').slice(5).replace('-', '/');
-      return { line1: `Day ${day.n} · ${mmdd}（${day.weekday || ''}）`, line2: day.title || '' };
-    }
-    return {
-      line1: spot?.nameZh || spot?.name || '',
-      line2: p ? `${p.mmdd}（${WEEK[p.weekday]}）` : '',
-    };
+  function setPanel(open) {
+    txt.panel = open;
+    textTools.hidden = !open;
+    root.classList.toggle('col-textmode', open);
+    picked = -1;
+    requestAnimationFrame(() => { if (canvas.width) fitCanvas(canvas.width, canvas.height); });
+    draw();
   }
 
   async function previewBitmap(id) {
@@ -80,6 +118,7 @@ export async function openCollageEditor({ rows, data, kind, day, spot }) {
     return b;
   }
 
+  let tools = null;
   // 預覽：同一支 renderCollage，只是寬度小
   async function draw() {
     if (closed) return;
@@ -92,8 +131,9 @@ export async function openCollageEditor({ rows, data, kind, day, spot }) {
       const bmps = await Promise.all(ids.map(previewBitmap));
       const tmp = document.createElement('canvas');
       lay = await renderCollage(tmp, {
-        W, H, n: ids.length, variant, title: titleSpec(),
+        W, H, n: ids.length, variant,
         getBitmap: async (i) => bmps[i],
+        text: textSpec(),
       });
       canvas.width = W; canvas.height = H;
       const ctx = canvas.getContext('2d');
@@ -105,6 +145,7 @@ export async function openCollageEditor({ rows, data, kind, day, spot }) {
         ctx.strokeRect(c.x + ctx.lineWidth / 2, c.y + ctx.lineWidth / 2, c.w - ctx.lineWidth, c.h - ctx.lineWidth);
       }
       fitCanvas(W, H);
+      tools?.sync();
     } finally {
       busy = false;
       if (dirty) draw();
@@ -116,9 +157,29 @@ export async function openCollageEditor({ rows, data, kind, day, spot }) {
     canvas.style.height = Math.floor(H * s) + 'px';
   }
 
-  // ---- 點兩格交換 ----
+  // 加字控制項（共用單張編輯器的那一套）
+  tools = wireOverlayTools(textTools, {
+    st: txt.st, redraw: draw,
+    getNote: () => txt.note, setNote: (v) => { txt.note = v; },
+    getEff: () => lay?.text?.eff || null,
+    getLast: () => lay?.text?.last || null,
+    getCw: () => canvas.width || PREVIEW_W,
+    hasSpot: () => false,          // 拼貼沒有單一景點，景點名稱放在文字框裡
+  });
+  attachTextPointer(canvas, txt.st, {
+    redraw: draw,
+    freeze: () => {
+      if (!txt.st.auto) return;
+      const eff = lay?.text?.eff;
+      if (eff) { txt.st.x = eff.x; txt.st.y = eff.y; txt.st.align = eff.align; }
+      txt.st.auto = false;
+    },
+    enabled: () => txt.on && txt.panel,
+  });
+
+  // ---- 點兩格交換（加字展開時是拖曳文字，不交換）----
   canvas.addEventListener('click', (e) => {
-    if (!lay) return;
+    if (!lay || txt.panel) return;
     const rc = canvas.getBoundingClientRect();
     const x = (e.clientX - rc.left) * canvas.width / rc.width;
     const y = (e.clientY - rc.top) * canvas.height / rc.height;
@@ -130,7 +191,7 @@ export async function openCollageEditor({ rows, data, kind, day, spot }) {
     draw();
   });
 
-  // ---- 最終輸出（2 倍解析度，原圖、不加字）----
+  // ---- 最終輸出（2 倍解析度，照片用原圖；有加字就一起畫上去）----
   async function exportBlob() {
     await ensureFonts();
     const rt = RATIOS[ratio];
@@ -138,7 +199,8 @@ export async function openCollageEditor({ rows, data, kind, day, spot }) {
     const c = document.createElement('canvas');
     const ids = order.slice();
     await renderCollage(c, {
-      W, H, n: ids.length, variant, title: titleSpec(), release: true,
+      W, H, n: ids.length, variant, release: true,
+      text: textSpec(),
       getBitmap: async (i, cell) => {
         const r = byId.get(ids[i]);
         const iw = r.w || 1, ih = r.h || 1;
@@ -154,7 +216,7 @@ export async function openCollageEditor({ rows, data, kind, day, spot }) {
     const first = byId.get(order[0]);
     const p = jstParts(first?.takenAt || first?.createdAt || '');
     const d = p ? p.mmdd.replace('/', '-') : '';
-    const base = kind === 'day' && day ? `拼貼_Day${day.n}_${d}` : `拼貼_${spot?.nameZh || spot?.name || ''}_${d}`;
+    const base = kind === 'day' && day?.n ? `拼貼_Day${day.n}_${d}` : kind === 'day' ? `拼貼_${d}` : `拼貼_${spot?.nameZh || spot?.name || ''}_${d}`;
     return `${safeName(base)}.jpg`;
   }
 
@@ -183,7 +245,7 @@ export async function openCollageEditor({ rows, data, kind, day, spot }) {
   // ---- 事件 ----
   root.addEventListener('click', (e) => {
     const t = e.target.closest('button');
-    if (!t) return;
+    if (!t || textTools.contains(t) && !t.dataset.a) return;
     if (t.dataset.ratio) {
       ratio = t.dataset.ratio;
       root.querySelectorAll('[data-ratio]').forEach(b => b.classList.toggle('on', b === t));
@@ -193,7 +255,12 @@ export async function openCollageEditor({ rows, data, kind, day, spot }) {
       variant = (variant + 1) % Math.max(1, n);
       picked = -1; draw();
       if (n <= 1) toast('這個張數只有一種版型');
-    } else if (t.dataset.a === 'share') doExport(true, t);
+    } else if (t.dataset.a === 'text') {
+      if (!txt.on) txt.on = true;
+      setPanel(!txt.panel);
+    } else if (t.dataset.a === 'text-done') setPanel(false);
+    else if (t.dataset.a === 'text-remove') { txt.on = false; setPanel(false); }
+    else if (t.dataset.a === 'share') doExport(true, t);
     else if (t.dataset.a === 'save') doExport(false, t);
     else if (t.dataset.a === 'close') close();
   });
@@ -218,6 +285,7 @@ export async function openCollageEditor({ rows, data, kind, day, spot }) {
   function close() {
     closed = true;
     window.removeEventListener('resize', onResize);
+    tools?.destroy();
     cache.forEach(b => b.close?.());
     cache.clear();
     urls.forEach(u => URL.revokeObjectURL(u));

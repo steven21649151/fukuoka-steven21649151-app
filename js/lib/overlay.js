@@ -116,22 +116,68 @@ export function hexToRgb(hex) {
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 }
 
-// ---------- 疊字內容 ----------
-export function metaLine(row, data) {
-  const p = jstParts(row.takenAt || row.createdAt || '');
-  const parts = [];
-  if (p) parts.push(p.mmdd);
-  if (row.spotId) {
-    const s = (data?.spots || []).find(x => x.id === row.spotId);
-    parts.push(s ? (s.nameZh || s.name || row.spotId) : '');
-  }
-  return parts.filter(Boolean).join(' · ');
+// ---------- 字級範圍 ----------
+export const SIZE_MIN = 0.06;
+export const SIZE_MAX = 0.20;
+export const SIZE_DEFAULT = 0.09;
+const MAX_LINES = 3;
+
+export function clampSize(s) {
+  const v = Number.isFinite(s) ? s : SIZE_DEFAULT;
+  return Math.min(SIZE_MAX, Math.max(SIZE_MIN, v));
 }
 
-export function overlayTexts(row, data, ov) {
-  const main = (row.note || '').trim();
-  const meta = (!ov || ov.meta !== false) ? metaLine(row, data) : '';
-  return { main, meta };
+export function defaultOverlay() {
+  return {
+    auto: true, x: 0.06, y: 0.88, size: SIZE_DEFAULT, color: 'auto', band: 'auto', shadow: true,
+    showDate: true, showSpot: true, metaMode: 'newline', align: 'left',
+  };
+}
+
+// 讀出來的設定一律先過這裡：舊資料的 meta → showDate／showSpot，size 夾進範圍（不回寫）
+export function normalizeOverlay(ov) {
+  const o = { ...defaultOverlay(), ...(ov || {}) };
+  if (ov && 'meta' in ov && !('showDate' in ov) && !('showSpot' in ov)) {
+    o.showDate = ov.meta !== false;
+    o.showSpot = ov.meta !== false;
+  }
+  delete o.meta;
+  if (o.metaMode !== 'inline') o.metaMode = 'newline';
+  o.showDate = o.showDate !== false;
+  o.showSpot = o.showSpot !== false;
+  o.size = clampSize(o.size);
+  return o;
+}
+
+// ---------- 疊字內容 ----------
+// row 可以是手帳照片，也可以是拼貼用的假 row（帶 metaOverride: { date, spot }）
+export function spotNameOf(row, data) {
+  if (!row.spotId) return '';
+  const s = (data?.spots || []).find(x => x.id === row.spotId);
+  return s ? (s.nameZh || s.name || '') : '';
+}
+export function dateTextOf(row) {
+  const p = jstParts(row.takenAt || row.createdAt || '');
+  return p ? p.mmdd : '';
+}
+// 這張有沒有景點可以加（編輯器用來灰掉「📍 景點」）
+export function hasSpotText(row, data) {
+  return row.metaOverride ? !!row.metaOverride.spot : !!spotNameOf(row, data);
+}
+
+// 回傳 { main, meta }：
+//   newline：main＝備註（沒備註時改放日期景點，用主字級）、meta＝日期景點（小字，另起一行）
+//   inline ：main＝「備註 · 日期 · 景點」一整段同字級、meta＝''
+export function overlayTexts(row, data, ovIn) {
+  const ov = normalizeOverlay(ovIn);
+  const note = (row.note || '').trim();
+  const date = ov.showDate ? (row.metaOverride ? row.metaOverride.date : dateTextOf(row)) : '';
+  const spot = ov.showSpot ? (row.metaOverride ? row.metaOverride.spot : spotNameOf(row, data)) : '';
+  const parts = [date, spot].filter(Boolean);
+  const metaStr = parts.join(' · ');
+  if (ov.metaMode === 'inline') return { main: [note, ...parts].filter(Boolean).join(' · '), meta: '' };
+  if (!note) return { main: metaStr, meta: '' };
+  return { main: note, meta: metaStr };
 }
 
 // 有沒有任何字要畫（沒有就輸出原圖）
@@ -140,12 +186,8 @@ export function hasOverlayText(row, data) {
   return !!(main || meta);
 }
 
-export function defaultOverlay() {
-  return { auto: true, x: 0.06, y: 0.88, size: 0.06, color: 'auto', band: 'auto', shadow: true, meta: true, align: 'left' };
-}
-
 // ---------- 排版 ----------
-function wrapLines(ctx, text, maxW, maxLines) {
+function wrapLines(ctx, text, maxW) {
   const out = [];
   for (const para of text.split(/\r?\n/)) {
     let cur = '';
@@ -155,29 +197,37 @@ function wrapLines(ctx, text, maxW, maxLines) {
     }
     out.push(cur);
   }
-  if (out.length > maxLines) {
-    const cut = out.slice(0, maxLines);
-    cut[maxLines - 1] = cut[maxLines - 1].replace(/.$/, '…');
-    return cut;
-  }
   return out;
 }
 
-// 算文字區大小（不含底帶內距）。回傳 null 表示沒有字
-export function layoutText(ctx, row, data, ov, W, H) {
+// 算文字區大小（不含底帶內距）。回傳 null 表示沒有字。
+// 放不下（超過 3 行）才自動縮小，但不小於 SIZE_MIN。
+export function layoutText(ctx, row, data, ovIn, W, H) {
+  const ov = normalizeOverlay(ovIn);
   const { main, meta } = overlayTexts(row, data, ov);
   if (!main && !meta) return null;
-  const px = Math.max(8, ov.size * Math.min(W, H));
-  const px2 = px * 0.55;
+  const base = Math.min(W, H);
   const maxW = W * 0.88;
   const lh = 1.3;
+  const minPx = Math.max(8, SIZE_MIN * base);
+  let px = Math.max(minPx, ov.size * base);
 
+  let mainLines = [];
   ctx.save();
-  ctx.font = `700 ${px}px ${FONT_FAMILY}`;
-  const mainLines = main ? wrapLines(ctx, main, maxW, 4) : [];
+  for (;;) {
+    ctx.font = `700 ${px}px ${FONT_FAMILY}`;
+    mainLines = main ? wrapLines(ctx, main, maxW) : [];
+    if (mainLines.length <= MAX_LINES || px <= minPx) break;
+    px = Math.max(minPx, px * 0.94);
+  }
+  if (mainLines.length > MAX_LINES) {
+    mainLines = mainLines.slice(0, MAX_LINES);
+    mainLines[MAX_LINES - 1] = mainLines[MAX_LINES - 1].replace(/.$/, '…');
+  }
   let bw = 0;
   for (const l of mainLines) bw = Math.max(bw, ctx.measureText(l).width);
 
+  const px2 = px * 0.55;
   ctx.font = `400 ${px2}px ${FONT_FAMILY}`;
   let metaText = meta;
   if (metaText) {
@@ -187,8 +237,8 @@ export function layoutText(ctx, row, data, ov, W, H) {
   }
   ctx.restore();
 
-  const gap = main && meta ? px * 0.1 : 0;
-  const bh = mainLines.length * px * lh + (meta ? px2 * lh + gap : 0);
+  const gap = mainLines.length && metaText ? px * 0.1 : 0;
+  const bh = mainLines.length * px * lh + (metaText ? px2 * lh + gap : 0);
   return { mainLines, metaText, px, px2, lh, gap, bw, bh, pad: px * 0.4 };
 }
 
@@ -213,7 +263,7 @@ const CANDIDATES = [   // 平手時的優先順序
 ];
 
 export function computeAuto(row, data, an, W, H, base = {}) {
-  const ov = { ...defaultOverlay(), ...base, auto: true, color: 'auto', band: 'auto' };
+  const ov = { ...normalizeOverlay(base), auto: true, color: 'auto', band: 'auto' };
   const refW = 1000, refH = Math.max(1, Math.round(refW * H / W));
   const c = document.createElement('canvas'); c.width = 4; c.height = 4;
   const lay = layoutText(c.getContext('2d'), row, data, ov, refW, refH);
@@ -254,13 +304,13 @@ export function resolveStyle(ov, an, box, W, H, pad) {
 // ---------- 繪製（預覽與輸出共用）----------
 // 回傳 { box, color, band }，編輯器用 box 做拖曳命中判斷
 export function drawOverlay(ctx, W, H, row, ovIn, data, an) {
-  const ov = { ...defaultOverlay(), ...(ovIn || {}) };
+  const ov = normalizeOverlay(ovIn);
   const lay = layoutText(ctx, row, data, ov, W, H);
   if (!lay) return null;
   const box = placeBox(lay, ov, W, H);
   const { color, band } = resolveStyle(ov, an, box, W, H, lay.pad);
   const ink = color.toLowerCase() === INK.toLowerCase();
-  const isLight = !ink && relLum(hexToRgb(color)) > 0.4;
+  const isLight = !ink && relLum(hexToRgb(color)) > 0.3;
 
   ctx.save();
   ctx.textBaseline = 'top';
@@ -314,9 +364,10 @@ export function roundRect(ctx, x, y, w, h, r) {
 export function resolveOverlayForOutput(row, data, an, W, H) {
   const ov = row.overlay;
   if (!ov || ov.auto) {
-    return computeAuto(row, data, an, W, H, { meta: ov?.meta ?? true, shadow: ov?.shadow ?? true, size: ov?.size ?? 0.06 });
+    const n = normalizeOverlay(ov);
+    return computeAuto(row, data, an, W, H, { showDate: n.showDate, showSpot: n.showSpot, metaMode: n.metaMode, shadow: n.shadow, size: n.size });
   }
-  return ov;
+  return normalizeOverlay(ov);
 }
 
 // ---------- 輸出加字版 ----------
