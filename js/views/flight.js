@@ -75,6 +75,7 @@ export async function render(root, params, ctx) {
           <li><b>桃園 T2</b>：自行前往（機捷／客運／自駕）。班機 08:00，抓 2h45 到，也就是 05:15 前要進航廈。</li>
           <li><b>福岡機場</b>國際線 → 國內線：<span class="nw">免費接駁 10 分</span>。地鐵入口在<b>國內線</b>那棟。</li>
           <li><b>地鐵空港線</b>：福岡空港站 → 天神站約 <span class="nw">11 分</span>、<span class="nw">¥260</span>。可以嗶信用卡感應。</li>
+          <li><b>回程 10/30</b>：博多站筑紫口搭西鐵巴士直達國際線，約 <span class="nw">20–25 分</span>、<span class="nw">¥380</span>（Visa 感應，上下車各感應一次）。</li>
         </ul>
       </section>
 
