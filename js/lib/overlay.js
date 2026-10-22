@@ -175,7 +175,10 @@ export function overlayTexts(row, data, ovIn) {
   const spot = ov.showSpot ? (row.metaOverride ? row.metaOverride.spot : spotNameOf(row, data)) : '';
   const parts = [date, spot].filter(Boolean);
   const metaStr = parts.join(' · ');
-  if (ov.metaMode === 'inline') return { main: [note, ...parts].filter(Boolean).join(' · '), meta: '' };
+  if (ov.metaMode === 'inline') {
+    const segs = [note, ...parts].filter(Boolean);
+    return { main: segs.join(' · '), meta: '', segs };
+  }
   if (!note) return { main: metaStr, meta: '' };
   return { main: note, meta: metaStr };
 }
@@ -187,16 +190,36 @@ export function hasOverlayText(row, data) {
 }
 
 // ---------- 排版 ----------
+const CLOSERS = '）」』】》〉，。、！？：；,.!?;:)]}…';
 function wrapLines(ctx, text, maxW) {
   const out = [];
   for (const para of text.split(/\r?\n/)) {
     let cur = '';
     for (const ch of para) {
-      if (cur && ctx.measureText(cur + ch).width > maxW) { out.push(cur); cur = ch; }
+      // 收尾的標點（）」，。等）不單獨換到下一行，寧可這行多出一個字
+      if (cur && !CLOSERS.includes(ch) && ctx.measureText(cur + ch).width > maxW) { out.push(cur); cur = ch; }
       else cur += ch;
     }
     out.push(cur);
   }
+  // 行尾行首的空白不算字：否則底帶會多出一截
+  return out.map(l => l.trim()).filter((l, i, a) => l || a.length === 1);
+}
+
+// 「備註 · 日期 · 景點」接在一起時：優先在各段之間換行（行尾不留「 · 」），單段太長才逐字換行
+function wrapSegs(ctx, segs, maxW) {
+  const out = [];
+  let cur = '';
+  for (const seg of segs) {
+    const joined = cur ? `${cur} · ${seg}` : seg;
+    if (ctx.measureText(joined).width <= maxW) { cur = joined; continue; }
+    if (cur) { out.push(cur); cur = ''; }
+    if (ctx.measureText(seg).width <= maxW) { cur = seg; continue; }
+    const pieces = wrapLines(ctx, seg, maxW);
+    cur = pieces.pop() || '';
+    out.push(...pieces);
+  }
+  if (cur) out.push(cur);
   return out;
 }
 
@@ -204,7 +227,7 @@ function wrapLines(ctx, text, maxW) {
 // 放不下（超過 3 行）才自動縮小，但不小於 SIZE_MIN。
 export function layoutText(ctx, row, data, ovIn, W, H) {
   const ov = normalizeOverlay(ovIn);
-  const { main, meta } = overlayTexts(row, data, ov);
+  const { main, meta, segs } = overlayTexts(row, data, ov);
   if (!main && !meta) return null;
   const base = Math.min(W, H);
   const maxW = W * 0.88;
@@ -216,7 +239,7 @@ export function layoutText(ctx, row, data, ovIn, W, H) {
   ctx.save();
   for (;;) {
     ctx.font = `700 ${px}px ${FONT_FAMILY}`;
-    mainLines = main ? wrapLines(ctx, main, maxW) : [];
+    mainLines = !main ? [] : segs ? wrapSegs(ctx, segs, maxW) : wrapLines(ctx, main, maxW);
     if (mainLines.length <= MAX_LINES || px <= minPx) break;
     px = Math.max(minPx, px * 0.94);
   }
