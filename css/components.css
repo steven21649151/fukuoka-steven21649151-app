@@ -2544,3 +2544,54 @@ body.script-open { overflow: hidden; }
 .script-chip { padding: 10px 14px; font-size: 15px; border-radius: 999px; border: 1px solid var(--sc-line); background: var(--sc-card); color: var(--sc-ink); cursor: pointer; font-family: inherit; }
 .script-chip.close { align-self: stretch; }
 .script-fsval { min-width: 48px; text-align: center; color: var(--sc-faint); font-size: 14px; }
+
+/* R17：備選 chip、文A 翻譯按鈕 */
+.alts-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 8px; font-size: 13px; color: var(--ink2); }
+.alts-k { flex: 0 0 auto; }
+.alt-chip {
+  display: inline-block; padding: 4px 11px; border-radius: 999px;
+  background: var(--cat-food-soft, #FBEDE9); color: var(--cat-food-main, #C4452F); font-size: 13px; line-height: 1.4; text-decoration: none; border: 1px solid rgba(196,69,47,.18);
+}
+.btn-trans .trans-ico {
+  display: inline-flex; align-items: baseline; justify-content: center; gap: 1px;
+  font-weight: 700; font-size: 15px; line-height: 1; letter-spacing: 0;
+}
+.btn-trans .trans-ico small { font-size: 10px; font-weight: 700; transform: translateY(2px); }
+
+/* R17：英文大字卡——大字是英文（至少 28px）、下方小字中文；長句自動換行、不超出畫面 */
+.bigcard .bc-body { display: flex; flex-direction: column; max-height: 100%; overflow-y: auto; box-sizing: border-box; }
+.bigcard .bc-body[data-lang="en"] .bc-ja {
+  margin-top: 0;
+  font-size: clamp(28px, 6.6vw, 52px);
+  line-height: 1.3;
+  letter-spacing: 0;
+  line-break: auto;
+  word-break: normal;
+  overflow-wrap: anywhere;
+}
+.bigcard .bc-body[data-lang="en"] .bc-zh {
+  order: 2;
+  margin-top: 18px;
+  font-size: clamp(18px, 4vw, 26px);
+  font-weight: 500;
+  color: rgba(255,255,255,.8);
+}
+.bigcard .bc-body[data-lang="en"] .bc-romaji { display: none; }
+@media (orientation: landscape) {
+  .bigcard .bc-body[data-lang="en"] .bc-ja { font-size: clamp(28px, 5vw, 56px); }
+  .bigcard .bc-body[data-lang="en"] .bc-zh { font-size: clamp(18px, 3vw, 26px); }
+}
+
+/* R17：日英字卡——語言切換、英文卡 */
+.lang-seg { display: flex; gap: 8px; margin-bottom: 10px; }
+.lang-seg .seg {
+  flex: 1 1 0; padding: 10px 12px; font-size: 15px; font-weight: 700; border-radius: 12px;
+  border: 1px solid var(--line); background: var(--card); color: var(--ink2); cursor: pointer; font-family: inherit;
+}
+.lang-seg .seg.on { background: var(--ink); color: var(--page); border-color: var(--ink); }
+.phrase-card[data-lang="en"] .phrase-ja.phrase-en {
+  margin-top: 0; font-size: 22px; line-height: 1.4; font-weight: 700; letter-spacing: 0;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  overflow-wrap: anywhere;
+}
+.phrase-card .phrase-zh-under { margin-top: 6px; color: var(--ink2); font-size: 15px; font-weight: 400; }

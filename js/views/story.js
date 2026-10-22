@@ -5,7 +5,7 @@ import { getPrevHash } from '../router.js';
 const KNOWN_BACK = {
   '#/tools/tips':    '回攻略',
   '#/tools/flight':  '回航班',
-  '#/tools/phrases': '回句庫',
+  '#/tools/phrases': '回字卡',
   '#/tools/packing': '回打包清單',
   '#/tools':         '回小工具',
 };

@@ -9,7 +9,7 @@ const TOOLS = [
   { key: 'talk',    emoji: '🎤', label: '我的報告' },
   { key: 'sos',     emoji: '🚨', label: '出事了' },
   { key: 'tickets', emoji: '🎫', label: '票券' },
-  { key: 'phrases', emoji: '🗣', label: '中日句庫' },
+  { key: 'phrases', emoji: '🗣', label: '日英字卡' },
   { key: 'tips',    emoji: '💡', label: '攻略 Tips' },
   { key: 'packing', emoji: '🎒', label: '打包清單' },
   { key: 'flight',  emoji: '✈️', label: '航班' },

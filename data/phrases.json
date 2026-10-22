@@ -1,304 +1,924 @@
 {
-  "_meta": {
-    "version": "1.0",
-    "updated": "2026-09-06",
-    "note": "中日對照句庫。scene 分場景，priority 小的排前面。bigCard=true 的可切成全螢幕大字模式，把手機轉給店員看。",
-    "tts": "朗讀用 speechSynthesis，lang='ja-JP'，優先挑 voice.lang.startsWith('ja') 的語音。⚠️ 出發前要在手機下載 Google 日文語音包並實機測過，否則離線唸不出來。",
-    "bigCard說明": "全螢幕大字模式：黑底白字、日文特大（至少 32px）、下方小字中文。給店員看的時候不要有其他 UI 干擾。"
+ "_meta": {
+  "version": "1.0",
+  "updated": "2026-10-22",
+  "note": "日英字卡。scene 分場景，scene.lang 為 ja 或 en；phrase.lang=ja 用 ja/romaji 欄，lang=en 用 en 欄。priority 小的排前面。bigCard=true 可切全螢幕大字給對方看。",
+  "tts": "朗讀用 speechSynthesis，lang='ja-JP'，優先挑 voice.lang.startsWith('ja') 的語音。⚠️ 出發前要在手機下載 Google 日文語音包並實機測過，否則離線唸不出來。",
+  "bigCard說明": "全螢幕大字模式：黑底白字、日文特大（至少 32px）、下方小字中文。給店員看的時候不要有其他 UI 干擾。"
+ },
+ "scenes": [
+  {
+   "key": "allergy",
+   "label": "🦐 過敏",
+   "color": "#C4452F",
+   "note": "最重要，固定置頂",
+   "lang": "ja"
   },
-
-  "scenes": [
-    { "key": "allergy",    "label": "🦐 過敏",   "color": "#C4452F", "note": "最重要，固定置頂" },
-    { "key": "restaurant", "label": "🍽 餐廳",   "color": "#C4452F" },
-    { "key": "shop",       "label": "🛍 購物",   "color": "#A97C1E" },
-    { "key": "transit",    "label": "🚇 交通",   "color": "#3A5A72" },
-    { "key": "hotel",      "label": "🏨 飯店",   "color": "#6A5E8C" },
-    { "key": "basic",      "label": "💬 基本",   "color": "#6E6863" },
-    { "key": "emergency",  "label": "🚨 緊急",   "color": "#C4452F" }
-  ],
-
-  "phrases": [
-
-    { "id": "al-01", "scene": "allergy", "priority": 1, "bigCard": true,
-      "zh": "我對甲殼類過敏，不能吃蝦和蟹",
-      "ja": "甲殻類アレルギーがあります。エビとカニが食べられません。",
-      "romaji": "Kōkakurui arerugī ga arimasu. Ebi to kani ga taberaremasen.",
-      "note": "⭐ 進店先講這一句。這是你最需要的一張卡" },
-
-    { "id": "al-02", "scene": "allergy", "priority": 2, "bigCard": true,
-      "zh": "這道菜裡面有蝦或蟹嗎？",
-      "ja": "この料理にエビやカニは入っていますか？",
-      "romaji": "Kono ryōri ni ebi ya kani wa haitte imasu ka?",
-      "note": "指著菜單問" },
-
-    { "id": "al-03", "scene": "allergy", "priority": 3, "bigCard": true,
-      "zh": "高湯裡有用到蝦或蟹嗎？",
-      "ja": "出汁にエビやカニは使っていますか？",
-      "romaji": "Dashi ni ebi ya kani wa tsukatte imasu ka?",
-      "note": "⚠️ 日本的高湯常有蝦米、蟹殼。看不到不代表沒有——這句要問" },
-
-    { "id": "al-04", "scene": "allergy", "priority": 4, "bigCard": true,
-      "zh": "同一個鐵板上有炒過蝦嗎？",
-      "ja": "同じ鉄板でエビを焼きましたか？",
-      "romaji": "Onaji teppan de ebi o yakimashita ka?",
-      "note": "⚠️ 屋台、小金ちゃん的炒拉麵、鐵板料理一定要問這句" },
-
-    { "id": "al-05", "scene": "allergy", "priority": 5,
-      "zh": "可以換成別的嗎？",
-      "ja": "別のものに変えられますか？",
-      "romaji": "Betsu no mono ni kaeraremasu ka?" },
-
-    { "id": "al-06", "scene": "allergy", "priority": 6,
-      "zh": "沒關係，我點別的就好，不用勉強",
-      "ja": "大丈夫です。別のものを注文しますので、お気になさらないでください。",
-      "romaji": "Daijōbu desu. Betsu no mono o chūmon shimasu node, oki ni nasaranaide kudasai.",
-      "note": "店家做不到時用這句，不要讓對方為難" },
-
-    { "id": "al-07", "scene": "allergy", "priority": 7, "bigCard": true,
-      "zh": "（給宴會場用）我有甲殼類過敏，如果餐點裡有蝦蟹，可以幫我換嗎？",
-      "ja": "甲殻類のアレルギーがあります。お料理にエビやカニが入っている場合、代わりのものをお願いできますか。",
-      "romaji": "Kōkakurui no arerugī ga arimasu. O-ryōri ni ebi ya kani ga haitte iru baai, kawari no mono o onegai dekimasu ka.",
-      "note": "⭐ 10/27 御花晚宴入座後先跟服務人員說這句。会席料理常有蝦蟹" },
-
-
-    { "id": "rs-01", "scene": "restaurant", "priority": 1,
-      "zh": "一位",
-      "ja": "一人です。",
-      "romaji": "Hitori desu.",
-      "note": "進門店員問「何名様？」時回這句" },
-
-    { "id": "rs-02", "scene": "restaurant", "priority": 2,
-      "zh": "有吧台的位子嗎？",
-      "ja": "カウンター席はありますか？",
-      "romaji": "Kauntā-seki wa arimasu ka?",
-      "note": "一個人吃，吧台最自在" },
-
-    { "id": "rs-03", "scene": "restaurant", "priority": 3,
-      "zh": "請問可以坐嗎？",
-      "ja": "座ってもいいですか？",
-      "romaji": "Suwatte mo ii desu ka?",
-      "note": "⭐ 屋台一定要先問這句再坐下" },
-
-    { "id": "rs-04", "scene": "restaurant", "priority": 4,
-      "zh": "不好意思（叫店員）",
-      "ja": "すみません。",
-      "romaji": "Sumimasen.",
-      "note": "萬用。叫人、道歉、借過都用這個" },
-
-    { "id": "rs-05", "scene": "restaurant", "priority": 5,
-      "zh": "請給我這個",
-      "ja": "これをください。",
-      "romaji": "Kore o kudasai.",
-      "note": "指著菜單說，最實用的一句" },
-
-    { "id": "rs-06", "scene": "restaurant", "priority": 6,
-      "zh": "推薦是什麼？",
-      "ja": "おすすめは何ですか？",
-      "romaji": "Osusume wa nan desu ka?" },
-
-    { "id": "rs-07", "scene": "restaurant", "priority": 7,
-      "zh": "這個怎麼吃？",
-      "ja": "これはどうやって食べますか？",
-      "romaji": "Kore wa dōyatte tabemasu ka?",
-      "note": "牛まぶし（三種吃法）、せいろ蒸し 有吃法順序，問了店員會教你" },
-
-    { "id": "rs-08", "scene": "restaurant", "priority": 8,
-      "zh": "請結帳",
-      "ja": "お会計お願いします。",
-      "romaji": "O-kaikei onegai shimasu." },
-
-    { "id": "rs-09", "scene": "restaurant", "priority": 9,
-      "zh": "可以刷卡嗎？",
-      "ja": "カードは使えますか？",
-      "romaji": "Kādo wa tsukaemasu ka?",
-      "note": "屋台、老店常常不行，先問" },
-
-    { "id": "rs-10", "scene": "restaurant", "priority": 10,
-      "zh": "很好吃",
-      "ja": "おいしかったです。ごちそうさまでした。",
-      "romaji": "Oishikatta desu. Gochisōsama deshita.",
-      "note": "離開時說。屋台的老闆會很開心" },
-
-
-    { "id": "sh-01", "scene": "shop", "priority": 1, "bigCard": true,
-      "zh": "請幫我辦免稅",
-      "ja": "免税の手続きをお願いします。",
-      "romaji": "Menzei no tetsuzuki o onegai shimasu.",
-      "note": "⭐ 結帳前先講。要出示護照正本或 Visit Japan Web 的免稅 QR" },
-
-    { "id": "sh-02", "scene": "shop", "priority": 2,
-      "zh": "可以試穿嗎？",
-      "ja": "試着してもいいですか？",
-      "romaji": "Shichaku shite mo ii desu ka?" },
-
-    { "id": "sh-03", "scene": "shop", "priority": 3,
-      "zh": "有大一號的嗎？",
-      "ja": "ワンサイズ大きいものはありますか？",
-      "romaji": "Wan-saizu ōkii mono wa arimasu ka?",
-      "note": "小一號＝「ワンサイズ小さい」" },
-
-    { "id": "sh-04", "scene": "shop", "priority": 4,
-      "zh": "這個多少錢？",
-      "ja": "これはいくらですか？",
-      "romaji": "Kore wa ikura desu ka?" },
-
-    { "id": "sh-05", "scene": "shop", "priority": 5,
-      "zh": "請給我袋子 / 不用袋子",
-      "ja": "袋をください。／ 袋はいりません。",
-      "romaji": "Fukuro o kudasai. / Fukuro wa irimasen.",
-      "note": "日本塑膠袋要錢（¥3–5）" },
-
-    { "id": "sh-06", "scene": "shop", "priority": 6,
-      "zh": "可以幫我包成禮盒嗎？",
-      "ja": "贈答用に包んでもらえますか？",
-      "romaji": "Zōtō-yō ni tsutsunde moraemasu ka?",
-      "note": "買伴手禮時用" },
-
-
-    { "id": "tr-01", "scene": "transit", "priority": 1, "bigCard": true,
-      "zh": "這班車有到⭘⭘嗎？",
-      "ja": "この電車は⭘⭘に行きますか？",
-      "romaji": "Kono densha wa ⭘⭘ ni ikimasu ka?",
-      "note": "⭘⭘ 換成站名。西鐵有特急／急行／普通，停的站不同" },
-
-    { "id": "tr-02", "scene": "transit", "priority": 2,
-      "zh": "⭘⭘站在哪個月台？",
-      "ja": "⭘⭘駅は何番ホームですか？",
-      "romaji": "⭘⭘-eki wa nanban hōmu desu ka?" },
-
-    { "id": "tr-03", "scene": "transit", "priority": 3, "bigCard": true,
-      "zh": "我用信用卡感應進不去閘門",
-      "ja": "クレジットカードのタッチ決済で改札を通れませんでした。",
-      "romaji": "Kurejitto kādo no tatchi kessai de kaisatsu o tōremasen deshita.",
-      "note": "⚠️ 郵局 Visa 感應累計到一定額度後要插卡輸密碼一次。去便利商店插卡買個東西輸密碼就會重置" },
-
-    { "id": "tr-04", "scene": "transit", "priority": 4,
-      "zh": "車票在哪裡買？",
-      "ja": "切符はどこで買えますか？",
-      "romaji": "Kippu wa doko de kaemasu ka?" },
-
-    { "id": "tr-05", "scene": "transit", "priority": 5,
-      "zh": "請問這裡怎麼去？（給司機看地址）",
-      "ja": "ここまでお願いします。",
-      "romaji": "Koko made onegai shimasu.",
-      "note": "把地圖或地址拿給計程車司機看，說這句就好" },
-
-
-    { "id": "ht-01", "scene": "hotel", "priority": 1,
-      "zh": "可以寄放行李嗎？",
-      "ja": "荷物を預かってもらえますか？",
-      "romaji": "Nimotsu o azukatte moraemasu ka?",
-      "note": "⭐ 10/25 12:45 到 Comfort Inn、10/29 07:35 到火星花園都要用" },
-
-    { "id": "ht-02", "scene": "hotel", "priority": 2,
-      "zh": "可以給我高樓層、遠離吸菸樓層的房間嗎？",
-      "ja": "高層階で、喫煙フロアから離れた部屋をお願いできますか。",
-      "romaji": "Kōsōkai de, kitsuen furoa kara hanareta heya o onegai dekimasu ka.",
-      "note": "⭐ 10/25 check-in 時講。低樓層或靠近吸菸樓層品質差很多" },
-
-    { "id": "ht-03", "scene": "hotel", "priority": 3, "bigCard": true,
-      "zh": "請給我正式的收據（報帳用）",
-      "ja": "領収書をお願いします。宛名は不要です。",
-      "romaji": "Ryōshūsho o onegai shimasu. Atena wa fuyō desu.",
-      "note": "⭐⭐ 10/29 退房時一定要講。「領収書」才是報帳用的正式收據，一般的「レシート」不算" },
-
-    { "id": "ht-04", "scene": "hotel", "priority": 4,
-      "zh": "宿泊稅要多少？",
-      "ja": "宿泊税はいくらですか？",
-      "romaji": "Shukuhakuzei wa ikura desu ka?",
-      "note": "福岡市每人每晚 ¥200（房價未滿 ¥20,000），現場付現" },
-
-    { "id": "ht-05", "scene": "hotel", "priority": 5, "bigCard": true,
-      "zh": "（請櫃台代訂餐廳）不好意思，我不會說日文，可以請您幫我打電話訂位嗎？店名和日期時間寫在這裡",
-      "ja": "すみません、日本語が話せないので、レストランの予約のお電話をお願いできますでしょうか。お店の名前と日時はこちらに書いてあります。一名でお願いします。",
-      "romaji": "Sumimasen, nihongo ga hanasenai node, resutoran no yoyaku no o-denwa o onegai dekimasu deshō ka. O-mise no namae to nichiji wa kochira ni kaite arimasu. Ichimei de onegai shimasu.",
-      "note": "⭐ 10/25 到飯店時用：暁（10/26 17:30、1 名）想保險就請櫃台訂。記得補一句過敏（ht-06）" },
-
-    { "id": "ht-06", "scene": "hotel", "priority": 6,
-      "zh": "（訂位時補充）請幫我備註：甲殼類過敏",
-      "ja": "予約の際に「甲殻類アレルギー」とお伝えいただけますか。",
-      "romaji": "Yoyaku no sai ni 'kōkakurui arerugī' to o-tsutae itadakemasu ka.",
-      "note": "⭐ 菅乃屋的「寿司箱膳」可能配到蝦握壽司，一定要備註" },
-
-    { "id": "ht-07", "scene": "hotel", "priority": 7, "bigCard": true,
-      "zh": "不好意思，可以幫我處理掉這雙舊鞋嗎？",
-      "ja": "すみません、この古い靴を処分していただけますか？",
-      "romaji": "Sumimasen, kono furui kutsu o shobun shite itadakemasu ka?",
-      "note": "⭐ 10/30 退房時跟櫃台說。不要不講就丟在房間——房務可能當成遺失物保管" },
-
-
-    { "id": "bs-01", "scene": "basic", "priority": 1,
-      "zh": "謝謝",
-      "ja": "ありがとうございます。",
-      "romaji": "Arigatō gozaimasu." },
-
-    { "id": "bs-02", "scene": "basic", "priority": 2,
-      "zh": "不好意思／請問",
-      "ja": "すみません。",
-      "romaji": "Sumimasen." },
-
-    { "id": "bs-03", "scene": "basic", "priority": 3, "bigCard": true,
-      "zh": "我不會說日文，可以用英文或寫字嗎？",
-      "ja": "日本語が話せません。英語か筆談でお願いできますか。",
-      "romaji": "Nihongo ga hanasemasen. Eigo ka hitsudan de onegai dekimasu ka.",
-      "note": "「筆談」＝寫字溝通。日本人漢字看得懂，寫比說有用" },
-
-    { "id": "bs-04", "scene": "basic", "priority": 4,
-      "zh": "可以拍照嗎？",
-      "ja": "写真を撮ってもいいですか？",
-      "romaji": "Shashin o totte mo ii desu ka?",
-      "note": "⭐ 屋台拍照前一定要問" },
-
-    { "id": "bs-05", "scene": "basic", "priority": 5,
-      "zh": "廁所在哪裡？",
-      "ja": "トイレはどこですか？",
-      "romaji": "Toire wa doko desu ka?",
-      "note": "⚠️ 屋台沒有廁所，進去前先解決" },
-
-    { "id": "bs-06", "scene": "basic", "priority": 6,
-      "zh": "有 Wi-Fi 嗎？",
-      "ja": "Wi-Fiはありますか？",
-      "romaji": "Wai-fai wa arimasu ka?" },
-
-
-    { "id": "em-01", "scene": "emergency", "priority": 1, "bigCard": true,
-      "zh": "我身體不舒服",
-      "ja": "気分が悪いです。",
-      "romaji": "Kibun ga warui desu." },
-
-    { "id": "em-02", "scene": "emergency", "priority": 2, "bigCard": true,
-      "zh": "我過敏發作了，請幫我叫救護車",
-      "ja": "アレルギーの症状が出ています。救急車を呼んでください。",
-      "romaji": "Arerugī no shōjō ga dete imasu. Kyūkyūsha o yonde kudasai.",
-      "note": "⭐ 救護車和消防都是 119（不是 911）" },
-
-    { "id": "em-03", "scene": "emergency", "priority": 3,
-      "zh": "最近的醫院在哪裡？",
-      "ja": "一番近い病院はどこですか？",
-      "romaji": "Ichiban chikai byōin wa doko desu ka?" },
-
-    { "id": "em-04", "scene": "emergency", "priority": 4,
-      "zh": "我東西掉了／被偷了",
-      "ja": "落とし物をしました。／ 盗まれました。",
-      "romaji": "Otoshimono o shimashita. / Nusumaremashita.",
-      "note": "警察 110。日本的遺失物找回率很高，先去最近的交番（派出所）" },
-
-    { "id": "em-05", "scene": "emergency", "priority": 5,
-      "zh": "我迷路了，這裡是哪裡？",
-      "ja": "道に迷いました。ここはどこですか？",
-      "romaji": "Michi ni mayoimashita. Koko wa doko desu ka?" }
-  ],
-
-  "emergencyInfo": {
-    "police": "110",
-    "fireAmbulance": "119",
-    "japanVisitorHotline": { "name": "Japan Visitor Hotline（觀光廳，24 小時多語言）", "tel": "050-3816-2787" },
-    "taipeiOffice": {
-      "name": "台北駐福岡經濟文化辦事處",
-      "address": "福岡市中央区桜坂3-7-5",
-      "tel": "+81-92-734-2810",
-      "emergency": "+81-90-1922-9740",
-      "note": "護照遺失、急難救助打緊急專線。一般事務打辦公室電話"
-    }
+  {
+   "key": "restaurant",
+   "label": "🍽 餐廳",
+   "color": "#C4452F",
+   "lang": "ja"
+  },
+  {
+   "key": "shop",
+   "label": "🛍 購物",
+   "color": "#A97C1E",
+   "lang": "ja"
+  },
+  {
+   "key": "transit",
+   "label": "🚇 交通",
+   "color": "#3A5A72",
+   "lang": "ja"
+  },
+  {
+   "key": "hotel",
+   "label": "🏨 飯店",
+   "color": "#6A5E8C",
+   "lang": "ja"
+  },
+  {
+   "key": "basic",
+   "label": "💬 基本",
+   "color": "#6E6863",
+   "lang": "ja"
+  },
+  {
+   "key": "emergency",
+   "label": "🚨 緊急",
+   "color": "#C4452F",
+   "lang": "ja"
+  },
+  {
+   "key": "en-airport",
+   "label": "✈️ 機場",
+   "color": "#3A5A72",
+   "lang": "en"
+  },
+  {
+   "key": "en-hotel",
+   "label": "🏨 飯店",
+   "color": "#6A5E8C",
+   "lang": "en"
+  },
+  {
+   "key": "en-conf",
+   "label": "🎤 會場",
+   "color": "#3A5A72",
+   "lang": "en"
   }
+ ],
+ "phrases": [
+  {
+   "id": "al-01",
+   "scene": "allergy",
+   "priority": 1,
+   "bigCard": true,
+   "zh": "我對甲殼類過敏，不能吃蝦和蟹",
+   "ja": "甲殻類アレルギーがあります。エビとカニが食べられません。",
+   "romaji": "Kōkakurui arerugī ga arimasu. Ebi to kani ga taberaremasen.",
+   "note": "⭐ 進店先講這一句。這是你最需要的一張卡",
+   "lang": "ja"
+  },
+  {
+   "id": "al-02",
+   "scene": "allergy",
+   "priority": 2,
+   "bigCard": true,
+   "zh": "這道菜裡面有蝦或蟹嗎？",
+   "ja": "この料理にエビやカニは入っていますか？",
+   "romaji": "Kono ryōri ni ebi ya kani wa haitte imasu ka?",
+   "note": "指著菜單問",
+   "lang": "ja"
+  },
+  {
+   "id": "al-03",
+   "scene": "allergy",
+   "priority": 3,
+   "bigCard": true,
+   "zh": "高湯裡有用到蝦或蟹嗎？",
+   "ja": "出汁にエビやカニは使っていますか？",
+   "romaji": "Dashi ni ebi ya kani wa tsukatte imasu ka?",
+   "note": "⚠️ 日本的高湯常有蝦米、蟹殼。看不到不代表沒有——這句要問",
+   "lang": "ja"
+  },
+  {
+   "id": "al-04",
+   "scene": "allergy",
+   "priority": 4,
+   "bigCard": true,
+   "zh": "同一個鐵板上有炒過蝦嗎？",
+   "ja": "同じ鉄板でエビを焼きましたか？",
+   "romaji": "Onaji teppan de ebi o yakimashita ka?",
+   "note": "⚠️ 屋台、小金ちゃん的炒拉麵、鐵板料理一定要問這句",
+   "lang": "ja"
+  },
+  {
+   "id": "al-05",
+   "scene": "allergy",
+   "priority": 5,
+   "zh": "可以換成別的嗎？",
+   "ja": "別のものに変えられますか？",
+   "romaji": "Betsu no mono ni kaeraremasu ka?",
+   "lang": "ja"
+  },
+  {
+   "id": "al-06",
+   "scene": "allergy",
+   "priority": 6,
+   "zh": "沒關係，我點別的就好，不用勉強",
+   "ja": "大丈夫です。別のものを注文しますので、お気になさらないでください。",
+   "romaji": "Daijōbu desu. Betsu no mono o chūmon shimasu node, oki ni nasaranaide kudasai.",
+   "note": "店家做不到時用這句，不要讓對方為難",
+   "lang": "ja"
+  },
+  {
+   "id": "al-07",
+   "scene": "allergy",
+   "priority": 7,
+   "bigCard": true,
+   "zh": "（給宴會場用）我有甲殼類過敏，如果餐點裡有蝦蟹，可以幫我換嗎？",
+   "ja": "甲殻類のアレルギーがあります。お料理にエビやカニが入っている場合、代わりのものをお願いできますか。",
+   "romaji": "Kōkakurui no arerugī ga arimasu. O-ryōri ni ebi ya kani ga haitte iru baai, kawari no mono o onegai dekimasu ka.",
+   "note": "⭐ 10/27 御花晚宴入座後先跟服務人員說這句。会席料理常有蝦蟹",
+   "lang": "ja"
+  },
+  {
+   "id": "rs-01",
+   "scene": "restaurant",
+   "priority": 1,
+   "zh": "一位",
+   "ja": "一人です。",
+   "romaji": "Hitori desu.",
+   "note": "進門店員問「何名様？」時回這句",
+   "lang": "ja"
+  },
+  {
+   "id": "rs-02",
+   "scene": "restaurant",
+   "priority": 2,
+   "zh": "有吧台的位子嗎？",
+   "ja": "カウンター席はありますか？",
+   "romaji": "Kauntā-seki wa arimasu ka?",
+   "note": "一個人吃，吧台最自在",
+   "lang": "ja"
+  },
+  {
+   "id": "rs-03",
+   "scene": "restaurant",
+   "priority": 3,
+   "zh": "請問可以坐嗎？",
+   "ja": "座ってもいいですか？",
+   "romaji": "Suwatte mo ii desu ka?",
+   "note": "⭐ 屋台一定要先問這句再坐下",
+   "lang": "ja"
+  },
+  {
+   "id": "rs-04",
+   "scene": "restaurant",
+   "priority": 4,
+   "zh": "不好意思（叫店員）",
+   "ja": "すみません。",
+   "romaji": "Sumimasen.",
+   "note": "萬用。叫人、道歉、借過都用這個",
+   "lang": "ja"
+  },
+  {
+   "id": "rs-05",
+   "scene": "restaurant",
+   "priority": 5,
+   "zh": "請給我這個",
+   "ja": "これをください。",
+   "romaji": "Kore o kudasai.",
+   "note": "指著菜單說，最實用的一句",
+   "lang": "ja"
+  },
+  {
+   "id": "rs-06",
+   "scene": "restaurant",
+   "priority": 6,
+   "zh": "推薦是什麼？",
+   "ja": "おすすめは何ですか？",
+   "romaji": "Osusume wa nan desu ka?",
+   "lang": "ja"
+  },
+  {
+   "id": "rs-07",
+   "scene": "restaurant",
+   "priority": 7,
+   "zh": "這個怎麼吃？",
+   "ja": "これはどうやって食べますか？",
+   "romaji": "Kore wa dōyatte tabemasu ka?",
+   "note": "牛まぶし（三種吃法）、せいろ蒸し 有吃法順序，問了店員會教你",
+   "lang": "ja"
+  },
+  {
+   "id": "rs-08",
+   "scene": "restaurant",
+   "priority": 8,
+   "zh": "請結帳",
+   "ja": "お会計お願いします。",
+   "romaji": "O-kaikei onegai shimasu.",
+   "lang": "ja"
+  },
+  {
+   "id": "rs-09",
+   "scene": "restaurant",
+   "priority": 9,
+   "zh": "可以刷卡嗎？",
+   "ja": "カードは使えますか？",
+   "romaji": "Kādo wa tsukaemasu ka?",
+   "note": "屋台、老店常常不行，先問",
+   "lang": "ja"
+  },
+  {
+   "id": "rs-10",
+   "scene": "restaurant",
+   "priority": 10,
+   "zh": "很好吃",
+   "ja": "おいしかったです。ごちそうさまでした。",
+   "romaji": "Oishikatta desu. Gochisōsama deshita.",
+   "note": "離開時說。屋台的老闆會很開心",
+   "lang": "ja"
+  },
+  {
+   "id": "sh-01",
+   "scene": "shop",
+   "priority": 1,
+   "bigCard": true,
+   "zh": "請幫我辦免稅",
+   "ja": "免税の手続きをお願いします。",
+   "romaji": "Menzei no tetsuzuki o onegai shimasu.",
+   "note": "⭐ 結帳前先講。要出示護照正本或 Visit Japan Web 的免稅 QR",
+   "lang": "ja"
+  },
+  {
+   "id": "sh-02",
+   "scene": "shop",
+   "priority": 2,
+   "zh": "可以試穿嗎？",
+   "ja": "試着してもいいですか？",
+   "romaji": "Shichaku shite mo ii desu ka?",
+   "lang": "ja"
+  },
+  {
+   "id": "sh-03",
+   "scene": "shop",
+   "priority": 3,
+   "zh": "有大一號的嗎？",
+   "ja": "ワンサイズ大きいものはありますか？",
+   "romaji": "Wan-saizu ōkii mono wa arimasu ka?",
+   "note": "小一號＝「ワンサイズ小さい」",
+   "lang": "ja"
+  },
+  {
+   "id": "sh-04",
+   "scene": "shop",
+   "priority": 4,
+   "zh": "這個多少錢？",
+   "ja": "これはいくらですか？",
+   "romaji": "Kore wa ikura desu ka?",
+   "lang": "ja"
+  },
+  {
+   "id": "sh-05",
+   "scene": "shop",
+   "priority": 5,
+   "zh": "請給我袋子 / 不用袋子",
+   "ja": "袋をください。／ 袋はいりません。",
+   "romaji": "Fukuro o kudasai. / Fukuro wa irimasen.",
+   "note": "日本塑膠袋要錢（¥3–5）",
+   "lang": "ja"
+  },
+  {
+   "id": "sh-06",
+   "scene": "shop",
+   "priority": 6,
+   "zh": "可以幫我包成禮盒嗎？",
+   "ja": "贈答用に包んでもらえますか？",
+   "romaji": "Zōtō-yō ni tsutsunde moraemasu ka?",
+   "note": "買伴手禮時用",
+   "lang": "ja"
+  },
+  {
+   "id": "tr-01",
+   "scene": "transit",
+   "priority": 1,
+   "bigCard": true,
+   "zh": "這班車有到⭘⭘嗎？",
+   "ja": "この電車は⭘⭘に行きますか？",
+   "romaji": "Kono densha wa ⭘⭘ ni ikimasu ka?",
+   "note": "⭘⭘ 換成站名。西鐵有特急／急行／普通，停的站不同",
+   "lang": "ja"
+  },
+  {
+   "id": "tr-02",
+   "scene": "transit",
+   "priority": 2,
+   "zh": "⭘⭘站在哪個月台？",
+   "ja": "⭘⭘駅は何番ホームですか？",
+   "romaji": "⭘⭘-eki wa nanban hōmu desu ka?",
+   "lang": "ja"
+  },
+  {
+   "id": "tr-03",
+   "scene": "transit",
+   "priority": 3,
+   "bigCard": true,
+   "zh": "我用信用卡感應進不去閘門",
+   "ja": "クレジットカードのタッチ決済で改札を通れませんでした。",
+   "romaji": "Kurejitto kādo no tatchi kessai de kaisatsu o tōremasen deshita.",
+   "note": "⚠️ 郵局 Visa 感應累計到一定額度後要插卡輸密碼一次。去便利商店插卡買個東西輸密碼就會重置",
+   "lang": "ja"
+  },
+  {
+   "id": "tr-04",
+   "scene": "transit",
+   "priority": 4,
+   "zh": "車票在哪裡買？",
+   "ja": "切符はどこで買えますか？",
+   "romaji": "Kippu wa doko de kaemasu ka?",
+   "lang": "ja"
+  },
+  {
+   "id": "tr-05",
+   "scene": "transit",
+   "priority": 5,
+   "zh": "請問這裡怎麼去？（給司機看地址）",
+   "ja": "ここまでお願いします。",
+   "romaji": "Koko made onegai shimasu.",
+   "note": "把地圖或地址拿給計程車司機看，說這句就好",
+   "lang": "ja"
+  },
+  {
+   "id": "ht-01",
+   "scene": "hotel",
+   "priority": 1,
+   "zh": "可以寄放行李嗎？",
+   "ja": "荷物を預かってもらえますか？",
+   "romaji": "Nimotsu o azukatte moraemasu ka?",
+   "note": "⭐ 10/25 12:45 到 Comfort Inn、10/29 07:35 到火星花園都要用",
+   "lang": "ja"
+  },
+  {
+   "id": "ht-02",
+   "scene": "hotel",
+   "priority": 2,
+   "zh": "可以給我高樓層、遠離吸菸樓層的房間嗎？",
+   "ja": "高層階で、喫煙フロアから離れた部屋をお願いできますか。",
+   "romaji": "Kōsōkai de, kitsuen furoa kara hanareta heya o onegai dekimasu ka.",
+   "note": "⭐ 10/25 check-in 時講。低樓層或靠近吸菸樓層品質差很多",
+   "lang": "ja"
+  },
+  {
+   "id": "ht-03",
+   "scene": "hotel",
+   "priority": 3,
+   "bigCard": true,
+   "zh": "請給我正式的收據（報帳用）",
+   "ja": "領収書をお願いします。宛名は不要です。",
+   "romaji": "Ryōshūsho o onegai shimasu. Atena wa fuyō desu.",
+   "note": "⭐⭐ 10/29 退房時一定要講。「領収書」才是報帳用的正式收據，一般的「レシート」不算",
+   "lang": "ja"
+  },
+  {
+   "id": "ht-04",
+   "scene": "hotel",
+   "priority": 4,
+   "zh": "宿泊稅要多少？",
+   "ja": "宿泊税はいくらですか？",
+   "romaji": "Shukuhakuzei wa ikura desu ka?",
+   "note": "福岡市每人每晚 ¥200（房價未滿 ¥20,000），現場付現",
+   "lang": "ja"
+  },
+  {
+   "id": "ht-05",
+   "scene": "hotel",
+   "priority": 5,
+   "bigCard": true,
+   "zh": "（請櫃台代訂餐廳）不好意思，我不會說日文，可以請您幫我打電話訂位嗎？店名和日期時間寫在這裡",
+   "ja": "すみません、日本語が話せないので、レストランの予約のお電話をお願いできますでしょうか。お店の名前と日時はこちらに書いてあります。一名でお願いします。",
+   "romaji": "Sumimasen, nihongo ga hanasenai node, resutoran no yoyaku no o-denwa o onegai dekimasu deshō ka. O-mise no namae to nichiji wa kochira ni kaite arimasu. Ichimei de onegai shimasu.",
+   "note": "⭐ 10/25 到飯店時用：暁（10/26 17:30、1 名）想保險就請櫃台訂。記得補一句過敏（ht-06）",
+   "lang": "ja"
+  },
+  {
+   "id": "ht-06",
+   "scene": "hotel",
+   "priority": 6,
+   "zh": "（訂位時補充）請幫我備註：甲殼類過敏",
+   "ja": "予約の際に「甲殻類アレルギー」とお伝えいただけますか。",
+   "romaji": "Yoyaku no sai ni 'kōkakurui arerugī' to o-tsutae itadakemasu ka.",
+   "note": "⭐ 菅乃屋的「寿司箱膳」可能配到蝦握壽司，一定要備註",
+   "lang": "ja"
+  },
+  {
+   "id": "ht-07",
+   "scene": "hotel",
+   "priority": 7,
+   "bigCard": true,
+   "zh": "不好意思，可以幫我處理掉這雙舊鞋嗎？",
+   "ja": "すみません、この古い靴を処分していただけますか？",
+   "romaji": "Sumimasen, kono furui kutsu o shobun shite itadakemasu ka?",
+   "note": "⭐ 10/30 退房時跟櫃台說。不要不講就丟在房間——房務可能當成遺失物保管",
+   "lang": "ja"
+  },
+  {
+   "id": "bs-01",
+   "scene": "basic",
+   "priority": 1,
+   "zh": "謝謝",
+   "ja": "ありがとうございます。",
+   "romaji": "Arigatō gozaimasu.",
+   "lang": "ja"
+  },
+  {
+   "id": "bs-02",
+   "scene": "basic",
+   "priority": 2,
+   "zh": "不好意思／請問",
+   "ja": "すみません。",
+   "romaji": "Sumimasen.",
+   "lang": "ja"
+  },
+  {
+   "id": "bs-03",
+   "scene": "basic",
+   "priority": 3,
+   "bigCard": true,
+   "zh": "我不會說日文，可以用英文或寫字嗎？",
+   "ja": "日本語が話せません。英語か筆談でお願いできますか。",
+   "romaji": "Nihongo ga hanasemasen. Eigo ka hitsudan de onegai dekimasu ka.",
+   "note": "「筆談」＝寫字溝通。日本人漢字看得懂，寫比說有用",
+   "lang": "ja"
+  },
+  {
+   "id": "bs-04",
+   "scene": "basic",
+   "priority": 4,
+   "zh": "可以拍照嗎？",
+   "ja": "写真を撮ってもいいですか？",
+   "romaji": "Shashin o totte mo ii desu ka?",
+   "note": "⭐ 屋台拍照前一定要問",
+   "lang": "ja"
+  },
+  {
+   "id": "bs-05",
+   "scene": "basic",
+   "priority": 5,
+   "zh": "廁所在哪裡？",
+   "ja": "トイレはどこですか？",
+   "romaji": "Toire wa doko desu ka?",
+   "note": "⚠️ 屋台沒有廁所，進去前先解決",
+   "lang": "ja"
+  },
+  {
+   "id": "bs-06",
+   "scene": "basic",
+   "priority": 6,
+   "zh": "有 Wi-Fi 嗎？",
+   "ja": "Wi-Fiはありますか？",
+   "romaji": "Wai-fai wa arimasu ka?",
+   "lang": "ja"
+  },
+  {
+   "id": "em-01",
+   "scene": "emergency",
+   "priority": 1,
+   "bigCard": true,
+   "zh": "我身體不舒服",
+   "ja": "気分が悪いです。",
+   "romaji": "Kibun ga warui desu.",
+   "lang": "ja"
+  },
+  {
+   "id": "em-02",
+   "scene": "emergency",
+   "priority": 2,
+   "bigCard": true,
+   "zh": "我過敏發作了，請幫我叫救護車",
+   "ja": "アレルギーの症状が出ています。救急車を呼んでください。",
+   "romaji": "Arerugī no shōjō ga dete imasu. Kyūkyūsha o yonde kudasai.",
+   "note": "⭐ 救護車和消防都是 119（不是 911）",
+   "lang": "ja"
+  },
+  {
+   "id": "em-03",
+   "scene": "emergency",
+   "priority": 3,
+   "zh": "最近的醫院在哪裡？",
+   "ja": "一番近い病院はどこですか？",
+   "romaji": "Ichiban chikai byōin wa doko desu ka?",
+   "lang": "ja"
+  },
+  {
+   "id": "em-04",
+   "scene": "emergency",
+   "priority": 4,
+   "zh": "我東西掉了／被偷了",
+   "ja": "落とし物をしました。／ 盗まれました。",
+   "romaji": "Otoshimono o shimashita. / Nusumaremashita.",
+   "note": "警察 110。日本的遺失物找回率很高，先去最近的交番（派出所）",
+   "lang": "ja"
+  },
+  {
+   "id": "em-05",
+   "scene": "emergency",
+   "priority": 5,
+   "zh": "我迷路了，這裡是哪裡？",
+   "ja": "道に迷いました。ここはどこですか？",
+   "romaji": "Michi ni mayoimashita. Koko wa doko desu ka?",
+   "lang": "ja"
+  },
+  {
+   "id": "ea-01",
+   "scene": "en-airport",
+   "lang": "en",
+   "priority": 1,
+   "zh": "這是外國護照的隊伍嗎？",
+   "en": "Is this the line for foreign passports?",
+   "note": "入境審查排隊時"
+  },
+  {
+   "id": "ea-02",
+   "scene": "en-airport",
+   "lang": "en",
+   "priority": 2,
+   "zh": "我來參加學術研討會，待五晚。",
+   "en": "I'm here for an academic conference. I'm staying for five nights.",
+   "bigCard": true,
+   "note": "入境審查被問來做什麼"
+  },
+  {
+   "id": "ea-03",
+   "scene": "en-airport",
+   "lang": "en",
+   "priority": 3,
+   "zh": "我住在福岡天神舒適飯店。",
+   "en": "I'm staying at Comfort Inn Fukuoka Tenjin.",
+   "note": "被問住哪裡"
+  },
+  {
+   "id": "ea-04",
+   "scene": "en-airport",
+   "lang": "en",
+   "priority": 4,
+   "zh": "BR106 的行李轉盤在哪裡？",
+   "en": "Where is the baggage claim for flight BR106?"
+  },
+  {
+   "id": "ea-05",
+   "scene": "en-airport",
+   "lang": "en",
+   "priority": 5,
+   "zh": "我的行李沒有出來，這是我的行李條。",
+   "en": "My suitcase hasn't come out. Here is my baggage tag.",
+   "bigCard": true,
+   "note": "找長榮地勤（穿制服）"
+  },
+  {
+   "id": "ea-06",
+   "scene": "en-airport",
+   "lang": "en",
+   "priority": 6,
+   "zh": "請問到國內線航廈的免費接駁巴士在哪裡？",
+   "en": "Excuse me, where is the free shuttle bus to the domestic terminal?",
+   "bigCard": true,
+   "note": "要搭地鐵得先到國內線"
+  },
+  {
+   "id": "ea-07",
+   "scene": "en-airport",
+   "lang": "en",
+   "priority": 7,
+   "zh": "地鐵要往哪邊走？",
+   "en": "Which way is the subway?"
+  },
+  {
+   "id": "ea-08",
+   "scene": "en-airport",
+   "lang": "en",
+   "priority": 8,
+   "zh": "這班車有到國際線航廈嗎？",
+   "en": "Does this bus go to the international terminal?",
+   "note": "10/30 在博多筑紫口上車前問"
+  },
+  {
+   "id": "ea-09",
+   "scene": "en-airport",
+   "lang": "en",
+   "priority": 9,
+   "zh": "長榮航空的報到櫃台在哪裡？",
+   "en": "Where is the EVA Air check-in counter?"
+  },
+  {
+   "id": "ea-10",
+   "scene": "en-airport",
+   "lang": "en",
+   "priority": 10,
+   "zh": "行動電源可以放手提行李嗎？",
+   "en": "Can I bring this power bank in my carry-on?"
+  },
+  {
+   "id": "ea-11",
+   "scene": "en-airport",
+   "lang": "en",
+   "priority": 11,
+   "zh": "免稅品的收據要交給哪裡？",
+   "en": "Where should I hand in my tax-free receipts?",
+   "note": "出境前海關"
+  },
+  {
+   "id": "ea-12",
+   "scene": "en-airport",
+   "lang": "en",
+   "priority": 12,
+   "zh": "BR105 要從幾號登機門登機？",
+   "en": "Which gate is flight BR105 boarding from?"
+  },
+  {
+   "id": "eh-01",
+   "scene": "en-hotel",
+   "lang": "en",
+   "priority": 1,
+   "zh": "您好，我用 Hsu 的名字訂了房，想先寄放行李到入住時間。",
+   "en": "Hi, I have a reservation under the name Hsu. Could I leave my luggage here until check-in?",
+   "bigCard": true,
+   "note": "10/25 中午、10/29 早上"
+  },
+  {
+   "id": "eh-02",
+   "scene": "en-hotel",
+   "lang": "en",
+   "priority": 2,
+   "zh": "幾點可以來拿？",
+   "en": "What time can I pick it up?"
+  },
+  {
+   "id": "eh-03",
+   "scene": "en-hotel",
+   "lang": "en",
+   "priority": 3,
+   "zh": "我要辦入住，這是我的護照。",
+   "en": "I'd like to check in. Here is my passport."
+  },
+  {
+   "id": "eh-04",
+   "scene": "en-hotel",
+   "lang": "en",
+   "priority": 4,
+   "zh": "可以的話，想要高樓層、安靜一點的房間。",
+   "en": "If possible, could I have a quiet room on a higher floor?"
+  },
+  {
+   "id": "eh-05",
+   "scene": "en-hotel",
+   "lang": "en",
+   "priority": 5,
+   "zh": "可以幫我打電話訂這家餐廳嗎？明天 17:30、一位。",
+   "en": "Could you call this restaurant and make a reservation for me? One person, tomorrow at 5:30 p.m.",
+   "bigCard": true,
+   "note": "把店名和地址一起給櫃台看"
+  },
+  {
+   "id": "eh-06",
+   "scene": "en-hotel",
+   "lang": "en",
+   "priority": 6,
+   "zh": "請跟店家說我對甲殼類過敏，不能吃蝦和蟹。",
+   "en": "Please tell them I have a shellfish allergy — no shrimp or crab.",
+   "bigCard": true
+  },
+  {
+   "id": "eh-07",
+   "scene": "en-hotel",
+   "lang": "en",
+   "priority": 7,
+   "zh": "可以給我收據嗎？",
+   "en": "Could I have a receipt, please?",
+   "note": "住宿稅、火星花園現場付款時"
+  },
+  {
+   "id": "eh-08",
+   "scene": "en-hotel",
+   "lang": "en",
+   "priority": 8,
+   "zh": "收據抬頭可以寫「National Central University」嗎？",
+   "en": "Could you put \"National Central University\" on the receipt?",
+   "note": "報帳需要學校抬頭時"
+  },
+  {
+   "id": "eh-09",
+   "scene": "en-hotel",
+   "lang": "en",
+   "priority": 9,
+   "zh": "早餐幾點開始？在哪裡吃？",
+   "en": "What time does breakfast start, and where is it?"
+  },
+  {
+   "id": "eh-10",
+   "scene": "en-hotel",
+   "lang": "en",
+   "priority": 10,
+   "zh": "熱水是幾點到幾點有？",
+   "en": "What hours is hot water available?",
+   "note": "火星花園不是 24 小時供應熱水"
+  },
+  {
+   "id": "eh-11",
+   "scene": "en-hotel",
+   "lang": "en",
+   "priority": 11,
+   "zh": "可以給我 Wi-Fi 密碼嗎？",
+   "en": "Could I have the Wi-Fi password?"
+  },
+  {
+   "id": "eh-12",
+   "scene": "en-hotel",
+   "lang": "en",
+   "priority": 12,
+   "zh": "我要退房。",
+   "en": "I'd like to check out, please."
+  },
+  {
+   "id": "eh-13",
+   "scene": "en-hotel",
+   "lang": "en",
+   "priority": 13,
+   "zh": "可以幫我處理掉這雙舊鞋嗎？",
+   "en": "Could you please dispose of these old shoes for me?",
+   "note": "10/30 退房時"
+  },
+  {
+   "id": "ec-01",
+   "scene": "en-conf",
+   "lang": "en",
+   "priority": 1,
+   "zh": "您好，我是報告者，請問報到處在哪裡？",
+   "en": "Hi, I'm a presenter. Where is the registration desk?",
+   "bigCard": true
+  },
+  {
+   "id": "ec-02",
+   "scene": "en-conf",
+   "lang": "en",
+   "priority": 2,
+   "zh": "我叫徐晟芳，註冊編號 440，論文 2377。",
+   "en": "My name is Sheng-Fang Hsu. My registration ID is 440, and my paper ID is 2377.",
+   "bigCard": true
+  },
+  {
+   "id": "ec-03",
+   "scene": "en-conf",
+   "lang": "en",
+   "priority": 3,
+   "zh": "Welcome Reception 的票在哪裡領？",
+   "en": "Where can I get my Welcome Reception ticket?"
+  },
+  {
+   "id": "ec-04",
+   "scene": "en-conf",
+   "lang": "en",
+   "priority": 4,
+   "zh": "27 號我不參加 Excursion，會自己去柳川，參加御花的主題演講和晚宴。這樣可以嗎？",
+   "en": "On the 27th, I won't join the excursion. I'll go to Yanagawa on my own and attend the keynotes and the banquet at Ohana. Is that OK?",
+   "bigCard": true,
+   "note": "大會 8/30 回信要你在報到處說"
+  },
+  {
+   "id": "ec-05",
+   "scene": "en-conf",
+   "lang": "en",
+   "priority": 5,
+   "zh": "在御花入場需要出示什麼嗎？",
+   "en": "Do I need to show anything to enter the venue at Ohana?"
+  },
+  {
+   "id": "ec-06",
+   "scene": "en-conf",
+   "lang": "en",
+   "priority": 6,
+   "zh": "晚宴後回福岡的巴士幾點從御花出發？在哪裡下車？",
+   "en": "What time does the bus back to Fukuoka leave Ohana after the banquet, and where does it drop us off?",
+   "bigCard": true
+  },
+  {
+   "id": "ec-07",
+   "scene": "en-conf",
+   "lang": "en",
+   "priority": 7,
+   "zh": "我對甲殼類過敏，晚宴可以幫我備註嗎？",
+   "en": "I have a shellfish allergy. Could you make a note of it for the banquet?"
+  },
+  {
+   "id": "ec-08",
+   "scene": "en-conf",
+   "lang": "en",
+   "priority": 8,
+   "zh": "哪些菜沒有蝦或蟹？",
+   "en": "Which dishes don't have any shrimp or crab?",
+   "note": "晚宴入座後問服務人員"
+  },
+  {
+   "id": "ec-09",
+   "scene": "en-conf",
+   "lang": "en",
+   "priority": 9,
+   "zh": "607 會議室怎麼走？",
+   "en": "How do I get to Room 607?"
+  },
+  {
+   "id": "ec-10",
+   "scene": "en-conf",
+   "lang": "en",
+   "priority": 10,
+   "zh": "主持人您好，我是這場第 5 位講者，論文 2377。",
+   "en": "Hello, I'm the fifth speaker in this session, paper 2377.",
+   "bigCard": true,
+   "note": "10/28 12:40 向 session chair 報到"
+  },
+  {
+   "id": "ec-11",
+   "scene": "en-conf",
+   "lang": "en",
+   "priority": 11,
+   "zh": "我想更換簡報檔，這是我的 USB。",
+   "en": "I'd like to replace my presentation file. Here is my USB drive.",
+   "note": "12:45 前"
+  },
+  {
+   "id": "ec-12",
+   "scene": "en-conf",
+   "lang": "en",
+   "priority": 12,
+   "zh": "可以幫我確認簡報在這台電腦能正常打開嗎？",
+   "en": "Could you help me check that my slides open correctly on this computer?"
+  },
+  {
+   "id": "ec-13",
+   "scene": "en-conf",
+   "lang": "en",
+   "priority": 13,
+   "zh": "有翻頁筆嗎？",
+   "en": "Is there a clicker I can use?"
+  },
+  {
+   "id": "ec-14",
+   "scene": "en-conf",
+   "lang": "en",
+   "priority": 14,
+   "zh": "結束前兩分鐘可以提醒我嗎？",
+   "en": "Could you give me a signal two minutes before my time is up?"
+  },
+  {
+   "id": "ec-15",
+   "scene": "en-conf",
+   "lang": "en",
+   "priority": 15,
+   "zh": "可以請您再說一次問題嗎？",
+   "en": "Could you repeat the question, please?",
+   "note": "Q&A 沒聽清楚時"
+  },
+  {
+   "id": "ec-16",
+   "scene": "en-conf",
+   "lang": "en",
+   "priority": 16,
+   "zh": "謝謝您的問題，這部分我們還沒測試，會列入未來的工作。",
+   "en": "Thank you for the question. We haven't tested that yet, but it's part of our future work.",
+   "note": "Q&A 答不出來時"
+  },
+  {
+   "id": "ec-17",
+   "scene": "en-conf",
+   "lang": "en",
+   "priority": 17,
+   "zh": "可以在會後再跟您詳細討論嗎？",
+   "en": "Could we discuss this in more detail after the session?"
+  },
+  {
+   "id": "ec-18",
+   "scene": "en-conf",
+   "lang": "en",
+   "priority": 18,
+   "zh": "參加者有 Wi-Fi 嗎？",
+   "en": "Is there Wi-Fi for participants?"
+  }
+ ],
+ "emergencyInfo": {
+  "police": "110",
+  "fireAmbulance": "119",
+  "japanVisitorHotline": {
+   "name": "Japan Visitor Hotline（觀光廳，24 小時多語言）",
+   "tel": "050-3816-2787"
+  },
+  "taipeiOffice": {
+   "name": "台北駐福岡經濟文化辦事處",
+   "address": "福岡市中央区桜坂3-7-5",
+   "tel": "+81-92-734-2810",
+   "emergency": "+81-90-1922-9740",
+   "note": "護照遺失、急難救助打緊急專線。一般事務打辦公室電話"
+  }
+ }
 }

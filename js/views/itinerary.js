@@ -197,6 +197,7 @@ function renderCard(it, nowInfo, ctx) {
     : '';
   const costHtml = renderCostRow(it, ctx);
   const buyHtml = renderBuyLine(it, spot);
+  const altsHtml = renderAlts(it, ctx);
 
   const actions = [];
   if (it.spotId && spot) {
@@ -207,6 +208,11 @@ function renderCard(it, nowInfo, ctx) {
     }
     // 手帳：小圖示按鈕，跟 🗺 並排
     actions.push(`<button type="button" class="btn btn-icon" data-jrn-spot="${escapeHtml(it.spotId)}" data-jrn-day="${it.dayN || ''}" aria-label="拍照記錄">📷</button>`);
+  }
+  // 文A：開啟對話字卡。指定了 phraseScene 就跳到那個場景；用餐卡（要問甲殼類）預設跳日文過敏卡
+  const phraseScene = it.phraseScene || (it.allergy === 'ask' ? 'allergy' : null);
+  if (phraseScene) {
+    actions.push(`<a class="btn btn-icon btn-trans" href="#/tools/phrases?scene=${encodeURIComponent(phraseScene)}" aria-label="開啟對話字卡"><span class="trans-ico" aria-hidden="true">文<small>A</small></span></a>`);
   }
   // 🎫：這個 item 有票券 → 跳到 tickets 頁
   if (ctx.__ticketedItemIds && ctx.__ticketedItemIds.has(it.id)) {
@@ -242,6 +248,7 @@ function renderCard(it, nowInfo, ctx) {
           ${desc ? `<div class="desc">${mdInline(desc)}</div>` : ''}
           ${buyHtml}
           ${tipsHtml}
+          ${altsHtml}
           ${allergyHtml}
           ${costHtml}
         </div>
@@ -317,4 +324,13 @@ function renderBuyLine(it, spot) {
   if (!it.spotId || buy.length === 0) return '';
   const names = buy.map(b => b.zh || b.name).filter(Boolean).join('、');
   return `<a class="buy-line" href="#/spot/${encodeURIComponent(it.spotId)}">🛍 推薦：${escapeHtml(names)}</a>`;
+}
+
+// 「也可以選：」備選 chip（餐廳卡的 alts：spot id 陣列），點了進該 spot 內頁
+function renderAlts(it, ctx) {
+  const alts = (it.alts || []).map(id => (ctx.data.spots || []).find(s => s.id === id)).filter(Boolean);
+  if (!alts.length) return '';
+  return `<div class="alts-row"><span class="alts-k">也可以選：</span>${
+    alts.map(s => `<a class="alt-chip" href="#/spot/${encodeURIComponent(s.id)}">${escapeHtml(s.nameZh || s.name || s.id)}</a>`).join('')
+  }</div>`;
 }

@@ -42,6 +42,7 @@ export function openBigCard(phrases, options = {}) {
   document.body.appendChild(overlay);
   document.body.classList.add('bigcard-open');
 
+  const bodyEl   = overlay.querySelector('.bc-body');
   const zhEl     = overlay.querySelector('.bc-zh');
   const jaEl     = overlay.querySelector('.bc-ja');
   const romajiEl = overlay.querySelector('.bc-romaji');
@@ -53,9 +54,14 @@ export function openBigCard(phrases, options = {}) {
   function paint() {
     const p = list[idx];
     if (!p) return;
+    // 英文卡：大字是 en、下方小字 zh；日文卡照舊（zh 在上、ja 大字、romaji）
+    const en = p.lang === 'en';
+    bodyEl.dataset.lang = en ? 'en' : 'ja';
+    jaEl.lang = en ? 'en' : 'ja';
     zhEl.textContent = p.zh || '';
-    jaEl.textContent = p.ja || '';
-    romajiEl.textContent = p.romaji || '';
+    jaEl.textContent = (en ? p.en : p.ja) || '';
+    romajiEl.textContent = en ? '' : (p.romaji || '');
+    bodyEl.scrollTop = 0;
     idxEl.textContent = list.length > 1 ? `${idx + 1} / ${list.length}` : '';
     prevBtn.hidden = list.length <= 1;
     nextBtn.hidden = list.length <= 1;

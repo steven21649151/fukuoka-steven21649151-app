@@ -78,9 +78,9 @@ export async function render(root, params, ctx) {
             <div class="small faint">日本救護車不用錢。真的不舒服就叫，不要撐。</div>
           </li>
           <li>
-            <b>不知道怎麼跟對方講</b>——句庫的「🚨 緊急」場景，日文求救句可以直接朗讀或給對方看：
+            <b>不知道怎麼跟對方講</b>——字卡的「🚨 緊急」場景，日文求救句可以直接朗讀或給對方看：
             <div class="sos-line">
-              <a class="btn" href="#/tools/phrases?scene=emergency">🚨 打開緊急句庫 →</a>
+              <a class="btn" href="#/tools/phrases?scene=emergency">🚨 打開緊急字卡 →</a>
             </div>
           </li>
           <li>
