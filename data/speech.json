@@ -1,0 +1,346 @@
+{
+ "_meta": {
+  "note": "上台講稿。內容逐字取自投影片 C4L-E-5-2377.pptx 的備忘錄（只補了句號後漏掉的空格）。endSec 是以每分鐘 130 字估算、講完這頁時的累計秒數。",
+  "source": "C4L-E-5-2377.pptx",
+  "updated": "2026-10-22",
+  "wpm": 130,
+  "totalWords": 1518,
+  "targetSec": 780
+ },
+ "slides": [
+  {
+   "n": 1,
+   "title": "Exploitation of Approximation and Sparsity for LoRA Fine-Tuning on Edge Devices",
+   "words": 38,
+   "paragraphs": [
+    [
+     "Good afternoon, everyone.",
+     "I'm Sheng-Fang Hsu from National Central University.",
+     "Today I will present our work, \"Exploitation of Approximation and Sparsity for LoRA Fine-Tuning on Edge Devices.\" This is joint work with Li-Peng Wu and Professor Pei-Yun Tsai."
+    ]
+   ],
+   "skip": false,
+   "endSec": 18
+  },
+  {
+   "n": 2,
+   "title": "Contents",
+   "words": 45,
+   "paragraphs": [
+    [
+     "Here is the outline.",
+     "After the introduction and motivation, I will introduce three main techniques: the sparsity-inducing SiLU, the coarse-grained sparse update, and the DFP12 format.",
+     "After that, I'll briefly cover how we handle the cross-entropy loss, and finally, I will show the experimental results."
+    ]
+   ],
+   "skip": false,
+   "endSec": 38
+  },
+  {
+   "n": 3,
+   "title": "Introduction",
+   "words": 78,
+   "paragraphs": [
+    [
+     "Let me begin with the background.",
+     "Our baseline is QA-LoRA.",
+     "The pretrained weights are stored as integers with group-wise quantization, and only the two low-rank adapters, W-A and W-B, are trained in floating point.",
+     "The input is summed within each group of size G, so the adapter is very small.",
+     "After fine-tuning, the adapter can be merged into the zero point, so inference stays fully in integer.",
+     "In this work, we use rank sixteen and group size thirty-two."
+    ]
+   ],
+   "skip": false,
+   "endSec": 74
+  },
+  {
+   "n": 4,
+   "title": "Motivation",
+   "words": 67,
+   "paragraphs": [
+    [
+     "Fine-tuning on edge devices faces three main challenges."
+    ],
+    [
+     "The first is memory: backpropagation must store activations and gradients, which puts pressure on both memory size and bandwidth.",
+     "The second is nonlinearity: functions like SiLU and the exponential need dedicated hardware.",
+     "And the third is compute: matrix multiplications take most of the MAC operations.",
+     "So our goal is to build one framework that addresses all three challenges together."
+    ]
+   ],
+   "skip": false,
+   "endSec": 105
+  },
+  {
+   "n": 5,
+   "title": "SI-SiLU Approximation (1/2)",
+   "words": 138,
+   "paragraphs": [
+    [
+     "Let me start with our most important technique, the sparsity-inducing SiLU, or SI-SiLU."
+    ],
+    [
+     "It is a piecewise-linear approximation with no multipliers, and it has three paths.",
+     "When the input is below minus zero point five, the output is simply zero.",
+     "When the input is above zero point five, the output is the input itself.",
+     "In between, we use eight segments stored in a small look-up table."
+    ],
+    [
+     "To choose the path, the range classifier only needs to check the sign bit and the exponent bits."
+    ],
+    [
+     "Inside the table, each slope is a sum of two powers of two, so multiplying by a slope becomes shift-and-add.",
+     "This also lowers the cost of gradient propagation."
+    ],
+    [
+     "Moreover, since each segment is linear, its derivative is just its slope.",
+     "As a result, the activation and its derivative can share the same look-up table."
+    ]
+   ],
+   "skip": false,
+   "endSec": 169
+  },
+  {
+   "n": 6,
+   "title": "SI-SiLU Approximation (2/3)",
+   "words": 106,
+   "paragraphs": [
+    [
+     "Next, this figure shows where the sparsity is induced."
+    ],
+    [
+     "The red line is our approximated SiLU, and the orange line is its derivative.",
+     "Below minus zero point five, both the output and the gradient are exactly zero.",
+     "By the chain rule, these zeros propagate through backpropagation, so those elements can simply be skipped.",
+     "For comparison, ReSiLU2 is shown in green.",
+     "Its derivative is non-zero all the way down to minus six point three, so it produces almost no sparsity."
+    ],
+    [
+     "At the same time, our derivative is more accurate, with a mean squared error of zero point four nine percent, versus one point seven percent for ReSiLU2."
+    ]
+   ],
+   "skip": false,
+   "endSec": 218
+  },
+  {
+   "n": 7,
+   "title": "SI-SiLU Approximation (3/3)",
+   "words": 107,
+   "paragraphs": [
+    [
+     "But how much sparsity can we actually get?",
+     "To answer this, we analyzed real data layer by layer, and we found that the sparsity depends strongly on depth."
+    ],
+    [
+     "The shallow layers, zero to seven, have only zero point seven two percent, but the deep layers, fifteen to twenty-one, reach twenty-one point eight seven percent on average."
+    ],
+    [
+     "The table then compares our design with previous work.",
+     "First, because of the zero region, our design can induce sparsity.",
+     "Second, shift-and-add reduces the computation of gradient propagation.",
+     "And third, both the SiLU output and its derivative come from the look-up table with simple computation, so no extra memory is needed."
+    ]
+   ],
+   "skip": false,
+   "endSec": 267
+  },
+  {
+   "n": 8,
+   "title": "Coarse-Grained Sparse Update (1/2)",
+   "words": 172,
+   "paragraphs": [
+    [
+     "The second technique is the coarse-grained sparse update.",
+     "In LoRA, backpropagation has two parts.",
+     "The adapter gradient is only the computation for updating the LoRA weights A and B themselves.",
+     "The activation gradient is the gradient with respect to the input.",
+     "It becomes the upstream gradient of the previous matrix, so it is the cost of preparing the gradient for the next step back."
+    ],
+    [
+     "This chart shows the cost of each matrix in one decoding layer.",
+     "The orange part is the adapter gradient.",
+     "It is tiny, because the rank is small.",
+     "The blue part is the activation gradient propagation, and it is cumulative: to reach a matrix, the gradient must first pass through every matrix after it, starting from the layer output.",
+     "That is why it is almost zero at D, the down projection, but grows to about twenty-four G-MACs at Q and K.",
+     "In other words, the propagation clearly dominates the cost."
+    ],
+    [
+     "Therefore, lowering the rank further does not help much.",
+     "To make LoRA efficient in hardware, we must reduce propagation."
+    ]
+   ],
+   "skip": false,
+   "endSec": 347
+  },
+  {
+   "n": 9,
+   "title": "Coarse-Grained Sparse Update (2/2)",
+   "words": 114,
+   "paragraphs": [
+    [
+     "So how can we reduce propagation?",
+     "There are two ways.",
+     "In a matrix-wise sparse update, we skip some matrices, but the gradient must still travel through every layer to reach the lower ones.",
+     "In contrast, in a layer-wise update, we freeze the first S layers, so backpropagation simply stops at layer S plus one, and all the cross-layer propagation below it is gone.",
+     "Therefore, we adopt the layer-wise update.",
+     "In addition, it works well together with SI-SiLU.",
+     "As we saw earlier, the shallow layers have little sparsity.",
+     "By freezing them, the average induced sparsity of SI-SiLU rises from about eleven percent to fifteen percent for BoolQ and XSum, and to eighteen percent for WinoGrande."
+    ]
+   ],
+   "skip": false,
+   "endSec": 399
+  },
+  {
+   "n": 10,
+   "title": "DFP12 Format (1/2)",
+   "words": 82,
+   "paragraphs": [
+    [
+     "The third technique is the data format underneath everything, DFP12.",
+     "As this figure shows, gradients are much smaller than weights, and their exponent range also shifts from layer to layer.",
+     "To handle this, DFP12 uses a five-bit exponent and a six-bit mantissa.",
+     "More importantly, its exponent bias is dynamic: it is set by the largest exponent in each matrix.",
+     "So, unlike the red box, which has a fixed range, the gray window moves with the data and covers almost the whole range."
+    ]
+   ],
+   "skip": false,
+   "endSec": 437
+  },
+  {
+   "n": 11,
+   "title": "DFP12 Format (2/2)",
+   "words": 73,
+   "paragraphs": [
+    [
+     "In the datapath, for faster simulation, we use BF16 as a container, and quantize the result to DFP12 after each operation.",
+     "The mantissa uses round-to-nearest.",
+     "In this way, our simulation captures the quantization error and still keeps the accumulation error.",
+     "For the hardware cost, we synthesized the MAC unit in twenty-eight nanometers.",
+     "Compared with BF16, the DFP12 MAC unit saves sixteen point eight percent area and fourteen point eight percent energy per MAC."
+    ]
+   ],
+   "skip": false,
+   "endSec": 471
+  },
+  {
+   "n": 12,
+   "title": "Task-Adaptive KCE for CE Backward",
+   "words": 100,
+   "paragraphs": [
+    [
+     "Finally, the cross-entropy loss.",
+     "Every token produces a dense logit gradient.",
+     "Top-K selection itself is a standard technique.",
+     "What we do is apply it to the cross-entropy backward during fine-tuning, so each token keeps only K-CE values plus the label."
+    ],
+    [
+     "For BoolQ, that is nine out of thirty-two thousand.",
+     "The key point is that K-CE must follow the task.",
+     "It depends on the number of loss tokens, meaning the tokens that are not masked out and count in the loss.",
+     "For example, WinoGrande uses prompt masking, so very few tokens count in the loss, and it needs a larger K-CE."
+    ]
+   ],
+   "skip": false,
+   "endSec": 517
+  },
+  {
+   "n": 13,
+   "title": "Experimental Setup",
+   "words": 82,
+   "paragraphs": [
+    [
+     "Now let's move to the experiments.",
+     "We fine-tune TinyLlama one point one B with QA-LoRA, and the weights, activations, and gradients all use the DFP12 format.",
+     "As the golden reference, we use PyTorch autograd in BF16.",
+     "We evaluate three tasks.",
+     "BoolQ is a yes-or-no question answering task, and WinoGrande is a commonsense reasoning task.",
+     "Both are evaluated with the standard lm-evaluation-harness.",
+     "In addition, to check that our framework also generalizes beyond question answering, we test XSum, which is a text generation task."
+    ]
+   ],
+   "skip": false,
+   "endSec": 555
+  },
+  {
+   "n": 14,
+   "title": "Simulation Results",
+   "words": 136,
+   "paragraphs": [
+    [
+     "This figure shows a cumulative ablation on BoolQ, WinoGrande, and XSum.",
+     "From left to right, we add each technique step by step: starting from the BF16 baseline as the golden reference, then the DFP12 format, then the nonlinear approximation, and finally the sparsity strategies.",
+     "The lines show accuracy for the first two tasks and ROUGE-L for XSum.",
+     "As you can see, they stay stable through the whole process, and the final result is within one percent of the BF16 baseline.",
+     "Meanwhile, the bars show the MAC savings, which mainly come from our sparsity strategies.",
+     "Among them, the coarse-grained update gives the biggest gain, because it stops gradient propagation early.",
+     "Moreover, our framework is not limited to question answering.",
+     "On the generative task XSum, ROUGE-L even improves, from twenty-nine point eight four to thirty-one point two eight."
+    ]
+   ],
+   "skip": false,
+   "endSec": 618
+  },
+  {
+   "n": 15,
+   "title": "Cross-Task Results",
+   "words": 90,
+   "paragraphs": [
+    [
+     "Here are the final settings and results for each task.",
+     "Across tasks, only two settings change: the freeze depth and K-CE.",
+     "We tune them for each task, based on the number of loss tokens and how much the task relies on basic semantic information.",
+     "For example, WinoGrande has fewer loss tokens, so we set K-CE to two hundred fifty-six and freeze eleven layers.",
+     "This gives the largest saving, fifty-eight point five percent of the MACs.",
+     "For BoolQ and XSum, the savings are forty-one point one and thirty-eight point two percent."
+    ]
+   ],
+   "skip": false,
+   "endSec": 659
+  },
+  {
+   "n": 16,
+   "title": "Conclusion",
+   "words": 79,
+   "paragraphs": [
+    [
+     "To conclude, first, SI-SiLU creates sparsity for inputs below minus zero point five without multipliers, and with lower error than ReSiLU2.",
+     "Second, the layer-wise coarse-grained update removes propagation in the shallow layers, and it complements SI-SiLU.",
+     "Third, DFP12 serves as the data format underneath, saving sixteen point eight percent area and fourteen point eight percent energy.",
+     "Overall, with these techniques together, our framework reduces fine-tuning MACs by up to fifty-eight point five percent, with less than one percent degradation."
+    ]
+   ],
+   "skip": false,
+   "endSec": 696
+  },
+  {
+   "n": 17,
+   "title": "Reference",
+   "words": 0,
+   "paragraphs": [],
+   "skip": true,
+   "endSec": 696
+  },
+  {
+   "n": 18,
+   "title": "Reference",
+   "words": 0,
+   "paragraphs": [],
+   "skip": true,
+   "endSec": 696
+  },
+  {
+   "n": 19,
+   "title": "Thank You — Questions?",
+   "words": 11,
+   "paragraphs": [
+    [
+     "Thank you for your attention.",
+     "I'm happy to take any questions."
+    ]
+   ],
+   "skip": false,
+   "endSec": 701
+  }
+ ]
+}

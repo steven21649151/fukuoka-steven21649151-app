@@ -17,6 +17,7 @@ import { render as renderSettings }  from './views/settings.js';
 import { render as renderTalk }      from './views/talk.js';
 import { render as renderSos }       from './views/sos.js';
 import { render as renderTickets }   from './views/tickets.js';
+import { render as renderScript }    from './views/script.js';
 
 const VIEWS = {
   home:    renderItinerary,
@@ -37,6 +38,7 @@ const VIEWS = {
   talk:    renderTalk,
   sos:     renderSos,
   tickets: renderTickets,
+  script:  renderScript,
 };
 
 const TOOL_VIEWS = {
@@ -51,6 +53,7 @@ const TOOL_VIEWS = {
   talk:    'talk',
   sos:     'sos',
   tickets: 'tickets',
+  script:  'script',
 };
 
 export function parseHash(hash) {
@@ -116,6 +119,7 @@ export function initRouter(ctx) {
 
     const showHero = route.view === 'home' || route.view === 'day';
     if (hero) hero.hidden = !showHero;
+    document.body.classList.toggle('script-open', route.view === 'script');   // 提詞頁：藏掉 tabbar 與 hero
 
     const fn = VIEWS[route.view] || VIEWS.home;
     const restored = scrollMemory.has(currentHash);
@@ -150,7 +154,7 @@ function updateTabbar(route) {
     || route.view === 'rate' || route.view === 'phrases' || route.view === 'tips'
     || route.view === 'packing' || route.view === 'flight' || route.view === 'ledger'
     || route.view === 'journal' || route.view === 'settings'
-    || route.view === 'talk' || route.view === 'sos' || route.view === 'tickets';
+    || route.view === 'talk' || route.view === 'sos' || route.view === 'tickets' || route.view === 'script';
 
   tabs.forEach((a) => {
     a.removeAttribute('aria-current');

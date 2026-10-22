@@ -41,6 +41,8 @@ export async function render(root, params, ctx) {
         <div class="v" id="talkCountdown"></div>
       </section>
 
+      <a class="btn btn-primary talk-script-btn" href="#/tools/script">📜 上台講稿（${(ctx.data.speech?.slides || []).length || 19} 頁）</a>
+
       <section class="talk-block">
         <div class="talk-h">🕐 15 分鐘怎麼分配</div>
         <div class="talk-time-bar">

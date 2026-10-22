@@ -8,7 +8,7 @@ import { initRate, getRate, onChange as onRateChange } from './lib/rate.js';
 import { openRateOverlay } from './lib/rate_overlay.js';
 import { initTheme } from './lib/theme.js';
 
-const DATA_FILES = ['spots', 'days', 'tips', 'phrases', 'packing', 'guides', 'rates', 'talk'];
+const DATA_FILES = ['spots', 'days', 'tips', 'phrases', 'packing', 'guides', 'rates', 'talk', 'speech'];
 const FALLBACK_RATE = { jpyToTwd: 0.2035, asOf: null, source: null };
 const WEEKDAY_ZH = ['日', '一', '二', '三', '四', '五', '六'];
 
@@ -139,6 +139,7 @@ async function loadAllData() {
     packingGroups: raw.packing.groups || [],
     guides: raw.guides.guides || [],
     talk: raw.talk || null,
+    speech: raw.speech || null,
     rate,
   };
 }

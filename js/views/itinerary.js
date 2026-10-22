@@ -219,6 +219,10 @@ function renderCard(it, nowInfo, ctx) {
   if (it.guideId) {
     actions.push(`<a class="btn" href="#/guide/${encodeURIComponent(it.guideId)}">✈️ 流程怎麼走 →</a>`);
   }
+  // 自訂連結：days item 的選填欄位 links: [{ href, label }]
+  for (const l of it.links || []) {
+    actions.push(`<a class="btn" href="${escapeHtml(l.href)}">${escapeHtml(l.label)}</a>`);
+  }
 
   const apccasAttr = it.apccas
     ? ` data-apccas data-apccas-label="${it.apccasHighlight ? '你的報告' : 'APCCAS'}"${it.apccasHighlight ? ' data-apccas-highlight' : ''}`
