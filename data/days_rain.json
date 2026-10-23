@@ -135,7 +135,7 @@
   {
    "n": 2,
    "title": "Keynote 1 ＋ 太宰府 ＋ 天神購物",
-   "summary": "上午開幕和 Keynote 1，接著搭西鐵到太宰府天満宮、吃合格拉麵。下午待在室內：ミーナ天神一棟買齊衣服和藥妝，先回飯店放東西再吃暁的和牛まぶし。晚上逛天神西通，最後走到中洲吃一碗雜炊當宵夜。",
+   "summary": "上午開幕和 Keynote 1，接著搭西鐵到太宰府天満宮、吃合格拉麵。下午先繞去 Full Full 買明太子法棍，再待在室內：ミーナ天神一棟買齊衣服和藥妝，先回飯店放東西再吃暁的和牛まぶし。晚上逛天神西通，最後走到中洲吃一碗雜炊當宵夜。",
    "costEstimate": {
     "min": 6100,
     "max": 8600
@@ -176,22 +176,46 @@
     {
      "id": "d2-r09",
      "time": "15:10",
-     "endTime": "15:20",
+     "endTime": "15:35",
+     "segment": "afternoon",
+     "kind": "meal",
+     "status": "pick",
+     "title": "Full Full 天神店（明太子法棍）",
+     "spotId": "fullfull-tenjin",
+     "tips": [
+      "平日下午人比較少；排太長就跳過，不要耽誤購物",
+      "**現烤的最好吃**，買一條趁熱吃",
+      "要帶回台灣的，10/30 在機場買冷凍的就好"
+     ],
+     "transit": {
+      "mode": "walk",
+      "detail": "西鐵福岡（天神）站走過去約 5 分",
+      "minutes": 5
+     },
+     "cost": {
+      "min": 500,
+      "max": 1000
+     }
+    },
+    {
+     "id": "d2-r09b",
+     "time": "15:35",
+     "endTime": "15:40",
      "segment": "afternoon",
      "kind": "transit",
      "status": "normal",
-     "title": "西鐵福岡（天神）站 → ミーナ天神",
+     "title": "Full Full → ミーナ天神",
      "transit": {
       "mode": "walk",
-      "detail": "步行約 8 分",
-      "minutes": 8
+      "detail": "步行約 5 分",
+      "minutes": 5
      },
      "mapQuery": "ミーナ天神 福岡市中央区天神4-3-8"
     },
     {
      "id": "d2-r10",
-     "time": "15:20",
-     "endTime": "16:15",
+     "time": "15:40",
+     "endTime": "16:25",
      "segment": "afternoon",
      "kind": "shopping",
      "status": "normal",
@@ -208,7 +232,7 @@
     },
     {
      "id": "d2-r11",
-     "time": "16:15",
+     "time": "16:25",
      "endTime": "17:00",
      "segment": "afternoon",
      "kind": "shopping",
