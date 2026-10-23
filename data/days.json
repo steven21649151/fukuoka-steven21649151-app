@@ -293,8 +293,8 @@
     {
       "n": 4, "date": "2026-10-28", "weekday": "三", "kanji": "肆",
       "title": "報告日 · 報告完就是購物日",
-      "summary": "早上散步的六個點全部免費、全在會場十分鐘圈內。**你的報告是 14:15，第 5 位講者**。結束後開始購物：鞋 → 衣服 → 藥妝，回飯店先打包，22:00 慶功燒肉。",
-      "costEstimate": { "min": 6400, "max": 8600 },
+      "summary": "早上散步的六個點全部免費、全在會場十分鐘圈內。**你的報告是 14:15，第 5 位講者**。結束後開始購物：鞋 → 衣服 → 藥妝，回飯店放東西，19:30 在泰元 別館吃慶功燒肉。",
+      "costEstimate": { "min": 13300, "max": 15500 },
       "tipIds": ["tp-taxfree", "tp-taxfree-tactic", "tp-touchcap"],
       "items": [
         { "id": "d4-01", "time": "08:00", "endTime": "08:45", "segment": "morning", "kind": "meal", "status": "pick",
@@ -369,29 +369,12 @@
           "title": "購物 ③ 藥妝", "spotId": "tenjin-drugstore",
           "tips": ["不用出 ミーナ天神：**B1 マツモトキヨシ**（開到 22:00）", "三樣在同一家結帳就過免稅門檻"],
           "booking": { "required": true, "note": "帶護照！" } },
-        { "id": "d4-17", "time": "18:20", "endTime": "19:30", "segment": "night", "kind": "free", "status": "normal",
+        { "id": "d4-17", "time": "18:20", "endTime": "19:05", "segment": "night", "kind": "free", "status": "normal",
           "title": "回飯店放戰利品＋打包",
-          "desc": "燒肉吃完已經過午夜，所以現在就把四天的東西分成兩袋：明早寄放火星花園的（行李箱）和帶去熊本的（後背包）。",
-          "tips": ["明天 **06:45 起床、07:10 退房**"] },
-        { "id": "d4-19", "time": "19:30", "endTime": "21:30", "segment": "night", "kind": "free", "status": "normal",
-          "title": "空檔：休息或補逛",
-          "desc": "兩個小時自由時間。累了就回房睡一下，想逛就回天神補買。",
-          "tips": [
-            "午餐到晚餐隔十個小時——**17:00 前後先吃個飯糰或麵包墊胃**",
-            "藥妝店多半開到 21:00–22:00、ソラリアプラザ 服飾到 20:30、唐吉訶德天神本店 24 小時"
-          ] },
-        { "id": "d4-18", "time": "22:00", "endTime": "23:30", "segment": "night", "kind": "meal", "status": "pick",
-          "title": "慶功晚餐：薬院焼肉 NIKUICHI", "spotId": "nikuichi",
-          "transit": { "mode": "subway", "detail": "21:40 出發，天神南 → 薬院 七隈線 2 站", "minutes": 3,
-                       "cost": { "min": 210, "max": 210 }, "pay": "touch" },
-          "tips": [
-            "⚠️ **遲到超過 10 分鐘又沒打電話，訂位自動取消，還要付取消費 ¥4,000**——21:40 一定要出發。店家電話 092-522-4129",
-            "**已訂 22:00**（TableCheck，1 名）",
-            "⚠️ **食物 LO 23:00**——能點菜的時間只有一小時，**入座就一次點齊**，或直接點套餐",
-            "回程：七隈線 薬院 → 天神南，**平日末班約 00:25**；錯過就走路約 25 分或搭計程車"
-          ],
-          "cost": { "min": 4500, "max": 5500 },
-          "booking": { "required": true, "channel": "TableCheck", "note": "已訂 22:00" } }
+          "desc": "先把戰利品放好、大致分成兩袋：明早寄放火星花園的（行李箱）和帶去熊本的（後背包）。吃完晚餐回來再收尾。",
+          "tips": ["明天 **06:45 起床、07:10 退房**", "**19:05 出門**去赤坂"] },
+        {"id": "d4-20", "time": "19:30", "endTime": "21:30", "segment": "night", "kind": "meal", "status": "pick", "title": "慶功晚餐：泰元 別館（炭火和牛燒肉）", "spotId": "taigen-bekkan", "transit": {"mode": "subway", "detail": "走到地鐵天神站約 10 分，空港線 天神 → 赤坂 1 站，1 號出口走 5 分", "minutes": 20, "cost": {"min": 210, "max": 210}, "pay": "touch"}, "tips": ["已訂 **19:30、1 位、炭火 C 套餐**，預約編號 **#3148**", "套餐一道一道上，不用自己點菜", "可以刷卡或付現金（**不收 QR、全支付**）", "確認信沒寫遲到能保留多久——**19:25 前到**最保險", "會晚到就打電話 092-752-1567，講：「予約した HSU です。10分ほど遅れます」（よやくした シュー です。じゅっぷんほど おくれます）"], "cost": {"min": 11550, "max": 13000}, "booking": {"required": true, "channel": "網路預約（Toreta）", "note": "已訂 19:30 #3148"}},
+        {"id": "d4-21", "time": "21:35", "segment": "night", "kind": "free", "status": "normal", "title": "回飯店打包", "spotId": "hotel-comfort", "desc": "赤坂搭地鐵回天神，走回飯店把明天要寄放和帶去熊本的東西收好。", "tips": ["明天 **06:45 起床、07:10 退房**"], "transit": {"mode": "subway", "detail": "赤坂 → 天神 1 站，出站走約 10 分（或計程車約 5 分）", "minutes": 15, "cost": {"min": 210, "max": 210}, "pay": "touch"}}
       ]
     },
 
