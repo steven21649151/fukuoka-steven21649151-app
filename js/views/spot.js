@@ -144,12 +144,12 @@ function renderFacts(spot, rate) {
   if (spot.price)       rows.push(['價位', annotateYenTwd(spot.price, rate?.jpyToTwd)]);
   if (spot.stayMinutes) rows.push(['停留', `${spot.stayMinutes} 分鐘`]);
   if (spot.address)     rows.push(['地址', spot.address]);
-  if (spot.payment)     rows.push(['付款', payLabel(spot.payment)]);
+  if (spot.payment)     rows.push(['付款', payLabel(spot.payment) + pxSuffix(spot)]);
   if (spot.booking?.note) rows.push(['訂位', (spot.booking.required ? '需訂位 · ' : '') + spot.booking.note]);
   if (rows.length === 0) return '';
   return `<div class="facts">${
     rows.map(([k, v]) => `<div class="k">${k}</div><div class="v">${mdInline(v)}</div>`).join('')
-  }</div>`;
+  }</div>${spot.pxpayNote ? `<div class="px-note">${mdInline(spot.pxpayNote)}</div>` : ''}`;
 }
 
 function renderCautions(cautions) {
@@ -162,6 +162,13 @@ function paymentPill(spot) {
   if (Array.isArray(p) && p.length === 1 && p[0] === 'cash') {
     return `<span class="pill warn">只收現金</span>`;
   }
+  return spot.pxpay === 'yes' ? `<span class="pill pxpay">📱全支付</span>` : '';
+}
+
+// 付款列後面接的全支付說明
+function pxSuffix(spot) {
+  if (spot.pxpay === 'yes') return ' · 📱全支付';
+  if (spot.pxpay === 'some') return ' · 📱部分店家可用全支付';
   return '';
 }
 

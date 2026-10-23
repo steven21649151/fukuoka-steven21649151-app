@@ -2614,3 +2614,23 @@ body.script-open { overflow: hidden; }
 }
 :root[data-theme="dark"] .plan-tag.rain { background: #1F2D3D; color: #9CC1E6; }
 :root[data-theme="dark"] .plan-tag.sunny { background: #3A3015; color: #F0D27A; }
+
+/* R21：📱全支付（PayPay）標示 */
+.paychip.pxpay,
+.card .cost-row .paychip.pxpay,
+.commute .paychip.pxpay {
+  background: #E6F4EA; color: #1E7A3C; border: 1px solid #1E7A3C33;
+}
+.pill.pxpay { background: #E6F4EA; color: #1E7A3C; border-color: #1E7A3C33; }
+.px-note { margin-top: 6px; font-size: 12.5px; line-height: 1.55; color: var(--faint); }
+.alt-chip .alt-px { font-size: 11px; opacity: .85; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .paychip.pxpay,
+  :root:not([data-theme="light"]) .card .cost-row .paychip.pxpay,
+  :root:not([data-theme="light"]) .commute .paychip.pxpay,
+  :root:not([data-theme="light"]) .pill.pxpay { background: #16331F; color: #7CD39A; border-color: #7CD39A33; }
+}
+:root[data-theme="dark"] .paychip.pxpay,
+:root[data-theme="dark"] .card .cost-row .paychip.pxpay,
+:root[data-theme="dark"] .commute .paychip.pxpay,
+:root[data-theme="dark"] .pill.pxpay { background: #16331F; color: #7CD39A; border-color: #7CD39A33; }

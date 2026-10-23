@@ -200,7 +200,7 @@ function renderCard(it, nowInfo, ctx) {
   const spot = it.spotId ? ctx.data.spots.find(s => s.id === it.spotId) : null;
   const desc = it.desc || spot?.oneLine || '';
   const tipsHtml = renderTipsBlock(it.tips);
-  const costHtml = renderCostRow(it, ctx);
+  const costHtml = renderCostRow(it, ctx, spot);
   const buyHtml = renderBuyLine(it, spot);
   const altsHtml = renderAlts(it, ctx);
 
@@ -304,14 +304,22 @@ function renderTipsBlock(tips) {
   return `<div class="tips"><ul>${items}</ul></div>`;
 }
 
-function renderCostRow(it, ctx) {
+function renderCostRow(it, ctx, spot) {
   const label = yenRange(it.cost);
-  const payChip = renderPayChip(it.pay);
+  const payChip = renderPayChip(it.pay) + renderPxChip(spot);
   if (!label && !payChip) return '';
   const twdText = twdIfBig(it.cost, ctx.data.rate?.jpyToTwd, 500);
   const money = label ? `<span class="ico">💴</span><span class="nw">${label}</span>` : '';
   const twdSpan = twdText ? ` <span class="approx">≈ ${twdText}</span>` : '';
   return `<div class="cost-row">${money}${twdSpan}${payChip}</div>`;
+}
+
+// 📱全支付：spot 的 pxpay 是 "yes"（確定收 PayPay）或 "some"（部分店家收）。點了跳到 tp-pxpay
+function renderPxChip(spot) {
+  const v = spot && spot.pxpay;
+  if (v !== 'yes' && v !== 'some') return '';
+  const text = v === 'yes' ? '📱全支付' : '📱部分店家';
+  return `<button type="button" class="paychip pxpay" data-tip="tp-pxpay" aria-label="${text}｜點看攻略">${text}</button>`;
 }
 
 function renderPayChip(pay) {
@@ -340,6 +348,6 @@ function renderAlts(it, ctx) {
   const alts = (it.alts || []).map(id => (ctx.data.spots || []).find(s => s.id === id)).filter(Boolean);
   if (!alts.length) return '';
   return `<div class="alts-row"><span class="alts-k">也可以選：</span>${
-    alts.map(s => `<a class="alt-chip" href="#/spot/${encodeURIComponent(s.id)}">${escapeHtml(s.nameZh || s.name || s.id)}</a>`).join('')
+    alts.map(s => `<a class="alt-chip" href="#/spot/${encodeURIComponent(s.id)}">${escapeHtml(s.nameZh || s.name || s.id)}${s.pxpay === 'yes' ? '<small class="alt-px" aria-label="可用全支付"> 📱</small>' : ''}</a>`).join('')
   }</div>`;
 }
