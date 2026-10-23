@@ -3,6 +3,7 @@ import { mdInline, escapeHtml, phraseWrap } from '../lib/md.js';
 import { mapsUrl } from '../lib/maps.js';
 import { annotateYenTwd } from '../lib/fmt.js';
 import { getPrevHash } from '../router.js';
+import { findSpotDay } from '../lib/plan.js';
 
 const KNOWN_BACK = {
   '#/tools/tips':    '回攻略',
@@ -43,7 +44,7 @@ export async function render(root, params, ctx) {
   }
 
   const cat = spot.category || 'sight';
-  const day = spot.day;
+  const day = findSpotDay(ctx.data.days, spot.id, spot.day);
 
   const prev = getPrevHash();
   const prevBase = prev ? prev.split('?')[0] : null;

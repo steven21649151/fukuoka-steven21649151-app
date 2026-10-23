@@ -3,6 +3,7 @@
 import { escapeHtml } from './md.js';
 import { putJournal, getAllJournal, isAvailable } from './db.js';
 import { getTakenAt, matchItinerary, jstParts } from './exif.js';
+import { findSpotDay } from './plan.js';
 import { loadBitmap, srcW, srcH, freeCanvas } from './overlay.js';
 import { showProgress, toast, downloadBlob, safeName } from './ui.js';
 
@@ -138,7 +139,8 @@ async function prepare(file, source, opts) {
   let { day, spotId } = matchItinerary(takenAt, opts.data?.days, opts.data?.spots);
   if (opts.spot?.id) {            // 從景點按鈕進來：以那個景點為準
     spotId = opts.spot.id;
-    day = opts.dayN ?? opts.spot.day ?? day;
+    // 先在目前版本裡找第一個有這個景點的天（鞋店在雨天版是 10/25，spot.day 卻寫 4），找不到才用 spot.day
+    day = opts.dayN ?? findSpotDay(opts.data?.days, spotId, opts.spot.day) ?? day;
   }
   return { file, thumb, w, h, takenAt, source, day: day ?? null, spotId: spotId ?? null, note: '', name: '' };
 }

@@ -85,12 +85,20 @@ function renderDayHeader(day, ctx) {
       <div class="day-topline">
         <div class="k">${escapeHtml(day.kanji)}</div>
         <h1>${phraseWrap(day.title || '')}</h1>
+        ${renderPlanTag(day, ctx)}
       </div>
       <div class="date">${escapeHtml(md(day.date))}（${escapeHtml(day.weekday || '')}）</div>
       ${day.summary ? `<p class="summary">${mdInline(day.summary)}</p>` : ''}
       ${est}
     </header>
   `;
+}
+
+// 只有兩版不一樣的那幾天（10/25、10/26、10/28）顯示目前是哪一版，點了到設定切換
+function renderPlanTag(day, ctx) {
+  if (!(ctx.data.rainDayNums || []).includes(day.n)) return '';
+  const rain = ctx.data.plan !== 'sunny';
+  return `<a class="plan-tag${rain ? ' rain' : ' sunny'}" href="#/tools/settings" aria-label="切換行程版本">${rain ? '🌧 雨天版' : '☀️ 晴天版'}</a>`;
 }
 
 function renderEstimate(cost, rate) {
@@ -101,7 +109,7 @@ function renderEstimate(cost, rate) {
 }
 
 function renderItems(day, nowInfo, ctx) {
-  const items = day.items || [];
+  const items = (day.items || []).map(it => ({ ...it, dayN: day.n }));   // 📷 按鈕帶這一天
   const parts = [];
   let prevSeg = null;
 
@@ -258,7 +266,12 @@ function renderCard(it, nowInfo, ctx) {
 function renderTodayTips(day, ctx) {
   const tips = ctx.data.tips || [];
   const today = day.n;
-  const list = tips.filter(t => Array.isArray(t.days) && t.days.includes(today));
+  // 選雨天版時，有 rainDays 的 tip 用 rainDays 判斷，沒有的照舊用 days
+  const rain = ctx.data.plan === 'rain';
+  const list = tips.filter(t => {
+    const ds = rain && Array.isArray(t.rainDays) ? t.rainDays : t.days;
+    return Array.isArray(ds) && ds.includes(today);
+  });
   if (!list.length) return '';
   const RANK = { critical: 0, important: 1, info: 2 };
   list.sort((a, b) => (RANK[a.severity] ?? 9) - (RANK[b.severity] ?? 9));

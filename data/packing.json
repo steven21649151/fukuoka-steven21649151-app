@@ -22,6 +22,8 @@
         { "id": "pk-shinkansen", "text": "訂新幹線 博多⇄熊本（10/29）", "deadline": "2026-09-29",
           "detail": "已在 Trip.com 訂好（電子票，不用取票）。\n**去程 07:58 → 08:36 さくら401　6 號車 4-B**\n**回程 17:04 → 17:43　8 號車 5-B**\n進站掃 Trip.com App 的 QR，過閘門記得拿「座位資訊單」。",
           "critical": true },
+        { "id": "pk-cruise", "text": "上網訂 10/28 20:30 夜遊船", "deadline": "2026-10-27", "plan": "rain",
+          "detail": "官網 river-cruise.jp →「ご予約」→【中洲ナイトクルーズ30】→ 10/28 20:30、大人 1 名，¥1,500。\n**網路只收到前一天**，所以最晚 10/27。\n沒訂到也沒關係：當天發船前 15 分到福博であい橋乘船處現場排。" },
         { "id": "pk-nikuichi", "text": "訂薬院焼肉 NIKUICHI", "deadline": "2026-09-28",
           "detail": "10/28（三）**22:00**、1 名，TableCheck。" },
         { "id": "pk-ppt", "text": "簡報檔上傳", "deadline": "2026-10-16",

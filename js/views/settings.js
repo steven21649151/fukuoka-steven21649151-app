@@ -5,12 +5,24 @@ import { getRate, setOverride, clearOverride, onChange as onRateChange } from '.
 import { getAllLedger, getAllJournal, isAvailable } from '../lib/db.js';
 import { buildCSV as buildLedgerCSV } from './ledger.js';
 import { createZip } from '../lib/zip.js';
+import { setPlan } from '../lib/plan.js';
 
 export async function render(root, params, ctx) {
   root.innerHTML = `
     <div class="wrap">
       <div class="topnav"><a class="back" href="#/tools">← 回小工具</a></div>
       <h1 style="font-family:var(--dis);font-size:22px;margin:14px 0 6px">設定</h1>
+
+      <section class="set-block">
+        <div class="set-h">行程版本</div>
+        <div class="set-seg chiprow" id="planSeg" role="radiogroup" aria-label="行程版本">
+          <button type="button" class="chip" data-plan="rain">🌧 雨天版</button>
+          <button type="button" class="chip" data-plan="sunny">☀️ 晴天版</button>
+        </div>
+        <div class="small faint" style="margin-top:8px;line-height:1.6">
+          雨天版：10/25 下午去買鞋、10/26 下午在室內購物、10/28 去大濠公園和搭夜遊船。其他天兩版一樣。
+        </div>
+      </section>
 
       <section class="set-block">
         <div class="set-h">🎨 主題</div>
@@ -69,6 +81,7 @@ export async function render(root, params, ctx) {
     </div>
   `;
 
+  wirePlan(root, ctx);
   wireTheme(root);
   wireAutoSave(root);
   wireRate(root, ctx);
@@ -86,6 +99,25 @@ function wireAutoSave(root) {
   box.checked = on;
   box.addEventListener('change', () => {
     try { localStorage.setItem('jrn.autoSave', box.checked ? '1' : '0'); } catch {}
+  });
+}
+
+// ============ 行程版本 ============
+// 存進 localStorage['plan']，然後重新載入頁面：現在時間卡、分頁列、記帳下拉選單全都會跟著換
+function wirePlan(root, ctx) {
+  const seg = root.querySelector('#planSeg');
+  if (!seg) return;
+  const cur = ctx.data.plan === 'sunny' ? 'sunny' : 'rain';
+  seg.querySelectorAll('button').forEach(b => {
+    if (b.getAttribute('data-plan') === cur) b.setAttribute('aria-current', 'true');
+  });
+  seg.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-plan]');
+    if (!btn) return;
+    const p = btn.getAttribute('data-plan');
+    if (p === cur) return;
+    setPlan(p);
+    location.reload();
   });
 }
 
@@ -211,7 +243,7 @@ async function buildAllZip(ctx) {
   if (await isAvailable()) {
     try { ledgerRows = await getAllLedger(); } catch {}
   }
-  const ledgerCSV = buildLedgerCSV(ledgerRows, ctx.data.days);
+  const ledgerCSV = buildLedgerCSV(ledgerRows, ctx.data.daysLookup);
   zip.addString('記帳.csv', ledgerCSV);
 
   // 手帳

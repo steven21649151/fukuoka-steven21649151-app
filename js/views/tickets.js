@@ -89,7 +89,7 @@ export async function render(root, params, ctx) {
       return a - b;
     });
     listEl.innerHTML = orderedKeys.map(k => {
-      const label = k === 'other' ? '沒關聯日期' : dayLabel(ctx.data.days, k);
+      const label = k === 'other' ? '沒關聯日期' : dayLabel(ctx.data.daysLookup, k);
       return `
         <section class="tk-day">
           <div class="tk-day-head">${escapeHtml(label)}</div>
@@ -125,7 +125,7 @@ export async function render(root, params, ctx) {
     const row = existing || {
       id: cryptoUUID(),
       title: '', kind: 'ticket',
-      dayN: preItemId ? findDayNForItem(ctx.data.days, preItemId) : null,
+      dayN: preItemId ? findDayNForItem(ctx.data.daysLookup, preItemId) : null,
       itemId: preItemId || null,
       code: '', howToUse: '', link: '', note: '',
       image: null,
@@ -241,7 +241,7 @@ export async function render(root, params, ctx) {
       if (a === 'save') {
         const kind = kindGroup.querySelector('[aria-current="true"]')?.getAttribute('data-kind') || row.kind;
         const itemId = overlay.querySelector('#tkfItem').value || null;
-        const dayN = itemId ? findDayNForItem(ctx.data.days, itemId) : row.dayN;
+        const dayN = itemId ? findDayNForItem(ctx.data.daysLookup, itemId) : row.dayN;
         const merged = {
           ...row,
           title: overlay.querySelector('#tkfTitle').value.trim(),
@@ -274,7 +274,7 @@ export async function render(root, params, ctx) {
           </div>
           ${row.code ? `<div class="tk-code"><span class="k">確認編號</span><code>${escapeHtml(row.code)}</code></div>` : ''}
           ${row.howToUse ? `<div class="tk-how ${row.howToUse.startsWith('⚠️') ? 'warn' : ''}">${escapeHtml(row.howToUse)}</div>` : ''}
-          ${row.dayN != null ? `<div class="small faint">關聯：${escapeHtml(dayLabel(ctx.data.days, row.dayN))}${row.itemId ? ' · ' + escapeHtml(findItemLabel(ctx.data.days, row.itemId)) : ''}</div>` : ''}
+          ${row.dayN != null ? `<div class="small faint">關聯：${escapeHtml(dayLabel(ctx.data.daysLookup, row.dayN))}${row.itemId ? ' · ' + escapeHtml(findItemLabel(ctx.data.daysLookup, row.itemId)) : ''}</div>` : ''}
           ${row.note ? `<div class="tk-note">${mdInline(row.note)}</div>` : ''}
           ${row.image ? `<div class="tk-detail-img"><img alt="" id="tkDetImg"></div><div class="small faint">點圖進出示模式</div>` : ''}
           ${row.link ? `<div class="tk-link"><a class="btn" href="${escapeHtml(row.link)}" target="_blank" rel="noopener">🔗 打開連結</a></div>` : ''}

@@ -8,7 +8,7 @@
 // 唯一會讓瀏覽器重跑 install、重抓資源的觸發點——沒 bump 就會拿舊快取。
 // 新增或替換 photos/ 裡的照片也要 bump APP_VERSION，舊照片才會被換掉。
 
-const APP_VERSION = '1.8.8';
+const APP_VERSION = '1.8.9';
 const CACHE_SHELL = `fukuoka-shell-v${APP_VERSION}`;
 const CACHE_DATA = `fukuoka-data-v${APP_VERSION}`;
 
@@ -69,6 +69,12 @@ const SHELL_ASSETS = [
   './fonts/wenkai-tc-bold.woff2',
 ];
 
+// 資料檔：install 時先放進 data 快取（含雨天版），離線時兩個版本都能切換、正常顯示
+const DATA_ASSETS = [
+  './data/spots.json', './data/days.json', './data/days_rain.json', './data/tips.json', './data/phrases.json',
+  './data/packing.json', './data/guides.json', './data/rates.json', './data/talk.json', './data/speech.json',
+];
+
 // 只有 App 點下「更新條」才 skipWaiting；install 裡不放無條件版本。
 self.addEventListener('message', (e) => {
   if (e.data?.type === 'SKIP_WAITING') self.skipWaiting();
@@ -80,6 +86,13 @@ self.addEventListener('install', (event) => {
     await Promise.all(SHELL_ASSETS.map(async (url) => {
       try { await cache.add(new Request(url, { cache: 'reload' })); }
       catch (e) { /* photos/icons 可能缺，忽略 */ }
+    }));
+
+    // 資料檔：各自 try/catch，缺檔不擋 install
+    const dataCache = await caches.open(CACHE_DATA);
+    await Promise.all(DATA_ASSETS.map(async (url) => {
+      try { await dataCache.add(new Request(url, { cache: 'reload' })); }
+      catch (e) { /* 缺檔就跳過 */ }
     }));
 
     // 景點照片：照 spots.json 的 id 逐張預存，缺圖或讀不到清單都只跳過

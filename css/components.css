@@ -2599,3 +2599,18 @@ body.script-open { overflow: hidden; }
 .qa-answer { padding: 4px 14px 14px; border-top: 1px solid var(--sc-line); font-size: var(--script-fs); line-height: 1.6; }
 .qa-answer .script-sent { margin: .7em 0 .45em; }
 .qa-answer .qa-speak { margin-top: 6px; }
+
+/* R20：行程版本標籤（雨天版／晴天版） */
+.plan-tag {
+  display: inline-flex; align-items: center; align-self: center; white-space: nowrap;
+  padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; line-height: 1.4;
+  text-decoration: none; border: 1px solid transparent;
+}
+.plan-tag.rain { background: #E6EEF7; color: #2F5D8A; border-color: rgba(47,93,138,.25); }
+.plan-tag.sunny { background: #FFF3D6; color: #8A5A00; border-color: rgba(201,162,39,.4); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .plan-tag.rain { background: #1F2D3D; color: #9CC1E6; }
+  :root:not([data-theme="light"]) .plan-tag.sunny { background: #3A3015; color: #F0D27A; }
+}
+:root[data-theme="dark"] .plan-tag.rain { background: #1F2D3D; color: #9CC1E6; }
+:root[data-theme="dark"] .plan-tag.sunny { background: #3A3015; color: #F0D27A; }

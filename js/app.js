@@ -1,13 +1,14 @@
 // 進入點：載五份資料 → 建 tabbar → 初始化 router → 依環境註冊 SW → 掛時間條
 
 import { initRouter } from './router.js';
+import { getPlan, applyPlan } from './lib/plan.js';
 import { md } from './lib/fmt.js';
 import { warmUpJaVoice } from './lib/tts.js';
 import { initRate, getRate, onChange as onRateChange } from './lib/rate.js';
 import { openRateOverlay } from './lib/rate_overlay.js';
 import { initTheme } from './lib/theme.js';
 
-const DATA_FILES = ['spots', 'days', 'tips', 'phrases', 'packing', 'guides', 'rates', 'talk', 'speech'];
+const DATA_FILES = ['spots', 'days', 'days_rain', 'tips', 'phrases', 'packing', 'guides', 'rates', 'talk', 'speech'];
 const FALLBACK_RATE = { jpyToTwd: 0.2035, asOf: null, source: null };
 const WEEKDAY_ZH = ['日', '一', '二', '三', '四', '五', '六'];
 
@@ -93,12 +94,12 @@ async function loadAllData() {
       const res = await fetch(`./data/${k}.json`, { cache: 'no-cache' });
       if (!res.ok) {
         // rates 讀不到 → fallback，不擋整頁
-        if (k === 'rates') return [k, null];
+        if (k === 'rates' || k === 'days_rain') return [k, null];
         throw new Error(`${k}.json ${res.status}`);
       }
       return [k, await res.json()];
     } catch (e) {
-      if (k === 'rates') return [k, null];
+      if (k === 'rates' || k === 'days_rain') return [k, null];
       throw e;
     }
   }));
@@ -106,15 +107,29 @@ async function loadAllData() {
   const rate = raw.rates
     ? { jpyToTwd: raw.rates.jpyToTwd || FALLBACK_RATE.jpyToTwd, asOf: raw.rates.asOf, source: raw.rates.source }
     : FALLBACK_RATE;
+  // 行程版本：🌧 雨天版（預設）／☀️ 晴天版。daysSunny／daysRain 兩份都展開好，days 是目前選的那一版
+  const plan = getPlan();
+  const daysSunny = raw.days.days || [];
+  const daysRain = applyPlan(daysSunny, raw.days_rain, 'rain');
+  const days = plan === 'rain' ? daysRain : daysSunny;
+  const otherDays = plan === 'rain' ? daysSunny : daysRain;
+  // 打包清單：有 plan 欄位的項目只在版本相符時顯示；沒有 plan 的永遠顯示
+  const packingGroups = (raw.packing.groups || []).map(g => ({ ...g, items: (g.items || []).filter(it => !it.plan || it.plan === plan) }));
   return {
     spots: raw.spots.spots || [],
-    days:  raw.days.days || [],
+    days,
+    daysSunny,
+    daysRain,
+    // 用 id 查名稱（記帳、票券）：先查目前版本，查不到再查另一版
+    daysLookup: [...days, ...otherDays],
+    plan,
+    rainDayNums: (raw.days_rain?.days || []).map(d => d.n),
     tips:  raw.tips.tips || [],
     tipCategories: raw.tips.categories || [],
     scenes: raw.phrases.scenes || [],
     phrases: raw.phrases.phrases || [],
     emergencyInfo: raw.phrases.emergencyInfo || null,
-    packingGroups: raw.packing.groups || [],
+    packingGroups,
     guides: raw.guides.guides || [],
     talk: raw.talk || null,
     speech: raw.speech || null,

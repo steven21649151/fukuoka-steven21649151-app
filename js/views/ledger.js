@@ -277,7 +277,7 @@ export async function render(root, params, ctx) {
   }
 
   function renderRow(r) {
-    const itemLabel = r.itemId ? findItemLabel(ctx.data.days, r.itemId) : '';
+    const itemLabel = r.itemId ? findItemLabel(ctx.data.daysLookup, r.itemId) : '';
     return `
       <div class="ldg-row" data-id="${escapeHtml(r.id)}"${r.reimbursable ? ' data-reimb' : ''}>
         <div class="head">
@@ -333,14 +333,14 @@ export async function render(root, params, ctx) {
 
   async function onExport(list, filename) {
     if (!list.length) { alert('沒有可匯出的資料'); return; }
-    const csv = buildCSV(list, ctx.data.days);
+    const csv = buildCSV(list, ctx.data.daysLookup);
     await downloadCSV(csv, filename);
     try { localStorage.setItem(LS_LAST_EXPORT, todayISO()); } catch {}
     hideExportNudge();
   }
   async function onCopy(list) {
     if (!list.length) { alert('沒有可複製的資料'); return; }
-    const csv = buildCSV(list, ctx.data.days);
+    const csv = buildCSV(list, ctx.data.daysLookup);
     try {
       await navigator.clipboard.writeText(csv);
       toast('已複製到剪貼簿');
