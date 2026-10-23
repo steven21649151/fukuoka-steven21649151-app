@@ -342,5 +342,135 @@
    "skip": false,
    "endSec": 701
   }
- ]
+ ],
+ "qa": {
+  "note": "Q&A 2 分鐘。先說 Thank you for the question，聽不懂就請對方再說一次。",
+  "items": [
+   {
+    "id": "q1",
+    "who": "問超參數",
+    "q": "How did you choose K-CE and the freeze depth S?",
+    "zh": "K-CE 離線看 softmax 前 K 個的累積機率；S 用小批次測任務對淺層語意的敏感度",
+    "a": [
+     "For K-CE, we decide it offline.",
+     "We check the cumulative probability of the top-K softmax outputs in the forward pass.",
+     "For example, if the top eight cover about ninety percent, we set K-CE to eight.",
+     "For S, we run short tests on a small batch, to see how much the task depends on basic semantics in the shallow layers.",
+     "A more systematic way to choose S is part of our future work."
+    ]
+   },
+   {
+    "id": "q2",
+    "who": "問未來方向",
+    "q": "What is your future work?",
+    "zh": "換不同模型、不同任務，檢查強健性與泛用性",
+    "a": [
+     "We plan to test other models and more tasks,",
+     "to check the robustness and generality of our framework."
+    ]
+   },
+   {
+    "id": "q3",
+    "who": "硬體工程師",
+    "q": "Have you implemented this on hardware? How much real speedup do you get, since the SI-SiLU sparsity is irregular?",
+    "zh": "除了資料格式，其他硬體還在進行；難在整合微調資料流；稀疏度目前靠分析輸入判別",
+    "a": [
+     "Not yet. Except for the DFP12 MAC unit, the hardware is still in progress.",
+     "The main challenge is integrating it into the whole fine-tuning dataflow.",
+     "Right now, the SI-SiLU sparsity is detected by checking the inputs.",
+     "The hardware for it will be decided after the fine-tuning control flow is finalized."
+    ]
+   },
+   {
+    "id": "q4",
+    "who": "數值格式學者",
+    "q": "Why DFP12 instead of FP8 or MX formats? And what is the overhead of finding the maximum exponent?",
+    "zh": "兼顧效能並省記憶體與頻寬；試過 FP8 效果不好；找最大指數的成本比矩陣乘法小很多",
+    "a": [
+     "Our goal is to fine-tune with good accuracy, while saving memory and bandwidth.",
+     "We did try FP8, but it did not work well in our framework.",
+     "Finding the maximum exponent is very cheap compared with the matrix multiplication itself,",
+     "so the overhead is acceptable."
+    ]
+   },
+   {
+    "id": "q5",
+    "who": "近似研究者",
+    "q": "Real SiLU is negative below zero. Does setting it to zero hurt the forward output? Do you use SI-SiLU in the forward pass?",
+    "zh": "正向用原本的 SiLU、輸出不存；反向時用 SI-SiLU 即時重算輸出和導數，所以只影響反向",
+    "a": [
+     "In the forward pass, we keep the original SiLU, so the forward output is not changed.",
+     "We don't store the SiLU output.",
+     "In backpropagation, we recompute it on the fly with SI-SiLU,",
+     "and the derivative comes from the same look-up table.",
+     "So the approximation only affects the backward pass."
+    ]
+   },
+   {
+    "id": "q6",
+    "who": "大模型研究生",
+    "q": "Will these results hold for larger models, like LLaMA 7B?",
+    "zh": "這是未來想繼續探討的",
+    "a": [
+     "That's a good question.",
+     "Larger models like LLaMA 7B are what we want to explore next."
+    ]
+   },
+   {
+    "id": "q7",
+    "who": "邊緣裝置工程師",
+    "q": "Memory is your first challenge, but you mainly show MAC savings. How much memory do you save?",
+    "zh": "記憶體依賴 QA-LoRA，不是我們的成果所以沒分析；凍結 S 層也不用存那些層的激活值",
+    "a": [
+     "For memory, we rely on QA-LoRA.",
+     "It's a method we adopt, not our contribution, so we did not analyze the final memory saving.",
+     "Also, by freezing the first S layers, we don't need to store their activations for backpropagation."
+    ]
+   },
+   {
+    "id": "q8",
+    "who": "PEFT 研究者",
+    "q": "How is freezing the first S layers different from only fine-tuning the top layers, or methods like LISA?",
+    "zh": "差在梯度傳播成本：凍結可以中斷梯度傳播，省大量運算和激活值儲存；又跟 SI-SiLU 互補",
+    "a": [
+     "The key point is the cost of gradient propagation.",
+     "By freezing the first S layers, the gradient stops at layer S plus one.",
+     "This removes a lot of computation, and the storage of forward activations.",
+     "It also works well with SI-SiLU, because the shallow layers have little sparsity."
+    ]
+   },
+   {
+    "id": "q9",
+    "who": "主持人／一般聽眾",
+    "q": "What edge device are you targeting? What is the power or memory budget?",
+    "zh": "未來會在晶片上跑，實際裝置還在研究",
+    "a": [
+     "We plan to run it on a chip in the future,",
+     "but we are still studying the actual target device."
+    ]
+   }
+  ],
+  "rescue": [
+   {
+    "zh": "謝謝您的問題",
+    "en": "Thank you for the question."
+   },
+   {
+    "zh": "不好意思，可以再說一次嗎？",
+    "en": "Sorry, could you repeat the question?"
+   },
+   {
+    "zh": "確認一下，您問的是……對嗎？",
+    "en": "Just to make sure, you're asking about …, right?"
+   },
+   {
+    "zh": "好問題，我們還沒測試，會列入未來工作",
+    "en": "That's a good point. We haven't tested that yet, but it's part of our future work."
+   },
+   {
+    "zh": "可以會後再詳細討論嗎？",
+    "en": "Could we discuss this in more detail after the session?"
+   }
+  ]
+ }
 }

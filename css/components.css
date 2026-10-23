@@ -2503,16 +2503,11 @@ body.script-open { overflow: hidden; }
   background: var(--sc-card); border: 1px solid var(--sc-line); border-radius: 999px; padding: 8px 14px;
   font-variant-numeric: tabular-nums; cursor: pointer; font-family: inherit;
 }
-.script-timer.orange { background: #E08A1E; border-color: #E08A1E; color: #1b1203; }
-.script-timer.red { background: var(--sc-red); border-color: var(--sc-red); color: #fff; }
 .script-title { flex: 0 0 auto; padding: 0 18px 6px; font-size: 15px; color: var(--sc-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .script-prog { flex: 0 0 auto; padding: 0 18px 8px; }
 .script-bar { height: 4px; border-radius: 2px; background: var(--sc-line); overflow: hidden; }
 .script-bar i { display: block; height: 100%; background: var(--sc-red); transition: width .2s; }
 .script-progline { display: flex; justify-content: space-between; gap: 8px; margin-top: 5px; font-size: 13px; color: var(--sc-faint); }
-.script-progline .ahead { color: #5DBB7A; font-weight: 700; }
-.script-progline .behind { color: #E08A1E; font-weight: 700; }
-.script-progline .late { color: #F0644A; font-weight: 700; }
 
 .script-body {
   flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; touch-action: pan-y;
@@ -2595,3 +2590,46 @@ body.script-open { overflow: hidden; }
   overflow-wrap: anywhere;
 }
 .phrase-card .phrase-zh-under { margin-top: 6px; color: var(--ink2); font-size: 15px; font-weight: 400; }
+
+/* R18：速度燈（綠正常／亮黃太快／紅太慢）與 Q&A 頁 */
+.script-timer {
+  min-width: 104px; display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 1px; padding: 6px 14px; line-height: 1.15; text-align: center; border-radius: 14px;
+}
+.script-timer.idle { background: transparent; border: 2px solid var(--sc-faint); color: var(--sc-ink); font-size: 15px; padding: 11px 14px; }
+.script-timer .st-time { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.script-timer .st-label { font-size: 12px; font-weight: 700; letter-spacing: .08em; }
+.script-timer.sl-ok { background: #2FA36B; border-color: #2FA36B; color: #fff; }
+.script-timer.sl-fast { background: #FFD60A; border-color: #FFD60A; color: #2B2622; }
+.script-timer.sl-slow, .script-timer.sl-over { background: #E5484D; border-color: #E5484D; color: #fff; }
+.script-timer.paused { filter: saturate(.45) brightness(.92); }
+.script-legend { font-size: 13px; line-height: 1.6; color: var(--sc-faint); text-align: center; }
+.script-cell.qa { font-size: 15px; grid-column: span 2; }
+
+.qa-note { font-size: 14px; line-height: 1.5; color: var(--sc-faint); margin: 4px 0 12px; }
+.qa-h { font-size: 13px; font-weight: 700; letter-spacing: .08em; color: var(--sc-faint); margin: 14px 0 8px; }
+.qa-rescue { display: flex; flex-wrap: wrap; gap: 8px; }
+.qa-pill {
+  padding: 8px 14px; font-size: 15px; font-weight: 600; font-family: inherit; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--sc-line); background: var(--sc-card); color: var(--sc-ink);
+}
+.qa-pill.on { background: var(--sc-red); border-color: var(--sc-red); color: #fff; }
+.qa-rescue-open { margin-top: 10px; padding: 14px 16px; border-radius: 12px; background: var(--sc-card); display: flex; align-items: flex-start; gap: 10px; }
+.qa-rescue-en { flex: 1; margin: 0; font-size: calc(var(--script-fs) * 1.12); line-height: 1.45; font-weight: 700; overflow-wrap: anywhere; }
+.qa-speak {
+  flex: 0 0 auto; padding: 8px 12px; font-size: 15px; font-family: inherit; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--sc-line); background: var(--sc-bg); color: var(--sc-ink);
+}
+.qa-speak.speaking { background: var(--sc-red); border-color: var(--sc-red); color: #fff; }
+.qa-card { margin-bottom: 10px; border-radius: 14px; background: var(--sc-card); border: 1px solid var(--sc-line); overflow: hidden; }
+.qa-card.open { border-color: var(--sc-red); }
+.qa-head {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 3px; width: 100%; text-align: left; cursor: pointer;
+  padding: 12px 14px; background: transparent; border: 0; color: var(--sc-ink); font-family: inherit;
+}
+.qa-who { font-size: 12px; font-weight: 700; letter-spacing: .06em; color: var(--sc-red); }
+.qa-q { font-size: calc(var(--script-fs) * .85); line-height: 1.4; font-weight: 600; overflow-wrap: anywhere; }
+.qa-zh { font-size: 13px; line-height: 1.5; color: var(--sc-faint); font-weight: 400; }
+.qa-answer { padding: 4px 14px 14px; border-top: 1px solid var(--sc-line); font-size: var(--script-fs); line-height: 1.6; }
+.qa-answer .script-sent { margin: .7em 0 .45em; }
+.qa-answer .qa-speak { margin-top: 6px; }
