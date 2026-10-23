@@ -5,7 +5,6 @@ import { todayLedgerYen } from './ledger.js';
 import { yen } from '../lib/fmt.js';
 
 const TOOLS = [
-  { key: 'allergy', emoji: '🦐', label: '過敏卡',    action: 'allergy', urgent: true },
   { key: 'talk',    emoji: '🎤', label: '我的報告' },
   { key: 'sos',     emoji: '🚨', label: '出事了' },
   { key: 'tickets', emoji: '🎫', label: '票券' },
@@ -66,25 +65,10 @@ export async function render(root, params, ctx) {
               <span class="ext-hint">會開 App 或網頁版</span>
             </a>
           </div>
-          <a class="tk-safety-card" href="https://play.google.com/store/apps/details?id=jp.co.rcsc.safetytips.android" target="_blank" rel="noopener">
-            <div class="ico">⚠️</div>
-            <div class="body">
-              <div class="ttl">下載 Safety tips</div>
-              <div class="det">日本觀光廳官方防災 App，地震警報用</div>
-            </div>
-            <div class="chev">›</div>
-          </a>
         </section>
       </div>
     `;
 
-    // 過敏卡按下去 → 開大字卡（借用頂端 🦐 按鈕的行為）
-    root.querySelectorAll('[data-tool-action="allergy"]').forEach(el => {
-      el.addEventListener('click', (e) => {
-        e.preventDefault();
-        document.getElementById('allergyBtn')?.click();
-      });
-    });
     return;
   }
 
@@ -103,9 +87,7 @@ export async function render(root, params, ctx) {
 }
 
 function renderTile(t, s) {
-  const href = t.action === 'allergy'
-    ? '#'
-    : `#/tools/${t.key}`;
+  const href = `#/tools/${t.key}`;
   const status = t.soon ? '<span class="status">準備中</span>' : '';
   let meta = '';
   if (t.key === 'packing') meta = `<span class="meta">${s.packingDone} / ${s.packingTotal}</span>`;
@@ -116,8 +98,7 @@ function renderTile(t, s) {
     else                          meta = `<span class="meta">今日 ${yen(s.ledgerToday)}</span>`;
   }
   return `
-    <a href="${href}"${t.action ? ` data-tool-action="${escapeHtml(t.action)}"` : ''}
-       class="tool-tile${t.urgent ? ' urgent' : ''}">
+    <a href="${href}" class="tool-tile">
       <span class="emoji">${t.emoji}</span>
       <span class="label">${escapeHtml(t.label)}</span>
       ${meta || status}

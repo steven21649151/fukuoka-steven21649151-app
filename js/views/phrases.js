@@ -18,12 +18,8 @@ export async function render(root, params, ctx) {
   const phrases = ctx.data.phrases || [];
   const info    = ctx.data.emergencyInfo || null;
 
-  // 場景排序：日文的 allergy 一定第一；英文照資料順序（機場、飯店、會場）
-  const orderedScenes = scenes.slice().sort((a, b) => {
-    if (a.key === 'allergy') return -1;
-    if (b.key === 'allergy') return 1;
-    return 0;
-  });
+  // 場景照資料順序（日文：餐廳、購物…；英文：機場、飯店、會場）
+  const orderedScenes = scenes.slice();
   const scenesOf = (lang) => orderedScenes.filter(s => sceneLang(s) === lang);
 
   // 語言：網址有 scene 以網址為準（行程卡的 文A 就是靠這個跳轉），否則用上次記住的
@@ -32,7 +28,7 @@ export async function render(root, params, ctx) {
   let lang = qSceneObj ? sceneLang(qSceneObj) : null;
   if (!lang) { try { lang = localStorage.getItem(LS_LANG); } catch { /* ignore */ } }
   if (lang !== 'en') lang = 'ja';
-  let sceneKey = qSceneObj ? qSceneObj.key : (scenesOf(lang)[0]?.key || 'allergy');
+  let sceneKey = qSceneObj ? qSceneObj.key : (scenesOf(lang)[0]?.key || 'restaurant');
 
   // 返回：從行程卡過來就回行程（scrollMemory 會把捲動位置還原），否則回小工具
   const prev = getPrevHash() || '';

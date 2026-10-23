@@ -192,9 +192,6 @@ function renderCard(it, nowInfo, ctx) {
   const spot = it.spotId ? ctx.data.spots.find(s => s.id === it.spotId) : null;
   const desc = it.desc || spot?.oneLine || '';
   const tipsHtml = renderTipsBlock(it.tips);
-  const allergyHtml = it.allergy === 'ask'
-    ? `<a href="#" class="allergy-row" data-open-allergy role="button" aria-label="打開過敏大字卡"><span class="ico">🦐</span><span class="body">甲殼類：入座後先跟店家講一次 · 點開大字卡</span></a>`
-    : '';
   const costHtml = renderCostRow(it, ctx);
   const buyHtml = renderBuyLine(it, spot);
   const altsHtml = renderAlts(it, ctx);
@@ -209,8 +206,8 @@ function renderCard(it, nowInfo, ctx) {
     // 手帳：小圖示按鈕，跟 🗺 並排
     actions.push(`<button type="button" class="btn btn-icon" data-jrn-spot="${escapeHtml(it.spotId)}" data-jrn-day="${it.dayN || ''}" aria-label="拍照記錄">📷</button>`);
   }
-  // 文A：開啟對話字卡。指定了 phraseScene 就跳到那個場景；用餐卡（要問甲殼類）預設跳日文過敏卡
-  const phraseScene = it.phraseScene || (it.allergy === 'ask' ? 'allergy' : null);
+  // 文A：開啟對話字卡，跳到 phraseScene 指定的場景（沒指定就不顯示）
+  const phraseScene = it.phraseScene || null;
   if (phraseScene) {
     actions.push(`<a class="btn btn-icon btn-trans" href="#/tools/phrases?scene=${encodeURIComponent(phraseScene)}" aria-label="開啟對話字卡"><span class="trans-ico" aria-hidden="true">文<small>A</small></span></a>`);
   }
@@ -249,7 +246,6 @@ function renderCard(it, nowInfo, ctx) {
           ${buyHtml}
           ${tipsHtml}
           ${altsHtml}
-          ${allergyHtml}
           ${costHtml}
         </div>
         ${actions.length ? `<div class="actions">${actions.join('')}</div>` : ''}

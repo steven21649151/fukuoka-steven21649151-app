@@ -21,9 +21,6 @@ export const jorudanUrl        = 'https://world.jorudan.co.jp/mln/zh-TW/';
 // LINE 福岡屋台官方帳號（LINE 有 web 版）
 export const lineFukuokaYatai  = 'https://line.me/R/ti/p/@yatai_fukuoka';
 
-// Safety tips — 只有 App，連 Play 商店
-export const safetyTipsPlay    = 'https://play.google.com/store/apps/details?id=jp.co.rcsc.safetytips.android';
-
 // 通用文案：按鈕旁的小字提醒
 export const APP_OR_WEB_HINT   = '會開 App 或網頁版';
 

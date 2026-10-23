@@ -272,18 +272,6 @@ button.paychip {
 .card .tips li .body { flex: 1; min-width: 0; }
 .card .tips li .body b { color: var(--tip-ink); font-weight: 700; }
 
-.card .allergy-row {
-  display: flex;
-  gap: 8px;
-  padding: 6px 10px 6px 8px;
-  border-left: 2px solid var(--cat-food-main);
-  background: color-mix(in oklab, var(--cat-food-main) 8%, transparent);
-  border-radius: 0 8px 8px 0;
-  font-size: 13.5px;
-  line-height: 1.55;
-  color: var(--cat-food-main);
-}
-.card .allergy-row .ico { flex-shrink: 0; }
 .card .cost-row {
   display: flex;
   align-items: center;
@@ -373,11 +361,6 @@ button.paychip {
   background: #FFF3E0;
   color: #B24A00;
   border-color: #F0C68A;
-}
-.pill.allergy {
-  background: color-mix(in oklab, var(--cat-food-main) 12%, transparent);
-  color: var(--cat-food-main);
-  border-color: color-mix(in oklab, var(--cat-food-main) 25%, transparent);
 }
 .pill.now  { background: var(--hl-now-line);  color: #3a2a10; }
 .pill.next { background: var(--hl-next-line); color: #fff; }
@@ -1235,23 +1218,6 @@ body.cap-open { overflow: hidden; }
   margin-left: 2px;
 }
 
-.tk-safety-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  margin-top: 10px;
-  background: var(--card);
-  border-radius: 12px;
-  box-shadow: var(--shadow-card);
-  color: var(--ink);
-  border-left: 3px solid var(--shu);
-}
-.tk-safety-card .ico { font-size: 22px; flex-shrink: 0; }
-.tk-safety-card .body { flex: 1; }
-.tk-safety-card .ttl { font-family: var(--dis); font-size: 15px; font-weight: 700; }
-.tk-safety-card .det { color: var(--ink2); font-size: 13px; margin-top: 2px; }
-.tk-safety-card .chev { color: var(--faint); font-size: 18px; }
 
 /* ================= 我的報告頁 ================= */
 .talk-count {

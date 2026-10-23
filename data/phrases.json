@@ -8,13 +8,6 @@
  },
  "scenes": [
   {
-   "key": "allergy",
-   "label": "🦐 過敏",
-   "color": "#C4452F",
-   "note": "最重要，固定置頂",
-   "lang": "ja"
-  },
-  {
    "key": "restaurant",
    "label": "🍽 餐廳",
    "color": "#C4452F",
@@ -70,80 +63,6 @@
   }
  ],
  "phrases": [
-  {
-   "id": "al-01",
-   "scene": "allergy",
-   "priority": 1,
-   "bigCard": true,
-   "zh": "我對甲殼類過敏，不能吃蝦和蟹",
-   "ja": "甲殻類アレルギーがあります。エビとカニが食べられません。",
-   "romaji": "Kōkakurui arerugī ga arimasu. Ebi to kani ga taberaremasen.",
-   "note": "⭐ 進店先講這一句。這是你最需要的一張卡",
-   "lang": "ja"
-  },
-  {
-   "id": "al-02",
-   "scene": "allergy",
-   "priority": 2,
-   "bigCard": true,
-   "zh": "這道菜裡面有蝦或蟹嗎？",
-   "ja": "この料理にエビやカニは入っていますか？",
-   "romaji": "Kono ryōri ni ebi ya kani wa haitte imasu ka?",
-   "note": "指著菜單問",
-   "lang": "ja"
-  },
-  {
-   "id": "al-03",
-   "scene": "allergy",
-   "priority": 3,
-   "bigCard": true,
-   "zh": "高湯裡有用到蝦或蟹嗎？",
-   "ja": "出汁にエビやカニは使っていますか？",
-   "romaji": "Dashi ni ebi ya kani wa tsukatte imasu ka?",
-   "note": "⚠️ 日本的高湯常有蝦米、蟹殼。看不到不代表沒有——這句要問",
-   "lang": "ja"
-  },
-  {
-   "id": "al-04",
-   "scene": "allergy",
-   "priority": 4,
-   "bigCard": true,
-   "zh": "同一個鐵板上有炒過蝦嗎？",
-   "ja": "同じ鉄板でエビを焼きましたか？",
-   "romaji": "Onaji teppan de ebi o yakimashita ka?",
-   "note": "⚠️ 屋台、小金ちゃん的炒拉麵、鐵板料理一定要問這句",
-   "lang": "ja"
-  },
-  {
-   "id": "al-05",
-   "scene": "allergy",
-   "priority": 5,
-   "zh": "可以換成別的嗎？",
-   "ja": "別のものに変えられますか？",
-   "romaji": "Betsu no mono ni kaeraremasu ka?",
-   "lang": "ja"
-  },
-  {
-   "id": "al-06",
-   "scene": "allergy",
-   "priority": 6,
-   "zh": "沒關係，我點別的就好，不用勉強",
-   "ja": "大丈夫です。別のものを注文しますので、お気になさらないでください。",
-   "romaji": "Daijōbu desu. Betsu no mono o chūmon shimasu node, oki ni nasaranaide kudasai.",
-   "note": "店家做不到時用這句，不要讓對方為難",
-   "lang": "ja"
-  },
-  {
-   "id": "al-07",
-   "scene": "allergy",
-   "priority": 7,
-   "bigCard": true,
-   "zh": "（給宴會場用）我有甲殼類過敏，如果餐點裡有蝦蟹，可以幫我換嗎？",
-   "ja": "甲殻類のアレルギーがあります。お料理にエビやカニが入っている場合、代わりのものをお願いできますか。",
-   "romaji": "Kōkakurui no arerugī ga arimasu. O-ryōri ni ebi ya kani ga haitte iru baai, kawari no mono o onegai dekimasu ka.",
-   "note": "⭐ 10/27 御花晚宴入座後先跟服務人員說這句。会席料理常有蝦蟹",
-   "lang": "ja"
-  },
   {
    "id": "rs-01",
    "scene": "restaurant",
@@ -400,17 +319,7 @@
    "zh": "（請櫃台代訂餐廳）不好意思，我不會說日文，可以請您幫我打電話訂位嗎？店名和日期時間寫在這裡",
    "ja": "すみません、日本語が話せないので、レストランの予約のお電話をお願いできますでしょうか。お店の名前と日時はこちらに書いてあります。一名でお願いします。",
    "romaji": "Sumimasen, nihongo ga hanasenai node, resutoran no yoyaku no o-denwa o onegai dekimasu deshō ka. O-mise no namae to nichiji wa kochira ni kaite arimasu. Ichimei de onegai shimasu.",
-   "note": "⭐ 10/25 到飯店時用：暁（10/26 17:30、1 名）想保險就請櫃台訂。記得補一句過敏（ht-06）",
-   "lang": "ja"
-  },
-  {
-   "id": "ht-06",
-   "scene": "hotel",
-   "priority": 6,
-   "zh": "（訂位時補充）請幫我備註：甲殼類過敏",
-   "ja": "予約の際に「甲殻類アレルギー」とお伝えいただけますか。",
-   "romaji": "Yoyaku no sai ni 'kōkakurui arerugī' to o-tsutae itadakemasu ka.",
-   "note": "⭐ 菅乃屋的「寿司箱膳」可能配到蝦握壽司，一定要備註",
+   "note": "⭐ 10/25 到飯店時用：暁（10/26 17:30、1 名）想保險就請櫃台訂",
    "lang": "ja"
   },
   {
@@ -497,9 +406,9 @@
    "scene": "emergency",
    "priority": 2,
    "bigCard": true,
-   "zh": "我過敏發作了，請幫我叫救護車",
-   "ja": "アレルギーの症状が出ています。救急車を呼んでください。",
-   "romaji": "Arerugī no shōjō ga dete imasu. Kyūkyūsha o yonde kudasai.",
+   "zh": "我身體很不舒服、呼吸困難，請幫我叫救護車",
+   "ja": "具合が悪くて、息が苦しいです。救急車を呼んでください。",
+   "romaji": "Guai ga warukute, iki ga kurushii desu. Kyūkyūsha o yonde kudasai.",
    "note": "⭐ 救護車和消防都是 119（不是 911）",
    "lang": "ja"
   },
@@ -682,15 +591,6 @@
    "note": "把店名和地址一起給櫃台看"
   },
   {
-   "id": "eh-06",
-   "scene": "en-hotel",
-   "lang": "en",
-   "priority": 6,
-   "zh": "請跟店家說我對甲殼類過敏，不能吃蝦和蟹。",
-   "en": "Please tell them I have a shellfish allergy — no shrimp or crab.",
-   "bigCard": true
-  },
-  {
    "id": "eh-07",
    "scene": "en-hotel",
    "lang": "en",
@@ -802,23 +702,6 @@
    "zh": "晚宴後回福岡的巴士幾點從御花出發？在哪裡下車？",
    "en": "What time does the bus back to Fukuoka leave Ohana after the banquet, and where does it drop us off?",
    "bigCard": true
-  },
-  {
-   "id": "ec-07",
-   "scene": "en-conf",
-   "lang": "en",
-   "priority": 7,
-   "zh": "我對甲殼類過敏，晚宴可以幫我備註嗎？",
-   "en": "I have a shellfish allergy. Could you make a note of it for the banquet?"
-  },
-  {
-   "id": "ec-08",
-   "scene": "en-conf",
-   "lang": "en",
-   "priority": 8,
-   "zh": "哪些菜沒有蝦或蟹？",
-   "en": "Which dishes don't have any shrimp or crab?",
-   "note": "晚宴入座後問服務人員"
   },
   {
    "id": "ec-09",

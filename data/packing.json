@@ -44,7 +44,7 @@
           "detail": "屋台、小金ちゃん只收現金，神社的御守御朱印也是。不夠可在日本 7-11 的 Seven Bank ATM 領。" },
         {"id": "pk-suganoya-booking", "text": "訂 菅乃屋 銀座通り店（10/29 午）", "deadline": "2026-10-01", "critical": true, "detail": "已用 Google 預訂訂好：10/29 **12:00**、1 名。"},
         { "id": "pk-recheck-bookings", "text": "確認菅乃屋訂位還在", "deadline": "2026-10-20",
-          "detail": "打開 Google 預訂，確認 10/29 12:00、1 名的訂位還在。過敏要現場再講一次，用句庫的過敏大字卡。" }
+          "detail": "打開 Google 預訂，確認 10/29 12:00、1 名的訂位還在。" }
       ]
     },
 
@@ -61,12 +61,8 @@
           "detail": "⚠️ **離線地圖只有開車導航，沒有大眾運輸和步行路線。**所以這只是保險，主要還是靠 SIM 卡的網路。" },
         { "id": "pk-app-translate", "text": "Google 翻譯下載日文離線包",
           "detail": "鏡頭即時翻譯離線可用，這是翻菜單的主力。" },
-        { "id": "pk-app-safety", "text": "裝 Safety tips（觀光廳官方防災 App）", "critical": true,
-          "detail": "繁體中文、免費、免註冊、Android 5.0+。推播緊急地震速報與海嘯警報。\n⚠️ **熊本 7/28 才剛地震過，你 10/29 要去，這個一定要裝。**" },
-        { "id": "pk-app-jorudan", "text": "裝 Japan Transit Planner（備援轉乘查詢）",
-          "detail": "繁體中文、免費有廣告。福岡市內 Google Maps 就夠，這個是備援——Google Maps 偶爾會漏西鐵的特急班次。" },
         { "id": "pk-app-payke", "text": "裝 Payke（掃條碼看繁中商品資訊）",
-          "detail": "藥妝、伴手禮很好用。⚠️ **它不是過敏原資料庫，不要拿來判斷有沒有甲殼類。**" }
+          "detail": "藥妝、伴手禮很好用。" }
       ]
     },
 
@@ -79,7 +75,8 @@
         { "id": "pk-passport-copy", "text": "護照影本 ＋ 大頭照（實體與雲端各一份）", "critical": true,
           "detail": "遺失時補辦快很多。手機拍一份、Google 雲端存一份、紙本放另一個包。" },
         { "id": "pk-yiman-paper", "text": "役男出境核准通知單（印出來）", "detail": "已核准，**10/28 前可多次出境**。印出來放在護照裡。" },
-        { "id": "pk-ticket", "text": "機票 QR／Email（截圖存相簿）", "critical": true, "detail": "長榮 BR106 去程 26C、BR105 回程 26D。訂位代號 AMBVRX。" },
+        { "id": "pk-ticket", "text": "長榮登機證 QR（截圖存相簿）", "critical": true,
+          "detail": "去程已線上報到，登機證在長榮 App 裡。**截圖存相簿**，沒網路也能出示。\n報到櫃台只要託運行李；過出境、安檢、登機都掃這張 QR。\n回程 BR105 也可以在出發前用長榮 App 線上報到（開放時間以 App 顯示為準）。\n座位：去程 26C、回程 26D。訂位代號 AMBVRX。" },
         { "id": "pk-vjw-qr", "text": "Visit Japan Web QR（截圖存相簿）", "critical": true },
         { "id": "pk-hotel", "text": "兩家飯店的訂房確認信（截圖）", "detail": "Comfort Inn 福岡天神 ×4 晚、博多火星花園 ×1 晚。" },
         { "id": "pk-insurance-doc", "text": "旅平險保單（截圖）" },

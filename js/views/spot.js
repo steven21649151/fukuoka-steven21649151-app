@@ -145,7 +145,6 @@ function renderFacts(spot, rate) {
   if (spot.address)     rows.push(['地址', spot.address]);
   if (spot.payment)     rows.push(['付款', payLabel(spot.payment)]);
   if (spot.booking?.note) rows.push(['訂位', (spot.booking.required ? '需訂位 · ' : '') + spot.booking.note]);
-  if (spot.allergyNote) rows.push(['過敏', spot.allergyNote]);
   if (rows.length === 0) return '';
   return `<div class="facts">${
     rows.map(([k, v]) => `<div class="k">${k}</div><div class="v">${mdInline(v)}</div>`).join('')

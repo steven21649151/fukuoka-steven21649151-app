@@ -2,7 +2,6 @@
 
 import { initRouter } from './router.js';
 import { md } from './lib/fmt.js';
-import { openBigCard } from './lib/bigcard.js';
 import { warmUpJaVoice } from './lib/tts.js';
 import { initRate, getRate, onChange as onRateChange } from './lib/rate.js';
 import { openRateOverlay } from './lib/rate_overlay.js';
@@ -38,7 +37,6 @@ async function boot() {
 
   buildTabbar(data.days);
   startNowClock(data.days);
-  wireAllergyButton(ctx);
   wireRateButton(ctx);
   wireGlobalTipLinks(ctx);
   wireGlobalJournalButtons(ctx);
@@ -61,19 +59,6 @@ function wireRateButton(ctx) {
   const btn = document.getElementById('rateBtn');
   if (!btn) return;
   btn.addEventListener('click', () => openRateOverlay(ctx));
-}
-
-// 常駐 🦐：打開甲殼類過敏大字卡（scene=allergy，按 priority 排序）
-function wireAllergyButton(ctx) {
-  const btn = document.getElementById('allergyBtn');
-  if (!btn) return;
-  btn.addEventListener('click', () => {
-    const list = (ctx.data.phrases || [])
-      .filter(p => p.scene === 'allergy')
-      .sort((a, b) => (a.priority || 99) - (b.priority || 99));
-    if (!list.length) return;
-    openBigCard(list, { startId: list[0].id });
-  });
 }
 
 // 全域：任何 data-jrn-spot="<spotId>" 的按鈕，點下去跳「拍照／從相簿加入」選單
@@ -99,13 +84,6 @@ function wireGlobalTipLinks(_ctx) {
     if (!id) return;
     e.preventDefault();
     location.hash = `#/tools/tips?highlight=${encodeURIComponent(id)}`;
-  });
-  // 行程頁上的過敏列（allergy-row）點下去→打開大字卡
-  document.addEventListener('click', (e) => {
-    const el = e.target.closest('.allergy-row[data-open-allergy]');
-    if (!el) return;
-    e.preventDefault();
-    document.getElementById('allergyBtn')?.click();
   });
 }
 
