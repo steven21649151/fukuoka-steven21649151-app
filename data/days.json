@@ -67,7 +67,7 @@
           "title": "Comfort Inn 寄放行李", "spotId": "hotel-comfort",
           "desc": "check-in 前先把行李放在天神南站附近的飯店。",
           "tips": ["15:00 才能 check-in，訂房時已備註須寄放", "**順便口頭要求高樓層、遠離吸菸樓層**", "**要請櫃台代打電話訂位的，現在一起講**：10/26 17:30 的暁（想保險的話）"],
-          "transit": { "mode": "walk", "detail": "天神南站 140m", "minutes": 3 } },
+          "transit": { "mode": "walk", "detail": "地鐵**天神站**下車，走天神地下街往天神南方向約 10 分（地下街不淋雨；拖行李找電梯）", "minutes": 10 } },
         { "id": "d1-07", "time": "13:15", "endTime": "13:25", "segment": "noon", "kind": "transit", "status": "normal",
           "title": "天神 → 中洲川端",
           "transit": { "mode": "subway", "detail": "地鐵 2 分", "minutes": 2 },

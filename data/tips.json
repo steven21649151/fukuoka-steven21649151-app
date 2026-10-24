@@ -49,6 +49,16 @@
   ],
   "tips": [
     {
+      "id": "tp-flight-weather",
+      "category": "entry",
+      "severity": "critical",
+      "days": [
+        1
+      ],
+      "title": "10/25 預報大雨：出門前先看航班狀態",
+      "body": "出門前打開**長榮 App** 看 BR106 有沒有延誤或取消。\n\n萬一班機取消、確定趕不上 10/28 14:15 的報告，**越早寫信越好**給大會：program@apccas2026.org（大會官網的颱風／惡劣天氣公告）\n\n信裡寫：\n- Paper ID：**2377**\n- Session：**C4L-E**\n- 報告者：Sheng-Fang Hsu\n- 狀況：例如班機取消、預計幾點到\n\n大會說會考慮線上報告等替代方式，但最後一刻才聯絡不一定能安排。"
+    },
+    {
       "id": "tp-vjw",
       "category": "entry",
       "severity": "critical",
