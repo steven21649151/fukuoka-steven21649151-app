@@ -12,6 +12,7 @@ import { render as renderTips }      from './views/tips.js';
 import { render as renderPacking }   from './views/packing.js';
 import { render as renderFlight }    from './views/flight.js';
 import { render as renderLedger }    from './views/ledger.js';
+import { render as renderStats }     from './views/stats.js';
 import { render as renderJournal }   from './views/journal.js';
 import { render as renderSettings }  from './views/settings.js';
 import { render as renderTalk }      from './views/talk.js';
@@ -33,6 +34,7 @@ const VIEWS = {
   packing: renderPacking,
   flight:  renderFlight,
   ledger:  renderLedger,
+  stats:   renderStats,
   journal: renderJournal,
   settings: renderSettings,
   talk:    renderTalk,
@@ -48,6 +50,7 @@ const TOOL_VIEWS = {
   packing: 'packing',
   flight: 'flight',
   ledger: 'ledger',
+  stats:  'stats',
   journal: 'journal',
   settings: 'settings',
   talk:    'talk',
@@ -152,7 +155,7 @@ function updateTabbar(route) {
     null;
   const isTools = route.view === 'tools' || route.view === 'toolsub'
     || route.view === 'rate' || route.view === 'phrases' || route.view === 'tips'
-    || route.view === 'packing' || route.view === 'flight' || route.view === 'ledger'
+    || route.view === 'packing' || route.view === 'flight' || route.view === 'ledger' || route.view === 'stats'
     || route.view === 'journal' || route.view === 'settings'
     || route.view === 'talk' || route.view === 'sos' || route.view === 'tickets' || route.view === 'script';
 

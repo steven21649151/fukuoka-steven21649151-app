@@ -8,7 +8,7 @@ import { yen, twdExact, md as mdDate } from '../lib/fmt.js';
 import { isAvailable, putLedger, deleteLedger, getAllLedger } from '../lib/db.js';
 import { getRate, onChange as onRateChange } from '../lib/rate.js';
 import { findNowContext, todayISO } from '../lib/nowitem.js';
-import { budgetForDay, budgetForAll, actualTotals, sumTotals, donutSvg, chartTable } from '../lib/ledger_chart.js';
+import { DAILY_BUDGET_TWD } from '../lib/ledger_chart.js';
 
 const CATS = [
   { key: 'food',    label: '🍽 餐飲' },
@@ -20,7 +20,6 @@ const CATS = [
 ];
 const CAT_LABEL = Object.fromEntries(CATS.map(c => [c.key, c.label]));
 
-const DAILY_BUDGET_TWD = 8000;
 const LS_LAST_EXPORT = 'ledger.lastExport';   // YYYY-MM-DD
 
 export async function render(root, params, ctx) {
@@ -98,7 +97,7 @@ export async function render(root, params, ctx) {
 
       <section class="ldg-summary" id="ldgSummary"></section>
 
-      <section class="ldg-charts" id="ldgCharts"></section>
+      <a class="btn ldg-stats-btn" href="#/tools/stats">📊 看帳務分析 →</a>
 
       <div id="ldgFilter"></div>
 
@@ -126,15 +125,12 @@ export async function render(root, params, ctx) {
   const summaryEl   = $('#ldgSummary');
   const listEl      = $('#ldgList');
   const nudgeEl     = $('#exportNudge');
-  const chartsEl    = $('#ldgCharts');
   const filterEl    = $('#ldgFilter');
 
   // ==== 狀態
   let rows = [];         // 全部記帳資料
   let currentCat = defaultCat;
   let editingId  = null; // 若在編輯中
-  let chartMode  = 'day';   // 圓餅圖：'day'（這一天，跟著輸入區日期）／'all'（全程）
-  let filterCat  = null;    // 點分類表的某一列 → 清單只顯示那個分類
   let filterItem = qItem || null;   // 從行程卡進來 → 清單只顯示這個行程項目
 
   amountInput.addEventListener('input', paintPreview);
@@ -155,7 +151,6 @@ export async function render(root, params, ctx) {
   dateInput.addEventListener('change', () => {
     // 換日期→重繪 item 選單
     itemSelect.innerHTML = `<option value="">（不關聯）</option>` + renderItemOptions(ctx.data.days, dateInput.value, '');
-    paintCharts();   // 「這一天」的圓餅圖跟著日期走
   });
 
   submitBtn.addEventListener('click', onSubmit);
@@ -227,7 +222,6 @@ export async function render(root, params, ctx) {
       return (b.time || '').localeCompare(a.time || '');
     });
     paintSummary();
-    paintCharts();
     paintList();
   }
 
@@ -267,78 +261,14 @@ export async function render(root, params, ctx) {
     `;
   }
 
-  // ==== 預算 vs 實際 圓餅圖。⚠️ 只讀資料；任何地方出錯就整區不顯示，不能影響新增／刪除
-  function paintCharts() {
-    try { paintChartsInner(); }
-    catch (e) { console.error('圓餅圖計算失敗', e); chartsEl.innerHTML = ''; }
-  }
-  function paintChartsInner() {
-    const rate = getRate().jpyToTwd;
-    const date = dateInput.value || todayISO();
-    const isDay = chartMode === 'day';
-    const actualRows = isDay ? rows.filter(r => r.date === date) : rows;
-    const actual = actualTotals(actualRows);
-    const budget = isDay
-      ? budgetForDay((ctx.data.days || []).find(d => d.date === date), DAILY_BUDGET_TWD, rate)
-      : budgetForAll(ctx.data.days, DAILY_BUDGET_TWD, rate);
-    const aTot = sumTotals(actual), bTot = sumTotals(budget);
-    const aTwd = actualRows.reduce((s, r) => s + (Number(r.twd) || 0), 0);
-    const table = chartTable(budget, actual);
-
-    chartsEl.innerHTML = `
-      <div class="ldg-chart-tabs" role="group" aria-label="圓餅圖範圍">
-        <button type="button" class="seg${isDay ? ' on' : ''}" data-mode="day">這一天</button>
-        <button type="button" class="seg${isDay ? '' : ' on'}" data-mode="all">全程</button>
-        <span class="small faint ldg-chart-date">${isDay ? escapeHtml(mdDate(date)) : '全部日期'}</span>
-      </div>
-      <div class="ldg-donuts">
-        <figure class="ldg-donut-box"><figcaption>預算</figcaption>
-          ${donutSvg(budget, { centerYen: bTot, centerTwd: bTot * rate, emptyText: '沒有預算' })}
-        </figure>
-        <figure class="ldg-donut-box"><figcaption>實際</figcaption>
-          ${donutSvg(actual, { centerYen: aTot, centerTwd: aTwd, over: aTot > bTot && aTot > 0, emptyText: '還沒記帳' })}
-        </figure>
-      </div>
-      ${table.length ? `
-      <table class="ldg-chart-table">
-        <thead><tr><th>分類</th><th>預算</th><th>實際</th><th>差額</th></tr></thead>
-        <tbody>
-          ${table.map(r => `
-            <tr data-cat="${r.cat.key}" class="${filterCat === r.cat.key ? 'on' : ''}" tabindex="0" role="button" aria-pressed="${filterCat === r.cat.key}">
-              <td><i style="background:${r.cat.color}"></i>${r.cat.emoji} ${r.cat.label}</td>
-              <td class="mono">${yen(r.budget)}</td>
-              <td class="mono">${yen(r.actual)}</td>
-              <td class="mono${r.diff < 0 ? ' neg' : ''}">${r.diff < 0 ? '−' + yen(-r.diff) : yen(r.diff)}</td>
-            </tr>`).join('')}
-        </tbody>
-      </table>
-      <div class="small faint ldg-chart-hint">點一列，下面的記帳只看那個分類</div>` : ''}
-    `;
-    chartsEl.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => {
-      chartMode = b.getAttribute('data-mode');
-      paintCharts();
-    }));
-    chartsEl.querySelectorAll('tr[data-cat]').forEach(tr => {
-      const toggle = () => {
-        const k = tr.getAttribute('data-cat');
-        filterCat = filterCat === k ? null : k;
-        paintCharts();
-        paintList();
-      };
-      tr.addEventListener('click', toggle);
-      tr.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
-    });
-  }
-
   function paintFilterBar() {
     const parts = [];
-    if (filterCat) parts.push(escapeHtml(CAT_LABEL[filterCat] || filterCat));
     if (filterItem) parts.push(escapeHtml(findItemLabel(ctx.data.daysLookup, filterItem)));
     if (!parts.length) { filterEl.innerHTML = ''; return; }
     filterEl.innerHTML = `<div class="ldg-filter">只看：${parts.join('、')} <button type="button" class="mini" id="ldgFilterClear">✕ 取消篩選</button></div>`;
     filterEl.querySelector('#ldgFilterClear').addEventListener('click', () => {
-      filterCat = null; filterItem = null;
-      paintCharts(); paintList();
+      filterItem = null;
+      paintList();
     });
   }
 
@@ -348,7 +278,7 @@ export async function render(root, params, ctx) {
       listEl.innerHTML = `<div class="empty">還沒有任何一筆。上面輸入金額按「加入」。</div>`;
       return;
     }
-    const shown = rows.filter(r => (!filterCat || r.category === filterCat) && (!filterItem || r.itemId === filterItem));
+    const shown = rows.filter(r => (!filterItem || r.itemId === filterItem));
     if (shown.length === 0) {
       listEl.innerHTML = `<div class="empty">這個篩選下沒有記帳。</div>`;
       return;

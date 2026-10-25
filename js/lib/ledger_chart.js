@@ -3,6 +3,9 @@
 //   每個 item：cost 取 (min+max)/2；transit.cost 也加進「交通」；kind 對到分類；pay === 'paid'（已付）的不算
 //   購物 ＝ 日預算剩下的：max(0, 日預算換成日圓 − 其他分類加總)
 
+// 日預算（NT$）：記帳頁的日預算進度條、帳務分析頁、圓餅圖預算的「購物＝剩下的」都用這個
+export const DAILY_BUDGET_TWD = 8000;
+
 export const CHART_CATS = [
   { key: 'food',    label: '餐飲', emoji: '🍽', color: '#C4452F' },
   { key: 'transit', label: '交通', emoji: '🚇', color: '#6E6863' },

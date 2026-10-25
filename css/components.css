@@ -2674,3 +2674,48 @@ body.script-open { overflow: hidden; }
   :root:not([data-theme="light"]) .ldg-pill { background: #3A3222; color: #E9D9A6; }
 }
 :root[data-theme="dark"] .ldg-pill { background: #3A3222; color: #E9D9A6; }
+
+/* R26：記帳頁的「看帳務分析」按鈕、帳務分析頁 */
+.ldg-stats-btn { display: flex; justify-content: center; width: 100%; margin: 12px 0 4px; padding: 11px 14px; }
+.stats-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.stats-add { padding: 7px 14px; font-size: 14px; }
+.stats-chips { display: flex; gap: 6px; overflow-x: auto; padding: 4px 0 10px; -webkit-overflow-scrolling: touch; }
+.stats-chips .chip { flex: 0 0 auto; }
+.stats-sum { margin: 8px 0 4px; text-align: center; font-size: 14px; color: var(--ink2); }
+.stats-sum b { color: var(--ink); }
+.stats-sum.over, .stats-sum.over b, .stats-sum.over span { color: #E5484D; }
+.ldg-chart-table tr.total td { border-top: 2px solid var(--line); font-weight: 700; }
+.stats-detail { margin-top: 10px; padding: 8px 10px; border-radius: 12px; background: var(--soft); }
+.stats-detail-h { font-size: 13px; font-weight: 700; color: var(--ink2); margin-bottom: 4px; }
+.stats-row {
+  display: grid; grid-template-columns: auto auto 1fr; gap: 8px; align-items: baseline;
+  padding: 7px 2px; border-top: 1px solid var(--line); color: var(--ink); text-decoration: none; font-size: 13px;
+}
+.stats-row:first-of-type { border-top: 0; }
+.stats-row .dt { color: var(--faint); font-size: 12px; white-space: nowrap; }
+.stats-row .amt { font-weight: 700; white-space: nowrap; }
+.stats-row .lb { color: var(--ink2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.stats-h { font-family: var(--dis); font-size: 17px; margin: 22px 0 6px; }
+.stats-bars { width: 100%; height: auto; display: block; }
+.stats-bars .bar-g { cursor: pointer; outline: none; }
+.stats-bars .bar-bg { fill: transparent; }
+.stats-bars .bar-bg.sel { fill: color-mix(in oklab, var(--shu) 9%, transparent); }
+.stats-bars .bar-g:focus-visible .bar-bg { stroke: var(--shu); stroke-width: 1.5; }
+.stats-bars .bar-budget { stroke: var(--ink2); stroke-width: 1.2; stroke-dasharray: 3 2.5; }
+.stats-bars .bar-today { fill: none; stroke: var(--ink); stroke-width: 2; }
+.stats-bars .bar-val { font-family: var(--mono); font-size: 9px; font-weight: 700; fill: var(--ink); }
+.stats-bars .bar-val.over { fill: #E5484D; }
+.stats-bars .bar-lbl { font-family: var(--mono); font-size: 10px; fill: var(--ink2); }
+.stats-bars .bar-sub { font-family: var(--mono); font-size: 8px; fill: var(--faint); }
+.stats-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 2px 0 8px; }
+.stats-legend i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; }
+.stats-legend u.dash { display: inline-block; width: 14px; border-top: 1.5px dashed var(--ink2); margin-right: 4px; vertical-align: middle; text-decoration: none; }
+.stats-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.stats-table th { text-align: right; font-size: 11px; font-weight: 600; color: var(--faint); padding: 4px 6px; }
+.stats-table th:first-child, .stats-table td:first-child { text-align: left; }
+.stats-table td { text-align: right; padding: 6px 6px; border-top: 1px solid var(--line); vertical-align: top; }
+.stats-table td small { display: block; font-size: 10px; color: var(--faint); }
+.stats-table td .neg { color: #E5484D; font-weight: 700; }
+.stats-table tr.total td { border-top: 2px solid var(--line); font-weight: 700; }
+.stats-table tr.reimb td { font-weight: 600; }
+.stats-table td .faint { color: var(--faint); }
