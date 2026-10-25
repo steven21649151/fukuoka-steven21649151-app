@@ -3,7 +3,7 @@ import { mdInline, escapeHtml, phraseWrap } from '../lib/md.js';
 import { yen, yenRange, md, twdIfBig } from '../lib/fmt.js';
 import { mapsUrl } from '../lib/maps.js';
 import { computeNowInDay, todayISO } from '../lib/nowitem.js';
-import { ticketedItemIds, isAvailable as dbAvailable } from '../lib/db.js';
+import { ticketedItemIds, isAvailable as dbAvailable, getAllLedger } from '../lib/db.js';
 
 const KIND_CAT = {
   flight: 'transit', transit: 'transit', meal: 'food', sight: 'sight',
@@ -58,6 +58,17 @@ export async function render(root, params, ctx, opts = {}) {
     if (await dbAvailable()) tkSet = await ticketedItemIds();
   } catch {}
   ctx.__ticketedItemIds = tkSet;
+
+  // 每個行程項目已經記了多少錢（只讀；失敗就當作空的，行程頁照常顯示）
+  const ledgerByItem = new Map();
+  try {
+    if (await dbAvailable()) {
+      for (const r of await getAllLedger()) {
+        if (r && r.itemId) ledgerByItem.set(r.itemId, (ledgerByItem.get(r.itemId) || 0) + (Number(r.jpy) || 0));
+      }
+    }
+  } catch { ledgerByItem.clear(); }
+  ctx.__ledgerByItem = ledgerByItem;
 
   root.innerHTML = `
     <div class="wrap">
@@ -235,6 +246,17 @@ function renderCard(it, nowInfo, ctx) {
     actions.push(`<a class="btn" href="${escapeHtml(l.href)}">${escapeHtml(l.label)}</a>`);
   }
 
+  // 右上角：這一格已經記了多少錢（只有 > 0 才顯示）。放在 row1 最右邊、tags 後面，跟 APCCAS 立牌（row1 已退位）與「正在進行」pill 不會重疊
+  let spendHtml = '';
+  try {
+    const spent = ctx.__ledgerByItem && ctx.__ledgerByItem.get(it.id);
+    if (spent > 0) {
+      const date = (ctx.data.days.find(d => d.n === it.dayN) || {}).date || '';
+      const href = `#/tools/ledger?date=${encodeURIComponent(date)}&item=${encodeURIComponent(it.id)}`;
+      spendHtml = `<a class="ldg-pill" href="${href}" aria-label="這一格已記 ${yen(spent)}，點了看這一格的記帳">💴 ${yen(spent)}</a>`;
+    }
+  } catch { spendHtml = ''; }
+
   const apccasAttr = it.apccas
     ? ` data-apccas data-apccas-label="${it.apccasHighlight ? '你的報告' : 'APCCAS'}"${it.apccasHighlight ? ' data-apccas-highlight' : ''}`
     : '';
@@ -247,6 +269,7 @@ function renderCard(it, nowInfo, ctx) {
           ${time}
           <span class="iconbox" aria-hidden="true">${icon}</span>
           <span class="tags">${tags.join('')}</span>
+          ${spendHtml}
         </div>
         <div class="title">${phraseWrap(it.title || '')}</div>
         <div class="segs">

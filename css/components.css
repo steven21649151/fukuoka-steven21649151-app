@@ -2634,3 +2634,43 @@ body.script-open { overflow: hidden; }
 :root[data-theme="dark"] .card .cost-row .paychip.pxpay,
 :root[data-theme="dark"] .commute .paychip.pxpay,
 :root[data-theme="dark"] .pill.pxpay { background: #16331F; color: #7CD39A; border-color: #7CD39A33; }
+
+/* R25：記帳「預算 vs 實際」圓餅圖、行程卡右上角金額 */
+.ldg-charts { margin: 14px 0 6px; }
+.ldg-chart-tabs { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+.ldg-chart-tabs .seg {
+  padding: 6px 14px; border-radius: 999px; border: 1px solid var(--line);
+  background: var(--page); color: var(--ink2); font-size: 13px; font-family: inherit; cursor: pointer;
+}
+.ldg-chart-tabs .seg.on { background: var(--ink); color: var(--page); border-color: var(--ink); }
+.ldg-chart-date { margin-left: auto; }
+.ldg-donuts { display: grid; grid-template-columns: repeat(auto-fit, minmax(135px, 1fr)); gap: 10px; }
+.ldg-donut-box { margin: 0; text-align: center; color: var(--ink); }
+.ldg-donut-box figcaption { font-size: 12px; font-weight: 700; letter-spacing: .08em; color: var(--faint); margin-bottom: 2px; }
+.ldg-donut { width: 100%; max-width: 160px; height: auto; display: block; margin: 0 auto; }
+.ldg-donut .dn-amt { font-family: var(--mono); font-size: 13px; font-weight: 700; fill: var(--ink); }
+.ldg-donut .dn-amt.over { fill: #E5484D; }
+.ldg-donut .dn-twd { font-family: var(--mono); font-size: 9px; fill: var(--ink2); }
+.ldg-donut .dn-empty { font-size: 11px; fill: var(--faint); }
+.ldg-chart-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+.ldg-chart-table th { text-align: right; font-size: 11px; font-weight: 600; color: var(--faint); padding: 4px 6px; }
+.ldg-chart-table th:first-child { text-align: left; }
+.ldg-chart-table td { text-align: right; padding: 7px 6px; border-top: 1px solid var(--line); white-space: nowrap; }
+.ldg-chart-table td:first-child { text-align: left; }
+.ldg-chart-table td i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+.ldg-chart-table td.neg { color: #E5484D; font-weight: 700; }
+.ldg-chart-table tr[data-cat] { cursor: pointer; }
+.ldg-chart-table tr.on td { background: color-mix(in oklab, var(--shu) 10%, transparent); }
+.ldg-chart-hint { margin-top: 4px; }
+.ldg-filter { margin: 10px 0 4px; padding: 8px 10px; border-radius: 10px; background: var(--soft); font-size: 13px; color: var(--ink2); }
+.ldg-filter .mini { margin-left: 6px; }
+
+.ldg-pill {
+  flex: 0 0 auto; display: inline-flex; align-items: center; gap: 2px; white-space: nowrap;
+  padding: 2px 9px; border-radius: 999px; background: #F7F0DC; color: #5A4310;
+  font-family: var(--mono); font-size: 12px; line-height: 1.5; text-decoration: none;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .ldg-pill { background: #3A3222; color: #E9D9A6; }
+}
+:root[data-theme="dark"] .ldg-pill { background: #3A3222; color: #E9D9A6; }
