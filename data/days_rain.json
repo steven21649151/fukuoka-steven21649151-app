@@ -134,11 +134,11 @@
   },
   {
    "n": 2,
-   "title": "Keynote 1 ＋ 太宰府 ＋ 天神購物",
-   "summary": "上午開幕和 Keynote 1，接著搭西鐵到太宰府天満宮、吃合格拉麵。下午先繞去 Full Full 買明太子法棍，再待在室內：ミーナ天神一棟買齊衣服和藥妝，先回飯店放東西再吃暁的和牛まぶし。晚上逛天神西通，最後走到中洲吃一碗雜炊當宵夜。",
+   "title": "Keynote 1 ＋ 天神買衣服 ＋ 太宰府 ＋ 夜遊船",
+   "summary": "上午 Keynote 1，接著在 UNIQLO 買衣服、順路買 Full Full。下午搭西鐵去太宰府逛天満宮、吃魁源。天氣好轉，晚上 18:00 搭夜遊船，下船再去吃暁的和牛まぶし。",
    "costEstimate": {
-    "min": 6100,
-    "max": 8600
+    "min": 7000,
+    "max": 9500
    },
    "tipIds": [
     "tp-nishitetsu",
@@ -156,40 +156,56 @@
      "ref": "d2-02"
     },
     {
-     "ref": "d2-03"
+     "id": "d2-r03",
+     "time": "10:05",
+     "endTime": "10:30",
+     "segment": "morning",
+     "kind": "transit",
+     "status": "normal",
+     "title": "ACROS → ミーナ天神",
+     "transit": {
+      "mode": "walk",
+      "detail": "走地下街約 10 分",
+      "minutes": 10
+     },
+     "mapQuery": "ミーナ天神 福岡市中央区天神4-3-8"
     },
     {
-     "ref": "d2-04"
-    },
-    {
-     "ref": "d2-05"
-    },
-    {
-     "ref": "d2-06"
-    },
-    {
-     "ref": "d2-07"
-    },
-    {
-     "ref": "d2-08"
+     "id": "d2-r10",
+     "time": "10:30",
+     "endTime": "12:00",
+     "segment": "morning",
+     "kind": "shopping",
+     "status": "normal",
+     "title": "購物：衣服（UNIQLO）",
+     "spotId": "tenjin-clothes",
+     "tips": [
+      "**UNIQLO 2F 買滿 ¥5,500 → GU 3F 再買滿 ¥5,500**——兩家不能合併免稅",
+      "**帶護照**，結帳前先說 Tax free",
+      "10:00 開門，人還少，試穿比較快"
+     ],
+     "booking": {
+      "required": true,
+      "note": "帶護照！"
+     }
     },
     {
      "id": "d2-r09",
-     "time": "15:10",
-     "endTime": "15:35",
-     "segment": "afternoon",
+     "time": "12:00",
+     "endTime": "12:15",
+     "segment": "noon",
      "kind": "meal",
      "status": "pick",
      "title": "Full Full 天神店（明太子法棍）",
      "spotId": "fullfull-tenjin",
      "tips": [
-      "平日下午人比較少；排太長就跳過，不要耽誤購物",
-      "**現烤的最好吃**，買一條趁熱吃",
+      "10:00 開門，平日上午排隊比較短；排太長就跳過",
+      "**現烤的最好吃**——買一條，等一下在電車上吃",
       "要帶回台灣的，10/30 在機場買冷凍的就好"
      ],
      "transit": {
       "mode": "walk",
-      "detail": "西鐵福岡（天神）站走過去約 5 分",
+      "detail": "ミーナ天神走過去約 5 分",
       "minutes": 5
      },
      "cost": {
@@ -198,67 +214,15 @@
      }
     },
     {
-     "id": "d2-r09b",
-     "time": "15:35",
-     "endTime": "15:40",
-     "segment": "afternoon",
-     "kind": "transit",
-     "status": "normal",
-     "title": "Full Full → ミーナ天神",
-     "transit": {
-      "mode": "walk",
-      "detail": "步行約 5 分",
-      "minutes": 5
-     },
-     "mapQuery": "ミーナ天神 福岡市中央区天神4-3-8"
-    },
-    {
-     "id": "d2-r10",
-     "time": "15:40",
-     "endTime": "16:25",
-     "segment": "afternoon",
-     "kind": "shopping",
-     "status": "normal",
-     "title": "購物：衣服（UNIQLO → GU）",
-     "spotId": "tenjin-clothes",
-     "tips": [
-      "**UNIQLO 2F 買滿 ¥5,500 → GU 3F 再買滿 ¥5,500**——兩家不能合併免稅",
-      "整棟都在室內，下雨也不用出門"
-     ],
-     "booking": {
-      "required": true,
-      "note": "帶護照！"
-     }
-    },
-    {
-     "id": "d2-r11",
-     "time": "16:25",
-     "endTime": "17:00",
-     "segment": "afternoon",
-     "kind": "shopping",
-     "status": "normal",
-     "title": "購物：藥妝",
-     "spotId": "tenjin-drugstore",
-     "tips": [
-      "不用出 ミーナ天神：**B1 マツモトキヨシ**（開到 22:00）",
-      "三樣在同一家結帳就過免稅門檻",
-      "昨天鞋子沒買到合腳的，5F 有 ABC-MART"
-     ],
-     "booking": {
-      "required": true,
-      "note": "帶護照！"
-     }
-    },
-    {
      "id": "d2-r12",
-     "time": "17:00",
-     "endTime": "17:20",
-     "segment": "night",
+     "time": "12:20",
+     "endTime": "13:15",
+     "segment": "noon",
      "kind": "hotel",
      "status": "normal",
-     "title": "回飯店放購物袋",
+     "title": "回飯店放東西、吃 Full Full、休息",
      "spotId": "hotel-comfort",
-     "desc": "走天神地下街到天神南，不用淋雨；飯店和暁都在天神南站旁邊。",
+     "desc": "走天神地下街回飯店，放好購物袋，趁熱吃明太子法棍。",
      "transit": {
       "mode": "walk",
       "detail": "天神地下街走到天神南約 15 分",
@@ -266,21 +230,180 @@
      }
     },
     {
-     "ref": "d2-13"
+     "id": "d2-r04",
+     "time": "13:30",
+     "endTime": "14:10",
+     "segment": "noon",
+     "kind": "transit",
+     "status": "normal",
+     "title": "天神 → 太宰府（西鐵特急）",
+     "transit": {
+      "mode": "train",
+      "detail": "在**西鐵福岡（天神）**站搭，不是地鐵天神站。西鐵 25–40 分（旅人號直達，或特急到西鐵二日市轉太宰府線）",
+      "minutes": 40
+     },
+     "cost": {
+      "min": 500,
+      "max": 600
+     },
+     "pay": "card",
+     "mapQuery": "西鉄太宰府駅",
+     "tips": [
+      "**西鐵福岡（天神）站**搭特急，**二日市換太宰府線**",
+      "Visa 感應進出站"
+     ]
+    },
+    {
+     "id": "d2-r06",
+     "time": "14:10",
+     "endTime": "15:00",
+     "segment": "afternoon",
+     "kind": "sight",
+     "status": "pick",
+     "title": "表參道 → 太宰府天満宮",
+     "spotId": "dazaifu-tenmangu",
+     "desc": "從車站沿參道走到天満宮，看剛整修完的本殿。",
+     "tips": [
+      "宝物殿週一休館"
+     ],
+     "cost": {
+      "min": 0,
+      "max": 500
+     }
+    },
+    {
+     "id": "d2-r07",
+     "time": "15:00",
+     "endTime": "15:45",
+     "segment": "afternoon",
+     "kind": "meal",
+     "status": "pick",
+     "title": "午餐：魁源（太宰府）",
+     "desc": "在太宰府吃的午餐。"
+    },
+    {
+     "id": "d2-r08",
+     "time": "16:00",
+     "endTime": "16:45",
+     "segment": "afternoon",
+     "kind": "transit",
+     "status": "normal",
+     "title": "太宰府 → 天神",
+     "transit": {
+      "mode": "train",
+      "detail": "西鐵 45 分",
+      "minutes": 45
+     },
+     "cost": {
+      "min": 500,
+      "max": 600
+     },
+     "pay": "card",
+     "mapQuery": "西鉄福岡（天神）駅",
+     "tips": [
+      "西鐵，二日市轉車"
+     ]
+    },
+    {
+     "id": "d2-r12b",
+     "time": "16:45",
+     "endTime": "17:30",
+     "segment": "afternoon",
+     "kind": "free",
+     "status": "normal",
+     "title": "回飯店休息",
+     "spotId": "hotel-comfort",
+     "desc": "休息一下，17:30 出門去搭夜遊船。"
+    },
+    {
+     "id": "d2-r13",
+     "time": "17:30",
+     "endTime": "17:45",
+     "segment": "night",
+     "kind": "transit",
+     "status": "normal",
+     "title": "飯店 → 福博であい橋 乘船處",
+     "transit": {
+      "mode": "walk",
+      "detail": "走約 10 分",
+      "minutes": 10
+     },
+     "mapQuery": "那珂川水上バス 福博であい橋",
+     "tips": [
+      "**17:45 前到乘船處**報到"
+     ]
+    },
+    {
+     "id": "d2-r13b",
+     "time": "18:00",
+     "endTime": "18:30",
+     "segment": "night",
+     "kind": "sight",
+     "status": "pick",
+     "title": "中洲ナイトクルーズ（那珂川夜遊船）",
+     "spotId": "nakasu-night-cruise",
+     "tips": [
+      "今天天氣比較好，夜遊船改到今天搭",
+      "**現場付現金 ¥1,500**；硬幣只收 500／100 円",
+      "10/28 那筆預約要取消（寫信 river-cruise@outlook.jp，前一天以前取消收 50%）"
+     ],
+     "cost": {
+      "min": 1500,
+      "max": 1500
+     },
+     "pay": "cash"
+    },
+    {
+     "id": "d2-r13c",
+     "time": "18:35",
+     "endTime": "18:55",
+     "segment": "night",
+     "kind": "transit",
+     "status": "normal",
+     "title": "下船 → 暁（今泉）",
+     "transit": {
+      "mode": "walk",
+      "detail": "走約 15–20 分",
+      "minutes": 18
+     },
+     "mapQuery": "福岡市中央区今泉1-22-18 和牛まぶし"
+    },
+    {
+     "id": "d2-r13d",
+     "time": "19:00",
+     "endTime": "19:50",
+     "segment": "night",
+     "kind": "meal",
+     "status": "pick",
+     "title": "晚餐：黒毛和牛まぶし 暁 AKATSUKI 天神店",
+     "spotId": "akatsuki-tenjin",
+     "tips": [
+      "遊船後才去，避開開門那波排隊；晚上 LO 21:30",
+      "點「**上和牛まぶし**」¥2,400 就好，可以刷卡",
+      "Google 地圖上可能還是舊名「武蔵【天神店】」——地址一樣就是這家"
+     ],
+     "cost": {
+      "min": 2400,
+      "max": 3000
+     },
+     "booking": {
+      "required": false,
+      "note": "不用訂位，現場排"
+     }
     },
     {
      "id": "d2-r14",
-     "time": "18:30",
-     "endTime": "20:00",
+     "time": "20:00",
+     "endTime": "21:00",
      "segment": "night",
      "kind": "shopping",
      "status": "normal",
      "title": "散步：天神西通",
      "spotId": "tenjin-nishidori",
      "tips": [
-      "**伴手禮留到 10/29 再買**，今晚看看就好",
-      "唐吉訶德天神西通り店開到凌晨 5 點、天神本店 24 小時",
-      "雨太大就改逛天神地下街"
+      "吃飽了想散步再走，累了就直接回飯店",
+      "**伴手禮留到 10/29 再買**",
+      "唐吉訶德天神西通り店開到凌晨 5 點"
      ],
      "transit": {
       "mode": "walk",
@@ -290,8 +413,8 @@
     },
     {
      "id": "d2-r15",
-     "time": "20:15",
-     "endTime": "21:15",
+     "time": "21:15",
+     "endTime": "22:00",
      "segment": "night",
      "kind": "meal",
      "status": "pick",
@@ -302,7 +425,8 @@
       "**全店可以抽菸**——不喜歡菸味就跳過這格",
       "菜單是日文：用 Google 翻譯的相機功能拍菜單",
       "帶現金：刷卡不一定能用（PayPay 可以）",
-      "**明天 07:00 要去吃めんたい重**，22:00 前回飯店"
+      "**看肚子決定**——太飽就跳過",
+      "**明天 07:00 要去吃めんたい重**，早點睡"
      ],
      "transit": {
       "mode": "walk",
@@ -320,7 +444,7 @@
     },
     {
      "id": "d2-r16",
-     "time": "21:15",
+     "time": "22:00",
      "segment": "night",
      "kind": "free",
      "status": "normal",
@@ -337,11 +461,11 @@
   },
   {
    "n": 4,
-   "title": "報告日 · 大濠公園＋運河城＋夜遊船",
-   "summary": "早上散步的六個點全部免費、全在會場十分鐘圈內。**你的報告是 14:15，第 5 位講者**。報告完去大濠公園的日本庭園，再逛運河城；18:30 搭夜遊船，下船搭計程車到泰元 別館，19:30 吃慶功燒肉。",
+   "title": "報告日 · 大濠公園＋運河城",
+   "summary": "早上散步的六個點全部免費、全在會場十分鐘圈內。**你的報告是 14:15，第 5 位講者**。報告完去大濠公園的日本庭園，再逛運河城到 18:50，搭地鐵到赤坂，19:30 在泰元 別館吃慶功燒肉。",
    "costEstimate": {
-    "min": 15300,
-    "max": 18000
+    "min": 13800,
+    "max": 15500
    },
    "tipIds": [
     "tp-touchcap",
@@ -472,7 +596,7 @@
     {
      "id": "d4-r18",
      "time": "17:00",
-     "endTime": "17:50",
+     "endTime": "18:50",
      "segment": "night",
      "kind": "shopping",
      "status": "normal",
@@ -482,8 +606,7 @@
      "tips": [
       "主攻東棟：2nd STREET（1F）→ 3COINS+plus、GOOD MARKET KYUSHU（2F）",
       "無印主攻消耗品（調理包咖哩、化妝水），同店同日未稅滿 ¥5,000 才免稅",
-      "**17:50 一定要走**，穿過中洲走到碼頭約 15 分",
-      "買小東西就好——等一下要提去搭船和吃飯"
+      "**18:50 一定要走**，去中洲川端站搭地鐵"
      ],
      "booking": {
       "required": true,
@@ -492,74 +615,25 @@
     },
     {
      "id": "d4-r19",
-     "time": "17:50",
-     "endTime": "18:10",
-     "segment": "night",
-     "kind": "transit",
-     "status": "normal",
-     "title": "運河城 → 福博であい橋 乘船處",
-     "transit": {
-      "mode": "walk",
-      "detail": "穿過中洲、過那珂川，約 15 分",
-      "minutes": 15
-     },
-     "mapQuery": "那珂川水上バス 福博であい橋",
-     "tips": [
-      "Google 地圖搜「那珂川水上バス」就是乘船處"
-     ]
-    },
-    {
-     "id": "d4-r21",
-     "time": "18:30",
-     "endTime": "19:00",
-     "segment": "night",
-     "kind": "sight",
-     "status": "pick",
-     "title": "中洲ナイトクルーズ（那珂川夜遊船）",
-     "spotId": "nakasu-night-cruise",
-     "tips": [
-      "**已預約 18:30**（預約 ID **5775373**）",
-      "**18:15 前到福博であい橋乘船處**報到——過時間可能被當成取消",
-      "**現場付現金 ¥1,500**；硬幣只收 500 円、100 円，最好準備一張千円＋一個 500 円",
-      "天氣太差會停航——停航的話直接去泰元，時間很充裕",
-      "廁所先上好；河上有風，外套穿著"
-     ],
-     "transit": {
-      "mode": "walk",
-      "detail": "就在旁邊",
-      "minutes": 1
-     },
-     "cost": {
-      "min": 1500,
-      "max": 1500
-     },
-     "booking": {
-      "required": true,
-      "channel": "官網預約",
-      "note": "已訂 18:30 #5775373，現場付現"
-     },
-     "pay": "cash"
-    },
-    {
-     "id": "d4-r22",
-     "time": "19:00",
+     "time": "18:50",
      "endTime": "19:25",
      "segment": "night",
      "kind": "transit",
      "status": "normal",
-     "title": "下船 → 泰元 別館",
+     "title": "運河城 → 泰元 別館",
      "transit": {
-      "mode": "taxi",
-      "detail": "**下船直接搭計程車**，約 1.5 公里、5 分鐘、¥800–1,000。搭地鐵：走到中洲川端站 10 分 → 空港線 2 站到赤坂 → 1 號出口走 5 分",
-      "minutes": 10
+      "mode": "subway",
+      "detail": "走到中洲川端站約 10 分 → 空港線 2 站到赤坂 → 1 號出口走 5 分",
+      "minutes": 25
      },
      "cost": {
-      "min": 800,
-      "max": 1000
+      "min": 210,
+      "max": 210
      },
+     "pay": "touch",
      "mapQuery": "泰元 別館 福岡市中央区舞鶴3-1-23",
      "tips": [
-      "給司機看地址：福岡市中央区舞鶴3-1-23「泰元 別館」"
+      "晚到就打電話 092-752-1567"
      ]
     },
     {
