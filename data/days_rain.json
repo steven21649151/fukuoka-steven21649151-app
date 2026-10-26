@@ -8,7 +8,7 @@
   {
    "n": 1,
    "title": "抵達日 · 博多古蹟線＋買鞋",
-   "summary": "今天從凌晨四點半出門，抵達福岡是中午。下午走博多古蹟線（櫛田神社、東長寺），再去警固的 White atelier 買 CONVERSE。check-in 後先到 ACROS 領名牌，晚上 Welcome Reception；散場後買超市熟食回飯店吃。",
+   "summary": "今天從凌晨四點半出門，抵達福岡是中午。下午走博多古蹟線（櫛田神社、東長寺），check-in 後到 ACROS 領名牌，參加 Welcome Reception；之後去ミーナ天神 ABC-MART 買鞋、大國藥妝買藥妝，最後在西鐵超市買宵夜回飯店。",
    "costEstimate": {
     "min": 2000,
     "max": 3200
@@ -107,18 +107,73 @@
      "ref": "d1-12b"
     },
     {
-     "ref": "d1-13"
+     "id": "d1-r13",
+     "time": "18:00",
+     "endTime": "18:40",
+     "segment": "night",
+     "kind": "conference",
+     "status": "fixed",
+     "phraseScene": "en-conf",
+     "title": "Welcome Reception",
+     "spotId": "welcome-reception",
+     "apccas": true,
+     "desc": "APCCAS 的歡迎酒會，在天神的西鐵 Inn（Water site OTTO），立食、來去自由。",
+     "tips": [
+      "**入場要 Welcome Reception 票**——在報到處跟名牌一起領",
+      "領名牌時跟 Registration Desk 說：10/27 不參加 Excursion，會自己去御花參加 Keynote 和 Banquet（大會 8/30 回信要你在報到處說）",
+      "順便問：10/27 從御花回福岡的巴士幾點發車",
+      "從 ACROS 走過去約 5–10 分"
+     ],
+     "transit": {
+      "mode": "walk",
+      "detail": "ACROS 步行約 5–10 分",
+      "minutes": 10
+     },
+     "booking": {
+      "required": false,
+      "note": "已含在註冊費"
+     }
+    },
+    {
+     "id": "d1-r15",
+     "time": "18:45",
+     "endTime": "19:30",
+     "segment": "night",
+     "kind": "shopping",
+     "status": "normal",
+     "title": "買鞋：ABC-MART（ミーナ天神 5F）",
+     "spotId": "tenjin-shoes",
+     "desc": "Reception 早點離開，去ミーナ天神 5F 的 ABC-MART 買鞋。",
+     "booking": {
+      "required": true,
+      "note": "帶護照！"
+     }
+    },
+    {
+     "id": "d1-r16",
+     "time": "19:35",
+     "endTime": "20:40",
+     "segment": "night",
+     "kind": "shopping",
+     "status": "normal",
+     "title": "藥妝：大國藥妝",
+     "spotId": "tenjin-drugstore",
+     "desc": "在大國藥妝把要買的藥妝一次買齊。",
+     "booking": {
+      "required": true,
+      "note": "帶護照！"
+     }
     },
     {
      "id": "d1-r14",
-     "time": "20:05",
-     "endTime": "21:00",
+     "time": "20:45",
+     "endTime": "21:15",
      "segment": "night",
      "kind": "meal",
      "status": "pick",
-     "title": "宵夜：超市打折熟食帶回飯店",
+     "title": "宵夜：西鐵超市（レガネット）買打折熟食",
      "spotId": "tenjin-night-food",
-     "desc": "Reception 散場後順路去超市挑便當、壽司、熟食，帶回房間吃。",
+     "desc": "逛完藥妝去西鐵超市買打折的宵夜，帶回飯店吃。",
      "tips": [
       "**週日超市 22:00 關**——Reception 一結束就去",
       "晚上常貼「半額」「○割引」折扣貼紙",
@@ -129,6 +184,16 @@
       "min": 500,
       "max": 1500
      }
+    },
+    {
+     "id": "d1-r17",
+     "time": "21:20",
+     "segment": "night",
+     "kind": "free",
+     "status": "normal",
+     "title": "回飯店",
+     "spotId": "hotel-comfort",
+     "desc": "回房間吃宵夜、早點睡。"
     }
    ]
   },
@@ -343,9 +408,8 @@
      "title": "中洲ナイトクルーズ（那珂川夜遊船）",
      "spotId": "nakasu-night-cruise",
      "tips": [
-      "今天天氣比較好，夜遊船改到今天搭",
-      "**現場付現金 ¥1,500**；硬幣只收 500／100 円",
-      "10/28 那筆預約要取消（寫信 river-cruise@outlook.jp，前一天以前取消收 50%）"
+      "今天天氣比較好，**10/28 的預約已在櫃台改到今天**",
+      "**現場付現金 ¥1,500**；硬幣只收 500／100 円"
      ],
      "cost": {
       "min": 1500,
