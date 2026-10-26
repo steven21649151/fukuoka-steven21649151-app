@@ -28,17 +28,11 @@ export async function ledgerTotalYen() {
 
 const catKey = (r) => (CHART_CATS.some(c => c.key === r.category) ? r.category : 'other');
 
-// 全支付回饋估算：每筆 min(35, round(台幣 × 3.5%)) 點，每個月合計上限 140 點（依月份分開算）
+// 全支付回饋估算：每筆都先抓 3.5%（台幣），不設上限（實際有滿額加碼活動，以 App 為準）
 function pxpayPoints(rows) {
-  const byMonth = new Map();
-  for (const r of rows) {
-    if (r.pay !== 'pxpay') continue;
-    const m = String(r.date || '').slice(0, 7);
-    byMonth.set(m, (byMonth.get(m) || 0) + Math.min(35, Math.round((Number(r.twd) || 0) * 0.035)));
-  }
-  let t = 0;
-  for (const v of byMonth.values()) t += Math.min(140, v);
-  return t;
+  let twd = 0;
+  for (const r of rows) if (r.pay === 'pxpay') twd += Number(r.twd) || 0;
+  return Math.round(twd * 0.035);
 }
 
 export async function render(root, params, ctx, opts = {}) {
@@ -238,7 +232,7 @@ function renderStats(root, params, ctx, rows, head, opts = {}) {
             <small class="mono">${pct(pm.key)}%</small>
           </button>`).join('')}
       </div>
-      ${jpy.pxpay > 0 ? `<div class="pay-note">📱 全支付回饋約 <b class="mono">${pts}</b> 點（本月上限 140）<small>另有新戶、銀行加碼的話會更多，以 App 為準</small></div>` : ''}
+      ${jpy.pxpay > 0 ? `<div class="pay-note">📱 全支付回饋約 <b class="mono">${pts}</b> 點（以 3.5% 估算）<small>有滿額加碼活動的話會更多，實際點數以 App 為準</small></div>` : ''}
       ${jpy.visa > 0 ? `<div class="pay-note">💳 Visa 海外手續費約 <b class="mono">${twdStr(fee)}</b></div>` : ''}`;
   }
 
