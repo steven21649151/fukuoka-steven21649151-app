@@ -13,8 +13,9 @@ import { findNowContext, todayISO } from '../lib/nowitem.js';
 import { DAILY_BUDGET_TWD } from '../lib/ledger_chart.js';
 import { getPrevHash } from '../router.js';
 import {
-  rowHtml, confirmDelete, deleteMsg, toast, buildCSV, downloadCSV, markExported, LS_LAST_EXPORT,
+  rowHtml, confirmDelete, deleteMsg, toast, buildCSV, downloadCSV, markExported, LS_LAST_EXPORT, PAY_LIST,
 } from '../lib/ledger_io.js';
+import { loadWallet, saveWallet, walletBalance, isConfigured, LOW_CASH_YEN } from '../lib/cash_wallet.js';
 
 export { buildCSV };   // 舊的呼叫端（測試）還是從這裡拿
 
@@ -28,6 +29,24 @@ const CATS = [
 ];
 
 const RECENT_N = 3;
+const LS_LAST_PAY = 'ledger.lastPay';
+
+function lastPay() {
+  try { const v = localStorage.getItem(LS_LAST_PAY); return PAY_LIST.some(p => p.key === v) ? v : null; }
+  catch { return null; }
+}
+// 付款方式預設值：① 行程項目 pay 是現金 → 現金；嗶卡／刷卡類 → Visa；景點收全支付 → 全支付
+//                ② 否則用上一次存的，再沒有就 Visa
+function defaultPayFor(it, spots) {
+  if (it) {
+    if (it.pay === 'cash') return 'cash';
+    if (['touch', 'card', 'ic', 'pass'].includes(it.pay)) return 'visa';
+    const spot = it.spotId ? (spots || []).find(sp => sp.id === it.spotId) : null;
+    if (spot && spot.pxpay === 'yes') return 'pxpay';
+  }
+  return lastPay() || 'visa';
+}
+const findItem = (days, date, id) => id ? ((days || []).find(d => d.date === date)?.items || []).find(it => it.id === id) : null;
 
 export async function render(root, params, ctx) {
   const dbOk = await isAvailable();
@@ -51,11 +70,14 @@ export async function render(root, params, ctx) {
   const defaultItemId = qDate ? (qItemObj ? qItem : '') : (nowCtx.item?.id || '');
   const defaultCat = suggestCategoryFromItem(qDate ? qItemObj : nowCtx.item);
   const defaultReimb = (defaultCat === 'hotel');
+  const defaultPay = defaultPayFor(qDate ? qItemObj : nowCtx.item, ctx.data.spots);
 
   root.innerHTML = `
     <div class="wrap">
       <div class="topnav"><a class="back" href="#/tools">← 回小工具</a></div>
       <h1 style="font-family:var(--dis);font-size:22px;margin:14px 0 6px">記帳</h1>
+
+      <button type="button" class="ldg-wallet" id="ldgWallet"></button>
 
       <div id="exportNudge" hidden></div>
 
@@ -70,6 +92,13 @@ export async function render(root, params, ctx) {
           ${CATS.map(c => `
             <button type="button" class="chip" data-cat="${c.key}"
                     ${c.key === defaultCat ? 'aria-current="true"' : ''}>${c.label}</button>
+          `).join('')}
+        </div>
+
+        <div class="ldg-chips ldg-pays" id="ldgPays" role="radiogroup" aria-label="付款方式">
+          ${PAY_LIST.map(pm => `
+            <button type="button" class="chip" data-pay="${pm.key}"
+                    ${pm.key === defaultPay ? 'aria-current="true"' : ''}>${pm.emoji} ${pm.label}</button>
           `).join('')}
         </div>
 
@@ -117,6 +146,8 @@ export async function render(root, params, ctx) {
   const amountInput = $('#ldgAmount');
   const previewEl   = $('#ldgPreview');
   const catsEl      = $('#ldgCats');
+  const paysEl      = $('#ldgPays');
+  const walletEl    = $('#ldgWallet');
   const dateInput   = $('#ldgDate');
   const itemSelect  = $('#ldgItem');
   const reimbInput  = $('#ldgReimb');
@@ -132,7 +163,9 @@ export async function render(root, params, ctx) {
   let currentCat = defaultCat;
   let editingId  = null; // 若在編輯中
   let editingTime = '';  // 編輯時保留原本記的時間
-  let leaveAfterSave = false;   // 從 ?edit= 進來 → 存完回上一頁
+  let leaveAfterSave = params?.query?.back === '1';   // ?back=1（行程卡快速記）進來、或載入 ?edit= 之後 → 存完回上一頁
+  let currentPay = defaultPay;   // 編輯沒有 pay 的舊記錄時是 null（＝未標記）
+  let payTouched = false;        // 使用者自己點過付款方式 → 換行程項目不再幫他改
 
   amountInput.addEventListener('input', paintPreview);
   onRateChange(paintPreview);
@@ -149,9 +182,28 @@ export async function render(root, params, ctx) {
   });
   reimbInput.addEventListener('change', () => { reimbInput.dataset.userTouched = '1'; });
 
+  function showPay(key) {
+    currentPay = key;
+    paysEl.querySelectorAll('button').forEach(b => b.removeAttribute('aria-current'));
+    if (key) paysEl.querySelector(`button[data-pay="${key}"]`)?.setAttribute('aria-current', 'true');
+  }
+  paysEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-pay]');
+    if (!btn) return;
+    payTouched = true;
+    showPay(btn.getAttribute('data-pay'));
+  });
+  // 換關聯行程 → 付款方式跟著行程項目重新猜（使用者自己選過或在編輯就不動）
+  itemSelect.addEventListener('change', () => {
+    if (payTouched || editingId) return;
+    showPay(defaultPayFor(findItem(ctx.data.days, dateInput.value, itemSelect.value), ctx.data.spots));
+  });
+  walletEl.addEventListener('click', openWalletPanel);
+
   dateInput.addEventListener('change', () => {
     // 換日期→重繪 item 選單
     itemSelect.innerHTML = `<option value="">（不關聯）</option>` + renderItemOptions(ctx.data.days, dateInput.value, '');
+    if (!payTouched && !editingId) showPay(defaultPayFor(null, ctx.data.spots));
   });
 
   submitBtn.addEventListener('click', onSubmit);
@@ -189,9 +241,11 @@ export async function render(root, params, ctx) {
   function resetForm() {
     amountInput.value = '';
     noteInput.value = '';
+    const wasEditing = !!editingId;
     editingId = null; editingTime = '';
     submitBtn.textContent = '加入 →';
     cancelBtn.hidden = true;
+    if (wasEditing) { payTouched = false; showPay(lastPay() || 'visa'); }
     paintPreview();
   }
 
@@ -226,15 +280,16 @@ export async function render(root, params, ctx) {
       note: (noteInput.value || '').trim(),
       reimbursable: !!reimbInput.checked,
     };
+    if (currentPay) row.pay = currentPay;   // 編輯沒有 pay 的舊記錄又沒補選 → 維持沒有（未標記）
     try {
       await putLedger(row);
     } catch (e) {
       alert('儲存失敗：' + (e.message || e));
       return;
     }
-    const wasEditing = !!editingId;
+    if (currentPay) { try { localStorage.setItem(LS_LAST_PAY, currentPay); } catch {} }
     resetForm();
-    if (wasEditing && leaveAfterSave) { leave(); return; }
+    if (leaveAfterSave) { leave(); return; }
     amountInput.focus();
     await reload();
   }
@@ -248,6 +303,99 @@ export async function render(root, params, ctx) {
     rows = await getAllLedger();
     paintSummary();
     paintRecent();
+    paintWallet();
+  }
+
+  // ==== 現金錢包（只存在這支手機）
+  function paintWallet() {
+    try {
+      const w = loadWallet();
+      const bal = walletBalance(w, rows);
+      if (bal == null) {
+        walletEl.className = 'ldg-wallet unset';
+        walletEl.innerHTML = '<span class="w-main">設定一下帶了多少現金 →</span>';
+        return;
+      }
+      const low = bal < LOW_CASH_YEN;
+      walletEl.className = 'ldg-wallet' + (low ? ' low' : '');
+      walletEl.innerHTML = `<span class="w-main">💴 現金還剩 <b class="mono">${bal < 0 ? '−' : ''}${yen(Math.abs(bal))}</b></span>${low ? '<span class="w-warn">現金快用完了</span>' : ''}`;
+    } catch (e) {
+      console.error('現金錢包算不出來', e);
+      walletEl.className = 'ldg-wallet unset';
+      walletEl.innerHTML = '<span class="w-main">現金餘額暫時算不出來</span>';
+    }
+  }
+
+  function openWalletPanel() {
+    const ov = document.createElement('div');
+    ov.className = 'lsh-overlay';
+    ov.innerHTML = `
+      <div class="lsh-sheet" role="dialog" aria-modal="true" aria-labelledby="wlTitle">
+        <div class="lsh-head">
+          <div class="lsh-ttl"><div class="lsh-name" id="wlTitle">💴 現金錢包</div><div class="lsh-sum" id="wlSum"></div></div>
+          <button type="button" class="lsh-x" aria-label="關閉">✕</button>
+        </div>
+        <div class="lsh-body wl-body">
+          <label class="wl-field"><span class="k">一開始帶了多少日幣現金</span>
+            <span class="wl-inline"><input id="wlStart" inputmode="numeric" placeholder="例如 30000"><button type="button" class="btn" id="wlSaveStart">存</button></span>
+          </label>
+          <div class="wl-field"><span class="k">＋ 補現金（ATM 領錢或換錢時）</span>
+            <span class="wl-inline"><input type="date" id="wlDate"><input id="wlAmt" inputmode="numeric" placeholder="金額 ¥"><button type="button" class="btn" id="wlAdd">＋ 補現金</button></span>
+          </div>
+          <div id="wlList"></div>
+          <div class="small faint wl-note">這個金額只存在這支手機</div>
+        </div>
+      </div>`;
+    document.body.appendChild(ov);
+    const q = (sel) => ov.querySelector(sel);
+    q('#wlDate').value = todayISO();
+    const num = (v) => { const n = Math.round(parseFloat(String(v).replace(/,/g, ''))); return Number.isFinite(n) && n > 0 ? n : null; };
+    function paintPanel() {
+      const w = loadWallet();
+      const bal = walletBalance(w, rows);
+      q('#wlSum').innerHTML = bal == null ? '<span class="faint small">還沒設定</span>' : `還剩 <b class="mono">${bal < 0 ? '−' : ''}${yen(Math.abs(bal))}</b>`;
+      if (document.activeElement !== q('#wlStart')) q('#wlStart').value = w.start != null ? String(w.start) : '';
+      q('#wlList').innerHTML = w.topups.length
+        ? `<div class="wl-list">${w.topups.slice().sort((a, b) => (a.date < b.date ? 1 : -1)).map(t => `
+            <div class="wl-row"><span class="mono">${escapeHtml(t.date.slice(5).replace('-', '/'))}</span><b class="mono">＋${yen(t.jpy)}</b>
+              <button type="button" class="mini del" data-wl-del="${escapeHtml(t.id)}" aria-label="刪除這筆補現金">刪</button></div>`).join('')}</div>`
+        : '';
+      paintWallet();
+    }
+    function close() { ov.classList.remove('open'); setTimeout(() => ov.remove(), 220); }
+    q('#wlSaveStart').addEventListener('click', () => {
+      const raw = q('#wlStart').value.trim();
+      const w = loadWallet();
+      if (raw === '') { w.start = null; }
+      else {
+        const n = parseFloat(raw.replace(/,/g, ''));
+        if (!Number.isFinite(n) || n < 0) { toast('請輸入日幣金額'); return; }
+        w.start = Math.round(n);
+      }
+      if (!saveWallet(w)) toast('這個瀏覽器存不下來'); else toast('已存好');
+      paintPanel();
+    });
+    q('#wlAdd').addEventListener('click', () => {
+      const n = num(q('#wlAmt').value);
+      if (!n) { q('#wlAmt').focus(); return; }
+      const w = loadWallet();
+      w.topups.push({ id: cryptoUUID(), date: q('#wlDate').value || todayISO(), jpy: n });
+      if (!saveWallet(w)) { toast('這個瀏覽器存不下來'); return; }
+      q('#wlAmt').value = '';
+      paintPanel();
+    });
+    ov.addEventListener('click', (e) => {
+      if (e.target === ov || e.target.closest('.lsh-x')) { close(); return; }
+      const del = e.target.closest('[data-wl-del]');
+      if (del) {
+        const w = loadWallet();
+        w.topups = w.topups.filter(t => t.id !== del.getAttribute('data-wl-del'));
+        saveWallet(w);
+        paintPanel();
+      }
+    });
+    paintPanel();
+    setTimeout(() => ov.classList.add('open'), 20);
   }
 
   function paintSummary() {
@@ -315,6 +463,8 @@ export async function render(root, params, ctx) {
     const catBtn = catsEl.querySelector(`button[data-cat="${r.category}"]`);
     if (catBtn) catBtn.setAttribute('aria-current', 'true');
     currentCat = r.category;
+    showPay(PAY_LIST.some(pm => pm.key === r.pay) ? r.pay : null);   // 舊記錄沒有付款方式 → 都不選，可以補選
+    payTouched = true;
     // item 選項
     itemSelect.innerHTML = `<option value="">（不關聯）</option>` + renderItemOptions(ctx.data.days, r.date, r.itemId || '');
     submitBtn.textContent = '更新 ✓';

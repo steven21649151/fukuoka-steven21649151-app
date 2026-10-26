@@ -10,7 +10,7 @@ import {
   CHART_CATS, DAILY_BUDGET_TWD, budgetForDay, budgetForAll, actualTotals, sumTotals, donutSvg, chartTable,
 } from '../lib/ledger_chart.js';
 import {
-  rowHtml, confirmDelete, deleteMsg, toast, buildCSV, downloadCSV, copyCSV, markExported,
+  rowHtml, confirmDelete, deleteMsg, toast, buildCSV, downloadCSV, copyCSV, markExported, PAY_LIST, PAY_NONE, payKey,
 } from '../lib/ledger_io.js';
 
 const yenStr = (n) => '¥' + Math.round(n).toLocaleString('en-US');
@@ -27,6 +27,19 @@ export async function ledgerTotalYen() {
 }
 
 const catKey = (r) => (CHART_CATS.some(c => c.key === r.category) ? r.category : 'other');
+
+// 全支付回饋估算：每筆 min(35, round(台幣 × 3.5%)) 點，每個月合計上限 140 點（依月份分開算）
+function pxpayPoints(rows) {
+  const byMonth = new Map();
+  for (const r of rows) {
+    if (r.pay !== 'pxpay') continue;
+    const m = String(r.date || '').slice(0, 7);
+    byMonth.set(m, (byMonth.get(m) || 0) + Math.min(35, Math.round((Number(r.twd) || 0) * 0.035)));
+  }
+  let t = 0;
+  for (const v of byMonth.values()) t += Math.min(140, v);
+  return t;
+}
 
 export async function render(root, params, ctx, opts = {}) {
   const head = `
@@ -67,6 +80,7 @@ function renderStats(root, params, ctx, rows, head, opts = {}) {
   const q = params?.query?.d;
   let sel = q === 'all' || dates.includes(q) ? q : (dates.includes(today) ? today : 'all');
   let filterCat = null;             // 點分類表的某一列 → 明細只看那個分類（再點取消）
+  let filterPay = null;             // 點付款方式的某一格 → 明細只看那種付款方式（跟分類篩選可同時用）
 
   root.innerHTML = `
     <div class="wrap">
@@ -82,7 +96,7 @@ function renderStats(root, params, ctx, rows, head, opts = {}) {
   const barsEl = root.querySelector('#stBars');
 
   function setSel(v) {
-    sel = v; filterCat = null;
+    sel = v; filterCat = null; filterPay = null;
     const base = location.hash.split('?')[0];
     history.replaceState(null, '', `${base}?d=${encodeURIComponent(v)}`);   // 重新整理不會跑掉，也不重跑 view
     paint();
@@ -133,7 +147,7 @@ function renderStats(root, params, ctx, rows, head, opts = {}) {
         </figure>
       </div>
       <div class="stats-sum${over ? ' over' : ''}">實際 <b class="mono">${yenStr(aTot)}</b>／預算 <b class="mono">${yenStr(bTot)}</b>${pct != null ? `（<span class="mono">${pct}%</span>）` : ''}</div>
-      ${filterCat ? `<div class="ldg-filter">只看：${CHART_CATS.find(c => c.key === filterCat).emoji} ${CHART_CATS.find(c => c.key === filterCat).label} <button type="button" class="mini" id="stFilterClear" aria-label="取消篩選">✕</button></div>` : ''}
+      ${filterBarHtml()}
       ${table.length ? `
       <table class="ldg-chart-table">
         <thead><tr><th>分類</th><th>預算</th><th>實際</th><th>差額</th></tr></thead>
@@ -154,6 +168,7 @@ function renderStats(root, params, ctx, rows, head, opts = {}) {
         </tbody>
       </table>
       <div class="small faint ldg-chart-hint">點一列，下面的明細只看這個分類（再點一次取消）</div>` : `<div class="empty" style="margin-top:10px">${isAll ? '還沒有任何記帳。' : '這一天還沒記帳。'}</div>`}
+      ${selRows.length ? payBlockHtml(selRows) : ''}
     `;
     mainEl.querySelectorAll('tr[data-cat]').forEach(tr => {
       const toggle = () => {
@@ -170,6 +185,61 @@ function renderStats(root, params, ctx, rows, head, opts = {}) {
       safe(mainEl, paintMain);
       safe(listEl, paintList);
     });
+    mainEl.querySelector('#stFilterPayClear')?.addEventListener('click', () => {
+      filterPay = null;
+      safe(mainEl, paintMain);
+      safe(listEl, paintList);
+    });
+    mainEl.querySelectorAll('[data-pay]').forEach(b => b.addEventListener('click', () => {
+      const k = b.getAttribute('data-pay');
+      filterPay = filterPay === k ? null : k;
+      safe(mainEl, paintMain);
+      safe(listEl, paintList);
+    }));
+  }
+
+  function filterBarHtml() {
+    const parts = [];
+    if (filterCat) {
+      const c = CHART_CATS.find(x => x.key === filterCat);
+      parts.push(`${c.emoji} ${c.label} <button type="button" class="mini" id="stFilterClear" aria-label="取消分類篩選">✕</button>`);
+    }
+    if (filterPay) {
+      const pm = [...PAY_LIST, PAY_NONE].find(x => x.key === filterPay);
+      parts.push(`${pm.emoji ? pm.emoji + ' ' : ''}${pm.label} <button type="button" class="mini" id="stFilterPayClear" aria-label="取消付款方式篩選">✕</button>`);
+    }
+    return parts.length ? `<div class="ldg-filter">只看：${parts.join('　')}</div>` : '';
+  }
+
+  // ---------- 付款方式小計（跟著目前範圍）＋全支付回饋、Visa 手續費估算 ----------
+  function payBlockHtml(selRows) {
+    const jpy = { visa: 0, cash: 0, pxpay: 0, none: 0 };
+    const twd = { visa: 0, cash: 0, pxpay: 0, none: 0 };
+    for (const r of selRows) {
+      const k = payKey(r);
+      jpy[k] += Number(r.jpy) || 0;
+      twd[k] += Number(r.twd) || 0;
+    }
+    const all = jpy.visa + jpy.cash + jpy.pxpay + jpy.none;
+    const list = [...PAY_LIST, PAY_NONE].filter(pm => pm.key !== 'none' || jpy.none > 0);
+    const pct = (k) => (all > 0 ? Math.round(jpy[k] / all * 100) : 0);
+    const pts = pxpayPoints(selRows);
+    const fee = Math.round(twd.visa * 0.015);
+    return `
+      <h2 class="stats-h">付款方式</h2>
+      <div class="pay-bar" role="img" aria-label="付款方式佔比">
+        ${list.filter(pm => jpy[pm.key] > 0).map(pm => `<span style="width:${(jpy[pm.key] / all * 100).toFixed(2)}%;background:${pm.color}"></span>`).join('') || '<span style="width:100%;background:var(--line)"></span>'}
+      </div>
+      <div class="pay-grid">
+        ${list.map(pm => `
+          <button type="button" class="pay-cell${filterPay === pm.key ? ' on' : ''}" data-pay="${pm.key}" aria-pressed="${filterPay === pm.key}">
+            <span class="pc-l"><i style="background:${pm.color}"></i>${pm.emoji ? pm.emoji + ' ' : ''}${pm.label}</span>
+            <b class="mono">${yenStr(jpy[pm.key])}</b>
+            <small class="mono">${pct(pm.key)}%</small>
+          </button>`).join('')}
+      </div>
+      ${jpy.pxpay > 0 ? `<div class="pay-note">📱 全支付回饋約 <b class="mono">${pts}</b> 點（本月上限 140）<small>另有新戶、銀行加碼的話會更多，以 App 為準</small></div>` : ''}
+      ${jpy.visa > 0 ? `<div class="pay-note">💳 Visa 海外手續費約 <b class="mono">${twdStr(fee)}</b></div>` : ''}`;
   }
 
   // ---------- 明細（依範圍＋分類篩選；全程時依日期分組）＋匯出 ----------
@@ -177,7 +247,7 @@ function renderStats(root, params, ctx, rows, head, opts = {}) {
     const isAll = sel === 'all';
     const inRange = isAll ? rows : rows.filter(r => r.date === sel);
     const shown = inRange
-      .filter(r => !filterCat || catKey(r) === filterCat)
+      .filter(r => (!filterCat || catKey(r) === filterCat) && (!filterPay || payKey(r) === filterPay))
       .sort((a, b) => (a.date === b.date ? (b.time || '').localeCompare(a.time || '') : (a.date < b.date ? 1 : -1)));
     const groups = new Map();
     for (const r of shown) {

@@ -12,6 +12,16 @@ export const CAT_EMOJI = {
   food: '🍽', transit: '🚇', shop: '🛍', ticket: '🎟', hotel: '🏨', other: '🧾',
 };
 
+// 付款方式：新存的記錄才有 pay 欄位；舊記錄沒有 → 一律當「未標記」
+export const PAY_LIST = [
+  { key: 'visa',  emoji: '💳', label: 'Visa',  color: '#3B6FB6' },
+  { key: 'cash',  emoji: '💴', label: '現金',  color: '#4F7A4A' },
+  { key: 'pxpay', emoji: '📱', label: '全支付', color: '#D9731F' },
+];
+export const PAY_NONE = { key: 'none', emoji: '', label: '未標記', color: '#8A8580' };
+export const payKey = (r) => (PAY_LIST.some(p => p.key === r?.pay) ? r.pay : 'none');
+export const payLabel = (r) => (PAY_LIST.find(p => p.key === r?.pay) || PAY_NONE).label;
+
 // 行程項目名稱（lookup ＝ 目前版本＋另一版本的 days，找舊記錄綁的項目用）
 export function itemTitle(days, itemId) {
   for (const d of days || []) {
@@ -34,11 +44,12 @@ export function rowHtml(r, { lookup, showDate = false, showItem = true } = {}) {
   const label = [showItem && r.itemId ? itemTitle(lookup, r.itemId) : '', r.note || ''].filter(Boolean).join(' · ') || '—';
   const when = `${showDate ? mdDate(r.date) + ' ' : ''}${r.time || ''}`.trim();
   const id = escapeHtml(r.id);
+  const pay = PAY_LIST.find(p => p.key === r.pay);
   return `
     <div class="lr" data-id="${id}"${r.reimbursable ? ' data-reimb' : ''}>
       <span class="lr-t mono">${escapeHtml(when)}</span>
       <span class="lr-c" title="${escapeHtml(CAT_LABEL[r.category] || r.category)}">${CAT_EMOJI[r.category] || '🧾'}</span>
-      <span class="lr-a"><b class="mono">${yen(r.jpy)}</b><small class="mono">NT$${(Number(r.twd) || 0).toLocaleString('en-US')}</small></span>
+      <span class="lr-a">${pay ? `<i class="lr-p" title="${pay.label}">${pay.emoji}</i>` : ''}<b class="mono">${yen(r.jpy)}</b><small class="mono">NT$${(Number(r.twd) || 0).toLocaleString('en-US')}</small></span>
       <span class="lr-b">
         <button type="button" class="mini" data-edit="${id}" aria-label="改這一筆">改</button>
         <button type="button" class="mini del" data-del="${id}" aria-label="刪這一筆">刪</button>
@@ -86,7 +97,7 @@ function csvField(v) {
   return s;
 }
 export function buildCSV(list, days) {
-  const header = ['日期','時間','分類','日圓','台幣','當時匯率','關聯行程','可報帳','備註'];
+  const header = ['日期','時間','分類','日圓','台幣','當時匯率','關聯行程','可報帳','付款方式','備註'];
   const lines = [header.map(csvField).join(',')];
   // 用日期＋時間排序，早的在前
   const sorted = list.slice().sort((a, b) =>
@@ -99,6 +110,7 @@ export function buildCSV(list, days) {
       r.rateUsed?.toFixed?.(4) ?? r.rateUsed,
       r.itemId ? findItemLabel(days, r.itemId) : '',
       r.reimbursable ? '是' : '',
+      payLabel(r),
       r.note || '',
     ].map(csvField).join(','));
   }

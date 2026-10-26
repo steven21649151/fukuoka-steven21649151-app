@@ -271,6 +271,16 @@ function renderCard(it, nowInfo, ctx) {
     }
   } catch { spendHtml = ''; }
 
+  // 還沒記帳的卡：按鈕列多一顆 💴＋ 直接記一筆（機票、已付、免費的不顯示）；存完回到這一頁同一個位置
+  try {
+    if (!spendHtml && it.kind !== 'flight' && it.pay !== 'paid' && it.pay !== 'free') {
+      const date = (ctx.data.days.find(d => d.n === it.dayN) || {}).date || '';
+      if (date) {
+        actions.push(`<a class="btn btn-icon" href="#/tools/ledger?date=${encodeURIComponent(date)}&item=${encodeURIComponent(it.id)}&back=1" aria-label="記一筆">💴＋</a>`);
+      }
+    }
+  } catch { /* 快速記帳按鈕出錯就不顯示，卡片照常 */ }
+
   const apccasAttr = it.apccas
     ? ` data-apccas data-apccas-label="${it.apccasHighlight ? '你的報告' : 'APCCAS'}"${it.apccasHighlight ? ' data-apccas-highlight' : ''}`
     : '';

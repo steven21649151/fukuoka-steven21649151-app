@@ -92,7 +92,7 @@ export async function openLedgerSheet({ itemId, date, title, lookup, onChange })
     const ed = e.target.closest('[data-edit]');
     if (ed) { goto('#/tools/ledger?edit=' + encodeURIComponent(ed.getAttribute('data-edit'))); return; }
     if (e.target.closest('#lshAdd')) {
-      goto(`#/tools/ledger?date=${encodeURIComponent(date)}&item=${encodeURIComponent(itemId)}`);
+      goto(`#/tools/ledger?date=${encodeURIComponent(date)}&item=${encodeURIComponent(itemId)}&back=1`);
       return;
     }
     const del = e.target.closest('[data-del]');
