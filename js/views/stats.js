@@ -3,12 +3,15 @@
 // 計算和畫圖沿用 lib/ledger_chart.js。
 import { escapeHtml } from '../lib/md.js';
 import { md as mdDate } from '../lib/fmt.js';
-import { isAvailable, getAllLedger } from '../lib/db.js';
+import { isAvailable, getAllLedger, deleteLedger } from '../lib/db.js';
 import { getRate } from '../lib/rate.js';
 import { todayISO } from '../lib/nowitem.js';
 import {
   CHART_CATS, DAILY_BUDGET_TWD, budgetForDay, budgetForAll, actualTotals, sumTotals, donutSvg, chartTable,
 } from '../lib/ledger_chart.js';
+import {
+  rowHtml, confirmDelete, deleteMsg, toast, buildCSV, downloadCSV, copyCSV, markExported,
+} from '../lib/ledger_io.js';
 
 const yenStr = (n) => '¥' + Math.round(n).toLocaleString('en-US');
 const twdStr = (n) => 'NT$' + Math.round(n).toLocaleString('en-US');
@@ -23,15 +26,9 @@ export async function ledgerTotalYen() {
   } catch { return null; }
 }
 
-function itemTitle(days, itemId) {
-  for (const d of days || []) {
-    const it = (d.items || []).find(x => x.id === itemId);
-    if (it) return it.title || itemId;
-  }
-  return itemId;
-}
+const catKey = (r) => (CHART_CATS.some(c => c.key === r.category) ? r.category : 'other');
 
-export async function render(root, params, ctx) {
+export async function render(root, params, ctx, opts = {}) {
   const head = `
     <div class="topnav stats-top">
       <a class="back" href="#/tools">← 回小工具</a>
@@ -53,14 +50,14 @@ export async function render(root, params, ctx) {
   }
 
   try {
-    renderStats(root, params, ctx, rows, head);
+    renderStats(root, params, ctx, rows, head, opts);
   } catch (e) {
     console.error('帳務分析計算失敗', e);
     fail('帳務分析暫時算不出來，先不顯示。記帳和行程照常可以用。');
   }
 }
 
-function renderStats(root, params, ctx, rows, head) {
+function renderStats(root, params, ctx, rows, head, opts = {}) {
   const days = ctx.data.days || [];
   const lookup = ctx.data.daysLookup || days;
   const today = todayISO();
@@ -69,21 +66,23 @@ function renderStats(root, params, ctx, rows, head) {
   // ---- 範圍：?d=2026-10-26 或 ?d=all；預設今天在行程內就選今天，否則全程
   const q = params?.query?.d;
   let sel = q === 'all' || dates.includes(q) ? q : (dates.includes(today) ? today : 'all');
-  let openCat = null;               // 展開的分類（同時只開一個）
+  let filterCat = null;             // 點分類表的某一列 → 明細只看那個分類（再點取消）
 
   root.innerHTML = `
     <div class="wrap">
       ${head}
       <div class="stats-chips" id="stChips" role="group" aria-label="範圍"></div>
       <section id="stMain"></section>
+      <section id="stList"></section>
       <section id="stBars"></section>
     </div>`;
   const chipsEl = root.querySelector('#stChips');
   const mainEl = root.querySelector('#stMain');
+  const listEl = root.querySelector('#stList');
   const barsEl = root.querySelector('#stBars');
 
   function setSel(v) {
-    sel = v; openCat = null;
+    sel = v; filterCat = null;
     const base = location.hash.split('?')[0];
     history.replaceState(null, '', `${base}?d=${encodeURIComponent(v)}`);   // 重新整理不會跑掉，也不重跑 view
     paint();
@@ -93,6 +92,7 @@ function renderStats(root, params, ctx, rows, head) {
     // 每一塊各自包 try/catch：某一塊算錯，其他塊還是顯示
     safe(chipsEl, paintChips);
     safe(mainEl, paintMain);
+    safe(listEl, paintList);
     safe(barsEl, paintBars);
   }
   function safe(el, fn) {
@@ -133,12 +133,13 @@ function renderStats(root, params, ctx, rows, head) {
         </figure>
       </div>
       <div class="stats-sum${over ? ' over' : ''}">實際 <b class="mono">${yenStr(aTot)}</b>／預算 <b class="mono">${yenStr(bTot)}</b>${pct != null ? `（<span class="mono">${pct}%</span>）` : ''}</div>
+      ${filterCat ? `<div class="ldg-filter">只看：${CHART_CATS.find(c => c.key === filterCat).emoji} ${CHART_CATS.find(c => c.key === filterCat).label} <button type="button" class="mini" id="stFilterClear" aria-label="取消篩選">✕</button></div>` : ''}
       ${table.length ? `
       <table class="ldg-chart-table">
         <thead><tr><th>分類</th><th>預算</th><th>實際</th><th>差額</th></tr></thead>
         <tbody>
           ${table.map(r => `
-            <tr data-cat="${r.cat.key}" class="${openCat === r.cat.key ? 'on' : ''}" tabindex="0" role="button" aria-expanded="${openCat === r.cat.key}">
+            <tr data-cat="${r.cat.key}" class="${filterCat === r.cat.key ? 'on' : ''}" tabindex="0" role="button" aria-pressed="${filterCat === r.cat.key}">
               <td><i style="background:${r.cat.color}"></i>${r.cat.emoji} ${r.cat.label}</td>
               <td class="mono">${yenStr(r.budget)}</td>
               <td class="mono">${yenStr(r.actual)}</td>
@@ -152,40 +153,103 @@ function renderStats(root, params, ctx, rows, head) {
           </tr>
         </tbody>
       </table>
-      <div class="small faint ldg-chart-hint">點一列，看這個分類的每一筆</div>
-      <div id="stDetail"></div>` : `<div class="empty" style="margin-top:10px">${isAll ? '還沒有任何記帳。' : '這一天還沒記帳。'}</div>`}
+      <div class="small faint ldg-chart-hint">點一列，下面的明細只看這個分類（再點一次取消）</div>` : `<div class="empty" style="margin-top:10px">${isAll ? '還沒有任何記帳。' : '這一天還沒記帳。'}</div>`}
     `;
     mainEl.querySelectorAll('tr[data-cat]').forEach(tr => {
       const toggle = () => {
         const k = tr.getAttribute('data-cat');
-        openCat = openCat === k ? null : k;
-        paintMain();
+        filterCat = filterCat === k ? null : k;
+        safe(mainEl, paintMain);
+        safe(listEl, paintList);
       };
       tr.addEventListener('click', toggle);
       tr.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
     });
-    if (openCat) paintDetail(selRows);
+    mainEl.querySelector('#stFilterClear')?.addEventListener('click', () => {
+      filterCat = null;
+      safe(mainEl, paintMain);
+      safe(listEl, paintList);
+    });
   }
 
-  function paintDetail(selRows) {
-    const box = mainEl.querySelector('#stDetail');
-    if (!box) return;
-    const cat = CHART_CATS.find(c => c.key === openCat);
-    const list = selRows
-      .filter(r => (CHART_CATS.some(c => c.key === r.category) ? r.category : 'other') === openCat)
-      .sort((a, b) => (a.date === b.date ? (a.time || '').localeCompare(b.time || '') : (a.date < b.date ? -1 : 1)));
-    box.innerHTML = `
-      <div class="stats-detail">
-        <div class="stats-detail-h">${cat.emoji} ${cat.label}（${list.length} 筆）</div>
-        ${list.map(r => {
-          const label = r.itemId ? itemTitle(lookup, r.itemId) : (r.note || '—');
-          return `<a class="stats-row" href="#/tools/ledger?date=${encodeURIComponent(r.date)}">
-            <span class="dt mono">${escapeHtml(mdDate(r.date))} ${escapeHtml(r.time || '')}</span>
-            <span class="amt mono">${yenStr(r.jpy)}</span>
-            <span class="lb">${escapeHtml(label)}</span>
-          </a>`;
-        }).join('')}
+  // ---------- 明細（依範圍＋分類篩選；全程時依日期分組）＋匯出 ----------
+  function paintList() {
+    const isAll = sel === 'all';
+    const inRange = isAll ? rows : rows.filter(r => r.date === sel);
+    const shown = inRange
+      .filter(r => !filterCat || catKey(r) === filterCat)
+      .sort((a, b) => (a.date === b.date ? (b.time || '').localeCompare(a.time || '') : (a.date < b.date ? 1 : -1)));
+    const groups = new Map();
+    for (const r of shown) {
+      if (!groups.has(r.date)) groups.set(r.date, []);
+      groups.get(r.date).push(r);
+    }
+    const sumJpy = shown.reduce((s, r) => s + (Number(r.jpy) || 0), 0);
+    const sumTwd = shown.reduce((s, r) => s + (Number(r.twd) || 0), 0);
+    const body = shown.length === 0
+      ? `<div class="empty">${rows.length === 0 ? '還沒有任何一筆。' : '這個範圍沒有符合的記帳。'}</div>`
+      : [...groups.entries()].map(([date, list]) => {
+          const tot = list.reduce((s, r) => s + (Number(r.jpy) || 0), 0);
+          const wd = WEEK[new Date(date + 'T00:00:00Z').getUTCDay()];
+          return `
+          <section class="ldg-day">
+            <div class="ldg-day-head">
+              <span class="d">${escapeHtml(mdDate(date))}（${wd}）</span>
+              <span class="tot mono nw">${yenStr(tot)}</span>
+            </div>
+            ${list.map(r => rowHtml(r, { lookup })).join('')}
+          </section>`;
+        }).join('');
+
+    listEl.innerHTML = `
+      <h2 class="stats-h" id="stDetail">明細</h2>
+      <div class="small faint stats-count">${shown.length} 筆 · ${yenStr(sumJpy)} ≈ ${twdStr(sumTwd)}</div>
+      <div class="ldg-list">${body}</div>
+      <div class="ldg-exports">
+        <button type="button" class="btn" id="expAll">📤 匯出全部</button>
+        <button type="button" class="btn" id="expReimb">📤 只匯出可報帳</button>
+        <button type="button" class="btn" id="expCopy">📋 複製成文字</button>
       </div>`;
+  }
+
+  // 明細的 改／刪、匯出（listEl 本身不會被換掉，事件只接一次）
+  listEl.addEventListener('click', async (e) => {
+    const ed = e.target.closest('[data-edit]');
+    if (ed) { location.hash = '#/tools/ledger?edit=' + encodeURIComponent(ed.getAttribute('data-edit')); return; }
+    const del = e.target.closest('[data-del]');
+    if (del) { await onDelete(del.getAttribute('data-del')); return; }
+    const btn = e.target.closest('button[id^="exp"]');
+    if (!btn) return;
+    const stamp = todayISO().replace(/-/g, '');
+    try {
+      if (btn.id === 'expAll') await onExport(rows, `fukuoka-ledger-${stamp}.csv`);
+      else if (btn.id === 'expReimb') await onExport(rows.filter(r => r.reimbursable), `fukuoka-ledger-報帳-${stamp}.csv`);
+      else if (btn.id === 'expCopy') await onCopy(rows);
+    } catch (err) { console.error('匯出失敗', err); toast('匯出失敗了'); }
+  });
+
+  async function onExport(list, filename) {
+    if (!list.length) { alert('沒有可匯出的資料'); return; }
+    await downloadCSV(buildCSV(list, lookup), filename);
+    markExported(todayISO());
+  }
+  async function onCopy(list) {
+    if (!list.length) { alert('沒有可複製的資料'); return; }
+    if (await copyCSV(buildCSV(list, lookup))) markExported(todayISO());
+  }
+  async function onDelete(id) {
+    const r = rows.find(x => x.id === id);
+    if (!r) return;
+    if (!(await confirmDelete(deleteMsg(r)))) return;
+    try {
+      await deleteLedger(id);
+      rows = await getAllLedger();
+    } catch (err) {
+      console.error('刪除失敗', err);
+      toast('刪除失敗，再試一次');
+      return;
+    }
+    paint();   // 圖、表、明細、長條圖整頁重算
   }
 
   // ---------- 六天花費統計 ----------
@@ -282,4 +346,8 @@ function renderStats(root, params, ctx, rows, head) {
   }
 
   paint();
+  // 從記帳頁「看全部明細 →」進來：直接捲到明細（返回時尊重 router 的捲動記憶）
+  if (params?.query?.detail && !opts.restored) {
+    setTimeout(() => listEl.querySelector('#stDetail')?.scrollIntoView({ block: 'start' }), 80);
+  }
 }

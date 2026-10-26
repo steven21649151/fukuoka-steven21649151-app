@@ -1,14 +1,22 @@
-// 記帳頁：一頁式輸入 + 列表 + 匯出
+// 記帳頁：只留「記」——輸入區、今日摘要、最新 3 筆
 // - 送出當下寫 IndexedDB（含 rateUsed / twd snapshot）
 // - 每筆自帶「可報帳」旗標
-// - CSV 匯出（UTF-8 BOM）＋ 手機分享／下載／複製三段備援
+// - 完整明細、匯出 CSV、複製 都在帳務分析頁（#/tools/stats）
+// - ?edit=<id>：一進來就載入那一筆，存完回上一頁
+// - ?date=…&item=…：預填日期和行程項目（行程卡「再記一筆」用）
 
-import { escapeHtml, mdInline } from '../lib/md.js';
-import { yen, twdExact, md as mdDate } from '../lib/fmt.js';
+import { escapeHtml } from '../lib/md.js';
+import { yen, twdExact } from '../lib/fmt.js';
 import { isAvailable, putLedger, deleteLedger, getAllLedger } from '../lib/db.js';
 import { getRate, onChange as onRateChange } from '../lib/rate.js';
 import { findNowContext, todayISO } from '../lib/nowitem.js';
 import { DAILY_BUDGET_TWD } from '../lib/ledger_chart.js';
+import { getPrevHash } from '../router.js';
+import {
+  rowHtml, confirmDelete, deleteMsg, toast, buildCSV, downloadCSV, markExported, LS_LAST_EXPORT,
+} from '../lib/ledger_io.js';
+
+export { buildCSV };   // 舊的呼叫端（測試）還是從這裡拿
 
 const CATS = [
   { key: 'food',    label: '🍽 餐飲' },
@@ -18,9 +26,8 @@ const CATS = [
   { key: 'hotel',   label: '🏨 住宿' },
   { key: 'other',   label: '🧾 其他' },
 ];
-const CAT_LABEL = Object.fromEntries(CATS.map(c => [c.key, c.label]));
 
-const LS_LAST_EXPORT = 'ledger.lastExport';   // YYYY-MM-DD
+const RECENT_N = 3;
 
 export async function render(root, params, ctx) {
   const dbOk = await isAvailable();
@@ -35,13 +42,13 @@ export async function render(root, params, ctx) {
   }
 
   const nowCtx = findNowContext(ctx.data.days);
-  // 行程卡右上的金額 pill 會帶 ?date=…&item=… 進來：日期設成那一天、清單篩成那個行程項目
+  // 行程卡的「再記一筆」會帶 ?date=…&item=… 進來：日期設成那一天、行程項目選好
   const qDate = /^\d{4}-\d{2}-\d{2}$/.test(params?.query?.date || '') ? params.query.date : '';
   const qItem = qDate ? (params?.query?.item || '') : '';
+  const qEdit = params?.query?.edit || '';
   const qItemObj = qItem ? ((ctx.data.days || []).find(d => d.date === qDate)?.items || []).find(it => it.id === qItem) : null;
   const defaultDate = qDate || nowCtx.todayStr || todayISO();
   const defaultItemId = qDate ? (qItemObj ? qItem : '') : (nowCtx.item?.id || '');
-  const defaultDayN = nowCtx.day?.n ?? null;
   const defaultCat = suggestCategoryFromItem(qDate ? qItemObj : nowCtx.item);
   const defaultReimb = (defaultCat === 'hotel');
 
@@ -91,6 +98,7 @@ export async function render(root, params, ctx) {
 
         <div class="ldg-submit-row">
           <button type="button" class="btn btn-primary" id="ldgSubmit">加入 →</button>
+          <button type="button" class="btn" id="ldgCancel" hidden>取消</button>
           <span class="ldg-hint faint small" id="ldgHint">用日圓輸入。台幣自動換算。</span>
         </div>
       </section>
@@ -99,15 +107,7 @@ export async function render(root, params, ctx) {
 
       <a class="btn ldg-stats-btn" href="#/tools/stats">📊 看帳務分析 →</a>
 
-      <div id="ldgFilter"></div>
-
-      <section class="ldg-list" id="ldgList"></section>
-
-      <section class="ldg-exports">
-        <button type="button" class="btn" id="expAll">📤 匯出全部</button>
-        <button type="button" class="btn" id="expReimb">📤 只匯出可報帳</button>
-        <button type="button" class="btn" id="expCopy">📋 複製成文字</button>
-      </section>
+      <section class="ldg-recent" id="ldgRecent"></section>
 
       <div id="confirmSlot"></div>
     </div>
@@ -122,16 +122,17 @@ export async function render(root, params, ctx) {
   const reimbInput  = $('#ldgReimb');
   const noteInput   = $('#ldgNote');
   const submitBtn   = $('#ldgSubmit');
+  const cancelBtn   = $('#ldgCancel');
   const summaryEl   = $('#ldgSummary');
-  const listEl      = $('#ldgList');
+  const recentEl    = $('#ldgRecent');
   const nudgeEl     = $('#exportNudge');
-  const filterEl    = $('#ldgFilter');
 
   // ==== 狀態
   let rows = [];         // 全部記帳資料
   let currentCat = defaultCat;
   let editingId  = null; // 若在編輯中
-  let filterItem = qItem || null;   // 從行程卡進來 → 清單只顯示這個行程項目
+  let editingTime = '';  // 編輯時保留原本記的時間
+  let leaveAfterSave = false;   // 從 ?edit= 進來 → 存完回上一頁
 
   amountInput.addEventListener('input', paintPreview);
   onRateChange(paintPreview);
@@ -154,15 +155,24 @@ export async function render(root, params, ctx) {
   });
 
   submitBtn.addEventListener('click', onSubmit);
+  cancelBtn.addEventListener('click', onCancel);
   amountInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') onSubmit(); });
 
-  $('#expAll').addEventListener('click', () => onExport(rows, `fukuoka-ledger-${todayISO().replace(/-/g,'')}.csv`));
-  $('#expReimb').addEventListener('click', () => onExport(rows.filter(r => r.reimbursable), `fukuoka-ledger-報帳-${todayISO().replace(/-/g,'')}.csv`));
-  $('#expCopy').addEventListener('click', () => onCopy(rows));
+  // 「剛剛記的」：改／刪
+  recentEl.addEventListener('click', (e) => {
+    const ed = e.target.closest('[data-edit]');
+    if (ed) { onEdit(ed.getAttribute('data-edit')); return; }
+    const del = e.target.closest('[data-del]');
+    if (del) onDelete(del.getAttribute('data-del'));
+  });
 
   // ==== 初始渲染
   paintPreview();
   await reload();
+  if (qEdit) {
+    if (rows.some(r => r.id === qEdit)) { leaveAfterSave = true; onEdit(qEdit); }
+    else toast('找不到這一筆，可能已經刪掉了');
+  }
   setTimeout(() => amountInput.focus(), 30);
 
   // ==== 提醒：20:00 之後且今天還沒匯出
@@ -176,6 +186,22 @@ export async function render(root, params, ctx) {
     previewEl.innerHTML = `≈ <b>${twdExact(v, r.jpyToTwd)}</b> <span class="faint small">（${escapeHtml(rateBadge(r))}）</span>`;
   }
 
+  function resetForm() {
+    amountInput.value = '';
+    noteInput.value = '';
+    editingId = null; editingTime = '';
+    submitBtn.textContent = '加入 →';
+    cancelBtn.hidden = true;
+    paintPreview();
+  }
+
+  // 存完（或取消）之後：從 ?edit= 進來的回上一頁；沒有上一頁就回帳務分析
+  function leave() {
+    const prev = getPrevHash();
+    if (prev && prev !== (location.hash || '#/')) history.back();
+    else location.hash = '#/tools/stats';
+  }
+
   async function onSubmit() {
     const v = parseFloat(amountInput.value);
     if (!isFinite(v) || v <= 0) {
@@ -185,7 +211,7 @@ export async function render(root, params, ctx) {
     }
     const r = getRate();
     const date = dateInput.value || todayISO();
-    const time = nowHHMM();
+    const time = (editingId && editingTime) || nowHHMM();
     const dayN = findDayN(ctx.data.days, date);
     const row = {
       id: editingId || cryptoUUID(),
@@ -206,23 +232,22 @@ export async function render(root, params, ctx) {
       alert('儲存失敗：' + (e.message || e));
       return;
     }
-    // reset input
-    amountInput.value = '';
-    noteInput.value = '';
-    editingId = null;
-    submitBtn.textContent = '加入 →';
-    paintPreview();
+    const wasEditing = !!editingId;
+    resetForm();
+    if (wasEditing && leaveAfterSave) { leave(); return; }
     amountInput.focus();
     await reload();
   }
 
+  function onCancel() {
+    resetForm();
+    if (leaveAfterSave) { leave(); return; }
+  }
+
   async function reload() {
-    rows = (await getAllLedger()).sort((a, b) => {
-      if (a.date !== b.date) return a.date < b.date ? 1 : -1;
-      return (b.time || '').localeCompare(a.time || '');
-    });
+    rows = await getAllLedger();
     paintSummary();
-    paintList();
+    paintRecent();
   }
 
   function paintSummary() {
@@ -261,76 +286,25 @@ export async function render(root, params, ctx) {
     `;
   }
 
-  function paintFilterBar() {
-    const parts = [];
-    if (filterItem) parts.push(escapeHtml(findItemLabel(ctx.data.daysLookup, filterItem)));
-    if (!parts.length) { filterEl.innerHTML = ''; return; }
-    filterEl.innerHTML = `<div class="ldg-filter">只看：${parts.join('、')} <button type="button" class="mini" id="ldgFilterClear">✕ 取消篩選</button></div>`;
-    filterEl.querySelector('#ldgFilterClear').addEventListener('click', () => {
-      filterItem = null;
-      paintList();
-    });
-  }
-
-  function paintList() {
-    paintFilterBar();
+  // 剛剛記的：最新 3 筆（依記下去的先後）
+  function paintRecent() {
     if (rows.length === 0) {
-      listEl.innerHTML = `<div class="empty">還沒有任何一筆。上面輸入金額按「加入」。</div>`;
+      recentEl.innerHTML = `<div class="empty">還沒有任何一筆。上面輸入金額按「加入」。</div>`;
       return;
     }
-    const shown = rows.filter(r => (!filterItem || r.itemId === filterItem));
-    if (shown.length === 0) {
-      listEl.innerHTML = `<div class="empty">這個篩選下沒有記帳。</div>`;
-      return;
-    }
-    const groups = groupByDate(shown);
-    listEl.innerHTML = groups.map(([date, list]) => {
-      const sum = list.reduce((s, r) => s + r.jpy, 0);
-      return `
-        <section class="ldg-day">
-          <div class="ldg-day-head">
-            <span class="d">${escapeHtml(mdDate(date))}</span>
-            <span class="tot mono nw">${yen(sum)}</span>
-          </div>
-          ${list.map(renderRow).join('')}
-        </section>
-      `;
-    }).join('');
-
-    listEl.querySelectorAll('.ldg-row').forEach(row => {
-      row.querySelector('.act-edit')?.addEventListener('click', () => onEdit(row.dataset.id));
-      row.querySelector('.act-del')?.addEventListener('click', () => onDelete(row.dataset.id));
-    });
-  }
-
-  function renderRow(r) {
-    const itemLabel = r.itemId ? findItemLabel(ctx.data.daysLookup, r.itemId) : '';
-    return `
-      <div class="ldg-row" data-id="${escapeHtml(r.id)}"${r.reimbursable ? ' data-reimb' : ''}>
-        <div class="head">
-          <span class="cat">${escapeHtml(CAT_LABEL[r.category] || r.category)}</span>
-          <span class="time mono">${escapeHtml(r.time || '')}</span>
-          ${r.reimbursable ? '<span class="tag-reimb">可報帳</span>' : ''}
-        </div>
-        <div class="amt">
-          <span class="mono nw">${yen(r.jpy)}</span>
-          <span class="approx">≈ NT$${(r.twd ?? 0).toLocaleString()}</span>
-          <span class="rate faint tiny nw">@ ${r.rateUsed?.toFixed(4)}</span>
-        </div>
-        ${itemLabel ? `<div class="link small faint">↳ ${escapeHtml(itemLabel)}</div>` : ''}
-        ${r.note ? `<div class="note small">${mdInline(r.note)}</div>` : ''}
-        <div class="acts">
-          <button type="button" class="mini act-edit">編輯</button>
-          <button type="button" class="mini act-del">刪除</button>
-        </div>
+    const latest = rows.slice().sort((a, b) => (b.ts || 0) - (a.ts || 0)).slice(0, RECENT_N);
+    recentEl.innerHTML = `
+      <h2 class="ldg-recent-h">剛剛記的</h2>
+      <div class="ldg-recent-list">
+        ${latest.map(r => rowHtml(r, { lookup: ctx.data.daysLookup, showDate: true })).join('')}
       </div>
-    `;
+      <a class="ldg-all-link small" href="#/tools/stats?d=all&detail=1">看全部明細 →</a>`;
   }
 
   function onEdit(id) {
     const r = rows.find(x => x.id === id);
     if (!r) return;
-    editingId = id;
+    editingId = id; editingTime = r.time || '';
     amountInput.value = String(r.jpy);
     noteInput.value = r.note || '';
     dateInput.value = r.date;
@@ -344,6 +318,7 @@ export async function render(root, params, ctx) {
     // item 選項
     itemSelect.innerHTML = `<option value="">（不關聯）</option>` + renderItemOptions(ctx.data.days, r.date, r.itemId || '');
     submitBtn.textContent = '更新 ✓';
+    cancelBtn.hidden = false;
     paintPreview();
     amountInput.focus();
     amountInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -352,55 +327,19 @@ export async function render(root, params, ctx) {
   async function onDelete(id) {
     const r = rows.find(x => x.id === id);
     if (!r) return;
-    const ok = await confirmDialog(`要刪除這筆嗎？\n${CAT_LABEL[r.category]} · ${yen(r.jpy)} · ${r.date}`);
+    const ok = await confirmDelete(deleteMsg(r));
     if (!ok) return;
-    await deleteLedger(id);
+    if (editingId === id) resetForm();
+    try { await deleteLedger(id); }
+    catch (e) { alert('刪除失敗：' + (e.message || e)); return; }
     await reload();
   }
 
-  async function onExport(list, filename) {
-    if (!list.length) { alert('沒有可匯出的資料'); return; }
-    const csv = buildCSV(list, ctx.data.daysLookup);
-    await downloadCSV(csv, filename);
-    try { localStorage.setItem(LS_LAST_EXPORT, todayISO()); } catch {}
-    hideExportNudge();
-  }
-  async function onCopy(list) {
-    if (!list.length) { alert('沒有可複製的資料'); return; }
-    const csv = buildCSV(list, ctx.data.daysLookup);
-    try {
-      await navigator.clipboard.writeText(csv);
-      toast('已複製到剪貼簿');
-      localStorage.setItem(LS_LAST_EXPORT, todayISO());
-      hideExportNudge();
-    } catch {
-      const w = window.open('', '_blank');
-      if (w) { w.document.body.innerText = csv; }
-      else prompt('手動複製這段：', csv);
-    }
-  }
-
-  function confirmDialog(msg) {
-    return new Promise(resolve => {
-      const slot = $('#confirmSlot');
-      slot.innerHTML = `
-        <div class="cd-overlay">
-          <div class="cd-sheet">
-            <div class="cd-msg">${escapeHtml(msg)}</div>
-            <div class="cd-btns">
-              <button type="button" class="btn" data-r="0">取消</button>
-              <button type="button" class="btn btn-primary" data-r="1">刪除</button>
-            </div>
-          </div>
-        </div>`;
-      const close = (v) => { slot.innerHTML = ''; resolve(!!v); };
-      slot.querySelectorAll('button[data-r]').forEach(b =>
-        b.addEventListener('click', () => close(b.getAttribute('data-r') === '1'))
-      );
-      slot.querySelector('.cd-overlay').addEventListener('click', (e) => {
-        if (e.target === e.currentTarget) close(false);
-      });
-    });
+  async function onExportAll() {
+    if (!rows.length) { alert('沒有可匯出的資料'); return; }
+    await downloadCSV(buildCSV(rows, ctx.data.daysLookup), `fukuoka-ledger-${todayISO().replace(/-/g,'')}.csv`);
+    markExported(todayISO());
+    nudgeEl.hidden = true;
   }
 
   function maybeShowExportNudge() {
@@ -419,11 +358,9 @@ export async function render(root, params, ctx) {
         <button type="button" class="cd-x" aria-label="關閉">✕</button>
       </div>
     `;
-    nudgeEl.querySelector('#nudgeExport').addEventListener('click',
-      () => onExport(rows, `fukuoka-ledger-${todayISO().replace(/-/g,'')}.csv`));
+    nudgeEl.querySelector('#nudgeExport').addEventListener('click', onExportAll);
     nudgeEl.querySelector('.cd-x').addEventListener('click', () => nudgeEl.hidden = true);
   }
-  function hideExportNudge() { nudgeEl.hidden = true; }
 }
 
 // ==================== 小工具 ====================
@@ -440,13 +377,6 @@ function nowHHMM() {
 function findDayN(days, date) {
   const d = (days || []).find(x => x.date === date);
   return d ? d.n : null;
-}
-function findItemLabel(days, itemId) {
-  for (const d of (days || [])) {
-    const it = (d.items || []).find(x => x.id === itemId);
-    if (it) return `${d.date}｜${it.time || ''} ${it.title || ''}`;
-  }
-  return itemId;
 }
 function renderItemOptions(days, date, selected) {
   const d = (days || []).find(x => x.date === date);
@@ -469,81 +399,6 @@ function rateBadge(r) {
 function shake(el) {
   el.classList.add('shake');
   setTimeout(() => el.classList.remove('shake'), 320);
-}
-function groupByDate(rows) {
-  const map = new Map();
-  for (const r of rows) {
-    if (!map.has(r.date)) map.set(r.date, []);
-    map.get(r.date).push(r);
-  }
-  return [...map.entries()];
-}
-
-// ==================== CSV ====================
-
-function csvField(v) {
-  if (v == null) return '';
-  const s = String(v);
-  if (/[",\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
-  return s;
-}
-export function buildCSV(list, days) {
-  const header = ['日期','時間','分類','日圓','台幣','當時匯率','關聯行程','可報帳','備註'];
-  const lines = [header.map(csvField).join(',')];
-  // 用日期＋時間排序，早的在前
-  const sorted = list.slice().sort((a, b) =>
-    (a.date === b.date) ? (a.time || '').localeCompare(b.time || '') : (a.date < b.date ? -1 : 1));
-  for (const r of sorted) {
-    lines.push([
-      r.date, r.time || '',
-      CAT_LABEL[r.category] || r.category,
-      r.jpy, r.twd,
-      r.rateUsed?.toFixed?.(4) ?? r.rateUsed,
-      r.itemId ? findItemLabel(days, r.itemId) : '',
-      r.reimbursable ? '是' : '',
-      r.note || '',
-    ].map(csvField).join(','));
-  }
-  return '﻿' + lines.join('\r\n');
-}
-
-async function downloadCSV(csv, filename) {
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-  const file = new File([blob], filename, { type: 'text/csv' });
-  // ① 系統分享（iOS/Android PWA 首選）
-  try {
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({ files: [file], title: filename });
-      return;
-    }
-  } catch { /* 分享被拒 → 掉到 ② */ }
-  // ② <a download>
-  try {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 200);
-    return;
-  } catch { /* fall through */ }
-  // ③ 開新視窗顯示原文
-  try {
-    const w = window.open('', '_blank');
-    if (w) { w.document.body.innerText = csv; return; }
-  } catch {}
-  // ④ 提示複製
-  prompt('複製這段（CSV）：', csv);
-}
-
-function toast(msg) {
-  const el = document.createElement('div');
-  el.className = 'toast';
-  el.textContent = msg;
-  document.body.appendChild(el);
-  setTimeout(() => el.classList.add('show'), 10);
-  setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 300); }, 1800);
 }
 
 // 給 tools 頁用：算今日累計 ¥

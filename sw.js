@@ -8,7 +8,7 @@
 // 唯一會讓瀏覽器重跑 install、重抓資源的觸發點——沒 bump 就會拿舊快取。
 // 新增或替換 photos/ 裡的照片也要 bump APP_VERSION，舊照片才會被換掉。
 
-const APP_VERSION = '1.8.18';
+const APP_VERSION = '1.8.19';
 const CACHE_SHELL = `fukuoka-shell-v${APP_VERSION}`;
 const CACHE_DATA = `fukuoka-data-v${APP_VERSION}`;
 
@@ -53,6 +53,8 @@ const SHELL_ASSETS = [
   './js/views/flight.js',
   './js/views/ledger.js',
   './js/views/stats.js',
+  './js/lib/ledger_io.js',
+  './js/lib/ledger_sheet.js',
   './js/views/journal.js',
   './js/views/journal_detail.js',
   './js/views/share_sheet.js',

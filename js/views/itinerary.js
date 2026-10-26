@@ -4,6 +4,7 @@ import { yen, yenRange, md, twdIfBig } from '../lib/fmt.js';
 import { mapsUrl } from '../lib/maps.js';
 import { computeNowInDay, todayISO } from '../lib/nowitem.js';
 import { ticketedItemIds, isAvailable as dbAvailable, getAllLedger } from '../lib/db.js';
+import { openLedgerSheet } from '../lib/ledger_sheet.js';
 
 const KIND_CAT = {
   flight: 'transit', transit: 'transit', meal: 'food', sight: 'sight',
@@ -77,6 +78,20 @@ export async function render(root, params, ctx, opts = {}) {
       ${renderTodayTips(day, ctx)}
     </div>
   `;
+
+  // 💴 pill：不換頁，跳出這一格的記帳明細（底部面板）。出錯只顯示提示，不影響行程頁
+  root.querySelector('.wrap').addEventListener('click', (e) => {
+    const pill = e.target.closest('.ldg-pill[data-ldg-item]');
+    if (!pill) return;
+    openLedgerSheet({
+      itemId: pill.dataset.ldgItem,
+      date: pill.dataset.ldgDate,
+      title: pill.dataset.ldgTitle,
+      lookup: ctx.data.daysLookup,
+      // 面板裡刪了東西：行程頁重畫一次，pill 金額跟著變（刪到 0 筆 pill 就消失）
+      onChange: () => { render(root, params, ctx, { restored: true }); },
+    }).catch((err) => console.error('記帳面板開不起來', err));
+  });
 
   // 只有第一次進到某一天才自動對焦當前時段；返回時尊重 router 的捲動記憶
   if (!opts.restored && nowInfo.highlightId) {
@@ -252,8 +267,7 @@ function renderCard(it, nowInfo, ctx) {
     const spent = ctx.__ledgerByItem && ctx.__ledgerByItem.get(it.id);
     if (spent > 0) {
       const date = (ctx.data.days.find(d => d.n === it.dayN) || {}).date || '';
-      const href = `#/tools/ledger?date=${encodeURIComponent(date)}&item=${encodeURIComponent(it.id)}`;
-      spendHtml = `<a class="ldg-pill" href="${href}" aria-label="這一格已記 ${yen(spent)}，點了看這一格的記帳">💴 ${yen(spent)}</a>`;
+      spendHtml = `<button type="button" class="ldg-pill" data-ldg-item="${escapeHtml(it.id)}" data-ldg-date="${escapeHtml(date)}" data-ldg-title="${escapeHtml(String(it.title || '').replace(/[*`]/g, ''))}" aria-label="這一格已記 ${yen(spent)}，點了看明細">💴 ${yen(spent)}</button>`;
     }
   } catch { spendHtml = ''; }
 
