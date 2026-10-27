@@ -48,6 +48,10 @@ export function applyPlan(sunnyDays, rainFile, plan) {
   });
 }
 
+// 手帳照片可以連到「行程卡」（不只景點）：只對這天以後的行程開放，之前的天維持原本只連景點
+export const CARD_LINK_FROM = '2026-10-27';
+export const canLinkCard = (date) => !!date && String(date) >= CARD_LINK_FROM;
+
 // 在目前版本裡找第一個有這個 spotId 的天（例如鞋店在雨天版是 10/25、spot.day 卻寫 4）；找不到才用 fallback
 export function findSpotDay(days, spotId, fallback = null) {
   for (const d of days || []) {

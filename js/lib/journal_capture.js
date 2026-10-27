@@ -3,7 +3,7 @@
 import { escapeHtml } from './md.js';
 import { putJournal, getAllJournal, isAvailable } from './db.js';
 import { getTakenAt, matchItinerary, jstParts } from './exif.js';
-import { findSpotDay } from './plan.js';
+import { findSpotDay, canLinkCard } from './plan.js';
 import { loadBitmap, srcW, srcH, freeCanvas } from './overlay.js';
 import { showProgress, toast, downloadBlob, safeName } from './ui.js';
 
@@ -63,12 +63,43 @@ async function ensureAvailable() {
   return ok;
 }
 
+// ---------------------------------------------------------------
+// 行程卡（今天以後的天，照片可以直接連到某一張卡）
+const cleanTitle = (s) => String(s || '').replace(/[*`]/g, '').trim();
+const dayByN = (data, n) => (data?.days || []).find(d => d.n === n) || null;
+function findCard(data, itemId) {
+  if (!itemId) return null;
+  for (const d of data?.days || []) {
+    const it = (d.items || []).find(x => x.id === itemId);
+    if (it) return { day: d, it };
+  }
+  return null;
+}
+const toMin = (hhmm) => { const [h, m] = String(hhmm || '').split(':').map(Number); return h * 60 + (m || 0); };
+// 這天有這個景點的卡裡挑一張：拍攝時間落在哪張就哪張，不然第一張
+function pickCardForSpot(dayObj, spotId, takenAt) {
+  const cards = (dayObj?.items || []).filter(it => it.spotId === spotId);
+  if (!cards.length) return null;
+  const p = takenAt ? jstParts(takenAt) : null;
+  if (p && p.date === dayObj.date) {
+    const t = toMin(p.hhmm);
+    const inside = cards.find(it => it.time && it.endTime && toMin(it.time) <= t && t < toMin(it.endTime));
+    if (inside) return inside;
+    let best = null;
+    for (const it of cards) if (it.time && toMin(it.time) <= t && (!best || toMin(it.time) >= toMin(best.time))) best = it;
+    if (best) return best;
+  }
+  return cards[0];
+}
+
 function showSourceMenu(opts) {
+  const card = findCard(opts.data, opts.itemId);
+  const where = opts.spot ? (opts.spot.nameZh || opts.spot.name || '') : (card ? cleanTitle(card.it.title) : '');
   const ov = document.createElement('div');
   ov.className = 'cap-overlay cap-menu';
   ov.innerHTML = `
     <div class="cap-sheet" role="dialog" aria-modal="true" aria-label="加入照片">
-      <div class="cap-title">${opts.spot ? escapeHtml(opts.spot.nameZh || opts.spot.name || '') + ' · ' : ''}加入照片</div>
+      <div class="cap-title">${where ? escapeHtml(where) + ' · ' : ''}加入照片</div>
       <button type="button" class="btn btn-primary cap-menu-btn" data-src="camera">📷 拍照</button>
       <button type="button" class="btn cap-menu-btn" data-src="album">🖼 從相簿加入</button>
       <button type="button" class="btn" data-src="">取消</button>
@@ -142,7 +173,17 @@ async function prepare(file, source, opts) {
     // 先在目前版本裡找第一個有這個景點的天（鞋店在雨天版是 10/25，spot.day 卻寫 4），找不到才用 spot.day
     day = opts.dayN ?? findSpotDay(opts.data?.days, spotId, opts.spot.day) ?? day;
   }
-  return { file, thumb, w, h, takenAt, source, day: day ?? null, spotId: spotId ?? null, note: '', name: '' };
+  let itemId = null;
+  const card = findCard(opts.data, opts.itemId);
+  if (card && canLinkCard(card.day.date)) {   // 從行程卡的 📷 進來：以那張卡為準（沒景點的卡 spotId 就是 null）
+    itemId = card.it.id;
+    day = card.day.n;
+    spotId = card.it.spotId && (opts.data?.spots || []).some(s => s.id === card.it.spotId) ? card.it.spotId : null;
+  } else if (spotId && day != null) {
+    const dobj = dayByN(opts.data, day);
+    if (dobj && canLinkCard(dobj.date)) itemId = pickCardForSpot(dobj, spotId, takenAt)?.id ?? null;
+  }
+  return { file, thumb, w, h, takenAt, source, day: day ?? null, spotId: spotId ?? null, itemId, note: '', name: '' };
 }
 
 // ---------------------------------------------------------------
@@ -172,11 +213,26 @@ function spotOptions(data, dayN, cur) {
   return `<option value="">不指定</option>` + list.map(o =>
     `<option value="${escapeHtml(o.id)}"${cur === o.id ? ' selected' : ''}>${escapeHtml(o.label)}</option>`).join('');
 }
-export function placeSummary(day, spotId, data) {
+// 今天以後的天：下拉列出當天每一張行程卡（值是卡片 id）
+function cardOptions(dayObj, curItemId) {
+  return `<option value="">不指定</option>` + (dayObj.items || []).map(it =>
+    `<option value="${escapeHtml(it.id)}"${curItemId === it.id ? ' selected' : ''}>${escapeHtml(`${it.time || ''} ${cleanTitle(it.title)}`.trim())}</option>`).join('');
+}
+function placeOptions(data, item) {
+  const d = dayByN(data, item.day);
+  return d && canLinkCard(d.date) ? cardOptions(d, item.itemId) : spotOptions(data, item.day, item.spotId);
+}
+const placeLabel = (data, item) => {
+  const d = dayByN(data, item.day);
+  return d && canLinkCard(d.date) ? '行程卡' : '景點';
+};
+export function placeSummary(day, spotId, data, itemId) {
   const parts = [];
   if (day) parts.push(`第 ${day} 天`);
   const sp = spotId ? (data?.spots || []).find(s => s.id === spotId) : null;
+  const card = findCard(data, itemId);
   if (sp) parts.push(sp.nameZh || sp.name || sp.id);
+  else if (card) parts.push(cleanTitle(card.it.title));
   return parts.length ? `📅 ${parts.join(' · ')}` : '📅 未指定天與景點';
 }
 
@@ -186,20 +242,41 @@ export function wirePlacePicker(box, item, data, onChange) {
   const pick = box.querySelector('[data-ds-pick]');
   const dsel = box.querySelector('[data-ds-day]');
   const ssel = box.querySelector('[data-ds-spot]');
-  const refresh = () => { sum.textContent = placeSummary(item.day, item.spotId, data) + ' ▾'; };
+  const lbl = box.querySelector('[data-ds-lbl]');
+  const refresh = () => { sum.textContent = placeSummary(item.day, item.spotId, data, item.itemId) + ' ▾'; };
   sum.addEventListener('click', () => { pick.hidden = !pick.hidden; });
   dsel.addEventListener('change', () => {
     item.day = dsel.value ? Number(dsel.value) : null;
-    if (item.spotId) {
-      const day = (data?.days || []).find(d => d.n === item.day);
-      const stillThere = (day?.items || []).some(it => it.spotId === item.spotId);
-      if (!stillThere) item.spotId = null;
+    const day = dayByN(data, item.day);
+    if (day && canLinkCard(day.date)) {
+      // 換到新的一天：原本的景點還在這天就挑那天對應的卡，不然清掉
+      const c = item.spotId ? pickCardForSpot(day, item.spotId, item.takenAt) : null;
+      item.itemId = c ? c.id : null;
+      if (!c) item.spotId = null;
+    } else {
+      item.itemId = null;
+      if (item.spotId) {
+        const stillThere = (day?.items || []).some(it => it.spotId === item.spotId);
+        if (!stillThere) item.spotId = null;
+      }
     }
-    ssel.innerHTML = spotOptions(data, item.day, item.spotId);
+    ssel.innerHTML = placeOptions(data, item);
+    if (lbl) lbl.textContent = placeLabel(data, item);
     ssel.disabled = !item.day;
     refresh(); onChange?.();
   });
-  ssel.addEventListener('change', () => { item.spotId = ssel.value || null; refresh(); onChange?.(); });
+  ssel.addEventListener('change', () => {
+    const day = dayByN(data, item.day);
+    if (day && canLinkCard(day.date)) {
+      const c = (day.items || []).find(it => it.id === ssel.value) || null;
+      item.itemId = c ? c.id : null;
+      item.spotId = c && c.spotId && (data?.spots || []).some(s => s.id === c.spotId) ? c.spotId : null;
+    } else {
+      item.itemId = null;
+      item.spotId = ssel.value || null;
+    }
+    refresh(); onChange?.();
+  });
   refresh();
 }
 export function placePickerHtml(item, data) {
@@ -209,8 +286,8 @@ export function placePickerHtml(item, data) {
       <div class="ds-pick" data-ds-pick hidden>
         <label class="cap-field"><span class="k">天</span>
           <select data-ds-day>${dayOptions(data, item.day)}</select></label>
-        <label class="cap-field"><span class="k">景點</span>
-          <select data-ds-spot${item.day ? '' : ' disabled'}>${spotOptions(data, item.day, item.spotId)}</select></label>
+        <label class="cap-field"><span class="k" data-ds-lbl>${placeLabel(data, item)}</span>
+          <select data-ds-spot${item.day ? '' : ' disabled'}>${placeOptions(data, item)}</select></label>
       </div>
     </div>`;
 }
@@ -220,14 +297,24 @@ export function placePickerHtml(item, data) {
 async function makeNamer(data) {
   const rows = await getAllJournal().catch(() => []);
   const bySpot = new Map();
+  const byCard = new Map();   // 連到沒有景點的行程卡的照片，檔名用卡片名稱
   const byDate = new Map();
   for (const r of rows) {
     if (r.spotId) bySpot.set(r.spotId, (bySpot.get(r.spotId) || 0) + 1);
+    else if (r.itemId) byCard.set(r.itemId, (byCard.get(r.itemId) || 0) + 1);
     const p = jstParts(r.takenAt || r.createdAt || '');
     if (p) byDate.set(p.mmdd.replace('/', '-'), (byDate.get(p.mmdd.replace('/', '-')) || 0) + 1);
   }
-  const used = { spot: new Map(), date: new Map() };
+  const used = { spot: new Map(), card: new Map(), date: new Map() };
   return (item) => {
+    const card = !item.spotId ? findCard(data, item.itemId) : null;
+    if (card) {
+      const n = (byCard.get(item.itemId) || 0) + (used.card.get(item.itemId) || 0) + 1;
+      used.card.set(item.itemId, (used.card.get(item.itemId) || 0) + 1);
+      const t = cleanTitle(card.it.title);
+      const short = (t.length > 12 ? t.replace(/[（(].*$/, '') : t).trim().slice(0, 20) || t.slice(0, 12);   // 括號裡的細節不放進檔名
+      return `${short}_${n}`;
+    }
     if (item.spotId) {
       const sp = (data?.spots || []).find(s => s.id === item.spotId);
       const n = (bySpot.get(item.spotId) || 0) + (used.spot.get(item.spotId) || 0) + 1;
@@ -321,6 +408,7 @@ async function showCaptureSheet(items, source, opts) {
             rows.push({
               id: cryptoUUID(), name, note,
               spotId: it.spotId || null, day: it.day ?? null,
+              ...(it.itemId ? { itemId: it.itemId } : {}),   // 今天以後的天才有；舊的照片和前面幾天不加這個欄位
               createdAt: now, takenAt: it.takenAt,
               blob: it.file, thumb: it.thumb, w: it.w, h: it.h,
               source: it.source, overlay: null, synced: false,

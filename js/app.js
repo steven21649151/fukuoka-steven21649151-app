@@ -65,14 +65,15 @@ function wireRateButton(ctx) {
 // 全域：任何 data-jrn-spot="<spotId>" 的按鈕，點下去跳「拍照／從相簿加入」選單
 function wireGlobalJournalButtons(ctx) {
   document.addEventListener('click', async (e) => {
-    const btn = e.target.closest('[data-jrn-spot]');
+    const btn = e.target.closest('[data-jrn-spot],[data-jrn-item]');
     if (!btn) return;
     e.preventDefault();
     const spotId = btn.getAttribute('data-jrn-spot');
+    const itemId = btn.getAttribute('data-jrn-item') || null;   // 行程卡上的按鈕才有；沒景點的卡只有這個
     const dayN = Number(btn.getAttribute('data-jrn-day')) || null;
     const spot = spotId ? (ctx.data.spots || []).find(s => s.id === spotId) : null;
     const { openCapture } = await import('./lib/journal_capture.js');
-    openCapture({ spot, dayN, data: ctx.data });
+    openCapture({ spot, dayN, itemId, data: ctx.data });
   });
 }
 

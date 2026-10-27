@@ -5,6 +5,7 @@ import { mapsUrl } from '../lib/maps.js';
 import { computeNowInDay, todayISO } from '../lib/nowitem.js';
 import { ticketedItemIds, isAvailable as dbAvailable, getAllLedger } from '../lib/db.js';
 import { openLedgerSheet } from '../lib/ledger_sheet.js';
+import { canLinkCard } from '../lib/plan.js';
 
 const KIND_CAT = {
   flight: 'transit', transit: 'transit', meal: 'food', sight: 'sight',
@@ -231,6 +232,10 @@ function renderCard(it, nowInfo, ctx) {
   const altsHtml = renderAlts(it, ctx);
 
   const actions = [];
+  // 今天以後的行程：手帳照片連到這張卡（不只景點）；機票卡不放
+  const cardDate = (ctx.data.days.find(d => d.n === it.dayN) || {}).date || '';
+  const linkCard = canLinkCard(cardDate) && it.kind !== 'flight';
+  const jrnItem = linkCard ? ` data-jrn-item="${escapeHtml(it.id)}"` : '';
   if (it.spotId && spot) {
     const label = SPOT_BTN[spot.category] || '看更多 →';
     actions.push(`<a class="btn" href="#/spot/${encodeURIComponent(it.spotId)}">${label}</a>`);
@@ -238,7 +243,9 @@ function renderCard(it, nowInfo, ctx) {
       actions.push(`<a class="btn btn-icon" href="${mapsUrl(spot.mapQuery)}" target="_blank" rel="noopener" aria-label="用 Google Maps 導航">🗺</a>`);
     }
     // 手帳：小圖示按鈕，跟 🗺 並排
-    actions.push(`<button type="button" class="btn btn-icon" data-jrn-spot="${escapeHtml(it.spotId)}" data-jrn-day="${it.dayN || ''}" aria-label="拍照記錄">📷</button>`);
+    actions.push(`<button type="button" class="btn btn-icon" data-jrn-spot="${escapeHtml(it.spotId)}"${jrnItem} data-jrn-day="${it.dayN || ''}" aria-label="拍照記錄">📷</button>`);
+  } else if (linkCard) {
+    actions.push(`<button type="button" class="btn btn-icon"${jrnItem} data-jrn-day="${it.dayN || ''}" aria-label="拍照記錄">📷</button>`);
   }
   // 文A：開啟對話字卡，跳到 phraseScene 指定的場景（沒指定就不顯示）
   const phraseScene = it.phraseScene || null;
