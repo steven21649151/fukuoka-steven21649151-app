@@ -186,7 +186,32 @@ export function overlayTexts(row, data, ovIn) {
 // 有沒有任何字要畫（沒有就輸出原圖）
 export function hasOverlayText(row, data) {
   const { main, meta } = overlayTexts(row, data, row.overlay);
-  return !!(main || meta);
+  return !!(main || meta) || extrasOf(row.overlay).length > 0;
+}
+
+// ---------- 多段加字 ----------
+// row.overlay.extras：[{ id, text, x, y, size, color, band, shadow, align }]，每一段各自有位置、大小、顏色，
+// 跟「主文字」（備註＋日期景點）互不影響。沒有 extras 的舊資料照原樣。
+export const MAX_EXTRAS = 8;
+export function newExtra(n = 0) {
+  return {
+    id: 'x' + Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-3),
+    text: '', x: 0.5, y: Math.min(0.8, 0.3 + 0.1 * n), size: SIZE_DEFAULT,
+    color: 'auto', band: 'auto', shadow: true, align: 'center',
+  };
+}
+export function normalizeExtra(e) {
+  const o = { ...newExtra(), ...(e || {}) };
+  o.text = String(o.text ?? '');
+  o.x = Math.min(1, Math.max(0, Number.isFinite(o.x) ? o.x : 0.5));
+  o.y = Math.min(1, Math.max(0, Number.isFinite(o.y) ? o.y : 0.5));
+  o.size = clampSize(o.size);
+  if (o.align !== 'left' && o.align !== 'right') o.align = 'center';
+  return o;
+}
+// 有字的幾段（輸出用）
+export function extrasOf(ov) {
+  return (Array.isArray(ov?.extras) ? ov.extras : []).filter(e => e && String(e.text || '').trim()).map(normalizeExtra);
 }
 
 // ---------- 排版 ----------
@@ -387,6 +412,23 @@ export function drawOverlay(ctx, W, H, row, ovIn, data, an) {
   return { box, color, band, pad: lay.pad };
 }
 
+// 畫其中一段：當成「只有備註、沒有日期景點」的主文字來畫，排版、自動顏色、底帶都共用
+export function drawExtra(ctx, W, H, e, an) {
+  const x = normalizeExtra(e);
+  if (!x.text.trim()) return null;
+  return drawOverlay(ctx, W, H, { note: x.text.trim() },
+    { x: x.x, y: x.y, size: x.size, color: x.color, band: x.band, shadow: x.shadow, align: x.align, auto: false, showDate: false, showSpot: false, metaMode: 'newline' },
+    null, an);
+}
+export function drawExtras(ctx, W, H, extras, an) {
+  const out = new Map();
+  for (const e of extras || []) {
+    const r = drawExtra(ctx, W, H, e, an);
+    if (r && e.id) out.set(e.id, r);
+  }
+  return out;
+}
+
 // 底帶顏色：在黑底與米白底之間挑跟文字對比比較高的，並且夠不透明，字才看得清楚
 export function bandFill(textHex) {
   const t = hexToRgb(textHex);
@@ -430,6 +472,7 @@ export async function renderOverlay(row, data, maxEdge = MAX_OUT_EDGE, quality =
   bmp.close?.();
   const ov = resolveOverlayForOutput(row, data, an, W, H);
   drawOverlay(ctx, W, H, row, ov, data, an);
+  drawExtras(ctx, W, H, extrasOf(row.overlay), an);
   const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', quality));
   freeCanvas(canvas);
   return blob;

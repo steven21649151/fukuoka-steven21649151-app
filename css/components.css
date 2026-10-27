@@ -2836,3 +2836,21 @@ body.script-open { overflow: hidden; }
 .pay-note { margin-top: 8px; font-size: 13.5px; color: var(--ink2); }
 .pay-note b { color: var(--ink); }
 .pay-note small { display: block; font-size: 11.5px; color: var(--faint); margin-top: 1px; }
+
+/* 手帳加字：多段文字（主文字之外可以再加好幾段，各自拖動） */
+.ove-layers { display: flex; flex-wrap: nowrap; gap: 6px; overflow-x: auto; padding: 6px 12px; background: var(--card); border-radius: 16px 16px 0 0; -webkit-overflow-scrolling: touch; }
+.ove-layers:empty { display: none; }
+.ove-layers + .ove-tools { border-radius: 0; padding-top: 4px; }
+.ove-lay {
+  flex: 0 0 auto; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--page);
+  color: var(--ink2); font-size: 13px; font-family: inherit; cursor: pointer; white-space: nowrap;
+}
+.ove-lay.on { background: var(--ink); color: var(--page); border-color: var(--ink); }
+.ove-lay.add { border-style: dashed; color: var(--ink); }
+.ove-lay.del { color: #C4452F; }
+/* 選到額外的一段時，日期／景點／換行這些只屬於主文字，先藏起來 */
+.ove-extra-mode .ove-tools [data-tg="date"],
+.ove-extra-mode .ove-tools [data-tg="spot"],
+.ove-extra-mode .ove-tools [data-mode],
+.ove-extra-mode .ove-tools [data-a="reset"],
+.ove-extra-mode .ove-tools .ove-sep { display: none; }

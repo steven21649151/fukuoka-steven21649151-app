@@ -7,6 +7,7 @@ import {
   ensureFonts, loadBitmap, analyze, srcW, srcH, freeCanvas,
   drawOverlay, computeAuto, normalizeOverlay, defaultOverlay, hasSpotText,
   INK, WHITE, SIZE_MIN, SIZE_MAX, clampSize,
+  MAX_EXTRAS, newExtra, normalizeExtra, drawExtra,
 } from '../lib/overlay.js';
 
 export const COLORS = [
@@ -139,7 +140,10 @@ export function wireOverlayTools(root, ctl) {
 }
 
 // 拖曳（單指）與雙指縮放。enabled() 回 false 時不處理（拼貼沒開加字時點格子是交換）
-export function attachTextPointer(canvas, st, { redraw, freeze, enabled = () => true }) {
+// st 可以是物件，也可以是回傳物件的函式（多段加字：目前選到哪一段就動哪一段）。
+// pick(px, py)：單指按下時先呼叫（px、py 是相對畫布左上角的 CSS 像素），可以在這裡換選到的那一段。
+export function attachTextPointer(canvas, stIn, { redraw, freeze, enabled = () => true, pick = null }) {
+  const S = () => (typeof stIn === 'function' ? stIn() : stIn);
   const pointers = new Map();
   let drag = null, pinch = null;
   canvas.style.touchAction = 'none';
@@ -148,11 +152,13 @@ export function attachTextPointer(canvas, st, { redraw, freeze, enabled = () => 
     canvas.setPointerCapture(e.pointerId);
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (pointers.size === 1) {
+      if (pick) { const r = canvas.getBoundingClientRect(); pick(e.clientX - r.left, e.clientY - r.top); }
       freeze();
-      drag = { sx: e.clientX, sy: e.clientY, ox: st.x, oy: st.y };
+      const st = S();
+      drag = { sx: e.clientX, sy: e.clientY, ox: st.x, oy: st.y, st };
     } else if (pointers.size === 2) {
       const [a, b] = [...pointers.values()];
-      pinch = { d0: Math.hypot(a.x - b.x, a.y - b.y) || 1, size0: st.size };
+      pinch = { d0: Math.hypot(a.x - b.x, a.y - b.y) || 1, size0: S().size, st: S() };
       drag = null;
     }
   });
@@ -162,12 +168,12 @@ export function attachTextPointer(canvas, st, { redraw, freeze, enabled = () => 
     if (pinch && pointers.size >= 2) {
       const [a, b] = [...pointers.values()];
       const d = Math.hypot(a.x - b.x, a.y - b.y) || 1;
-      st.size = clampSize(pinch.size0 * d / pinch.d0);
+      pinch.st.size = clampSize(pinch.size0 * d / pinch.d0);
       redraw();
     } else if (drag) {
       const rect = canvas.getBoundingClientRect();
-      st.x = Math.min(1, Math.max(0, drag.ox + (e.clientX - drag.sx) / rect.width));
-      st.y = Math.min(1, Math.max(0, drag.oy + (e.clientY - drag.sy) / rect.height));
+      drag.st.x = Math.min(1, Math.max(0, drag.ox + (e.clientX - drag.sx) / rect.width));
+      drag.st.y = Math.min(1, Math.max(0, drag.oy + (e.clientY - drag.sy) / rect.height));
       redraw();
     }
   });
@@ -177,7 +183,8 @@ export function attachTextPointer(canvas, st, { redraw, freeze, enabled = () => 
     if (pointers.size === 0) drag = null;
     else if (pointers.size === 1 && !drag) {      // 縮放結束、剩一指 → 接著拖
       const p = [...pointers.values()][0];
-      drag = { sx: p.x, sy: p.y, ox: st.x, oy: st.y };
+      const st = S();
+      drag = { sx: p.x, sy: p.y, ox: st.x, oy: st.y, st };
     }
   };
   canvas.addEventListener('pointerup', end);
@@ -200,6 +207,11 @@ export async function openOverlayEditor(row, data, onSaved) {
   let last = null;       // 最近一次畫出來的 { box, band, ... }（canvas 像素）
   let eff = null;        // 最近一次實際使用的 overlay（auto 時是算出來的）
 
+  // 多段加字：主文字（備註＋日期景點）之外，可以再加好幾段，每一段各自拖動、縮放、換顏色
+  const extras = (Array.isArray(row.overlay?.extras) ? row.overlay.extras : []).slice(0, MAX_EXTRAS).map(normalizeExtra);
+  const lastExtra = new Map();     // extra id → 最近一次畫出來的 { box, pad }
+  let sel = 'main';                // 目前選到哪一段：'main' 或 extra id
+
   const root = document.createElement('div');
   root.className = 'ove-overlay';
   root.innerHTML = `
@@ -209,6 +221,7 @@ export async function openOverlayEditor(row, data, onSaved) {
       <button type="button" class="btn btn-primary" data-a="done">完成</button>
     </div>
     <div class="ove-stage"><canvas class="ove-canvas"></canvas></div>
+    <div class="ove-layers" role="group" aria-label="文字段落"></div>
     <div class="ove-tools">${toolsHtml({ note, size: st.size })}</div>`;
   document.body.appendChild(root);
   document.body.classList.add('cap-open');
@@ -241,23 +254,89 @@ export async function openOverlayEditor(row, data, onSaved) {
       ? computeAuto(r, data, an, cw, ch, { showDate: st.showDate, showSpot: st.showSpot, metaMode: st.metaMode, shadow: st.shadow, size: st.size })
       : st;
     last = drawOverlay(ctx, cw, ch, r, { ...eff, color: st.color, band: st.band, shadow: st.shadow, showDate: st.showDate, showSpot: st.showSpot, metaMode: st.metaMode, size: st.size }, data, an);
+    lastExtra.clear();
+    for (const e of extras) { const res = drawExtra(ctx, cw, ch, e, an); if (res) lastExtra.set(e.id, res); }
     tools?.sync();
   }
   const redraw = () => { if (!raf) raf = requestAnimationFrame(draw); };
 
   function freeze() {
-    if (!st.auto) return;
+    if (sel !== 'main' || !st.auto) return;
     if (eff) { st.x = eff.x; st.y = eff.y; st.align = eff.align; }
     st.auto = false;
   }
 
-  tools = wireOverlayTools(root.querySelector('.ove-tools'), {
-    st, redraw,
-    getNote: () => note, setNote: (v) => { note = v; },
-    getEff: () => eff, getLast: () => last, getCw: () => cw,
-    hasSpot: () => hasSpotText(row, data),
+  const toolsEl = root.querySelector('.ove-tools');
+  const layersEl = root.querySelector('.ove-layers');
+  const noteInput = toolsEl.querySelector('.ove-note');
+  const curExtra = () => extras.find(e => e.id === sel) || null;
+  const curSt = () => curExtra() || st;
+
+  // 目前選到的那一段接上控制項（換段時重接）
+  function bindTools() {
+    tools?.destroy();
+    const ex = curExtra();
+    root.classList.toggle('ove-extra-mode', !!ex);
+    noteInput.value = ex ? ex.text : note;
+    noteInput.placeholder = ex ? '這段要寫什麼' : '備註（會壓在照片上）';
+    tools = wireOverlayTools(toolsEl, {
+      st: ex || st, redraw,
+      getNote: () => (ex ? ex.text : note), setNote: (v) => { if (ex) ex.text = v; else note = v; },
+      getEff: () => (ex || eff), getLast: () => (ex ? (lastExtra.get(ex.id) || null) : last), getCw: () => cw,
+      hasSpot: () => !ex && hasSpotText(row, data),
+    });
+    tools.sync();
+  }
+  function paintLayers() {
+    layersEl.innerHTML =
+      `<button type="button" class="ove-lay${sel === 'main' ? ' on' : ''}" data-lay="main">主文字</button>` +
+      extras.map(e => `<button type="button" class="ove-lay${sel === e.id ? ' on' : ''}" data-lay="${escapeHtml(e.id)}">${escapeHtml(e.text.trim().slice(0, 6) || '新文字')}</button>`).join('') +
+      (extras.length < MAX_EXTRAS ? `<button type="button" class="ove-lay add" data-add>＋ 新增文字</button>` : '') +
+      (curExtra() ? `<button type="button" class="ove-lay del" data-del>🗑 刪除這段</button>` : '');
+  }
+  function select(id) {
+    if (id === sel) return;
+    sel = id;
+    paintLayers();
+    bindTools();
+    redraw();
+  }
+  layersEl.addEventListener('click', (e) => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    if (b.dataset.lay) { select(b.dataset.lay); return; }
+    if (b.hasAttribute('data-add')) {
+      const x = newExtra(extras.length);
+      extras.push(x);
+      sel = x.id;
+      paintLayers(); bindTools(); redraw();
+      noteInput.focus();
+    } else if (b.hasAttribute('data-del')) {
+      const i = extras.findIndex(x => x.id === sel);
+      if (i >= 0) extras.splice(i, 1);
+      sel = 'main';
+      paintLayers(); bindTools(); redraw();
+    }
   });
-  attachTextPointer(canvas, st, { redraw, freeze });
+  noteInput.addEventListener('input', () => {
+    const ex = curExtra();
+    if (ex) { ex.text = noteInput.value; paintLayers(); }   // 段落小標籤跟著打的字變
+  });
+
+  // 點到哪一段的字就選那一段；點在空白處維持目前選的那一段（直接拖動它）
+  function pickAt(px, py) {
+    const k = cw / (canvas.getBoundingClientRect().width || 1);
+    const X = px * k, Y = py * k;
+    const inBox = (r) => r && X >= r.box.x - r.pad && X <= r.box.x + r.box.w + r.pad && Y >= r.box.y - r.pad && Y <= r.box.y + r.box.h + r.pad;
+    for (let i = extras.length - 1; i >= 0; i--) {
+      if (inBox(lastExtra.get(extras[i].id))) { select(extras[i].id); return; }
+    }
+    if (inBox(last)) select('main');
+  }
+
+  bindTools();
+  paintLayers();
+  attachTextPointer(canvas, curSt, { redraw, freeze, pick: pickAt });
 
   root.querySelector('.ove-head').addEventListener('click', (e) => {
     const a = e.target.closest('[data-a]')?.dataset.a;
@@ -275,6 +354,8 @@ export async function openOverlayEditor(row, data, onSaved) {
       row.overlay = st.auto
         ? { auto: true, x: eff?.x ?? st.x, y: eff?.y ?? st.y, color: 'auto', band: 'auto', align: eff?.align ?? st.align, ...flags }
         : { auto: false, x: st.x, y: st.y, color: st.color, band: st.band, align: st.align, ...flags };
+      const keep = extras.filter(e => e.text.trim()).map(e => ({ id: e.id, text: e.text.trim(), x: e.x, y: e.y, size: e.size, color: e.color, band: e.band, shadow: e.shadow !== false, align: e.align }));
+      if (keep.length) row.overlay.extras = keep;
       try { await putJournal(row); }
       catch (e) { alert('儲存失敗：' + (e.message || e)); btn.disabled = false; return; }
     }
