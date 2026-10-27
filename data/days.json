@@ -454,8 +454,8 @@
             "minutes": 40
           },
           "cost": {
-            "min": 500,
-            "max": 600
+            "min": 480,
+            "max": 480
           },
           "pay": "card",
           "mapQuery": "西鉄太宰府駅",
@@ -533,8 +533,8 @@
             "minutes": 45
           },
           "cost": {
-            "min": 500,
-            "max": 600
+            "min": 480,
+            "max": 480
           },
           "pay": "card",
           "mapQuery": "西鉄福岡（天神）駅",
@@ -707,7 +707,7 @@
       "weekday": "二",
       "kanji": "參",
       "title": "柳川日 · 遊船 → Keynote → 晚宴",
-      "summary": "上午搭西鐵到柳川撐篙遊河、吃鰻魚蒸籠飯。下午的兩場 Keynote 和大會晚宴 Banquet 都在御花。吃完晚宴有官方巴士送回天神（ACROS），21:15 左右到，還來得及去屋台吃炒拉麵。",
+      "summary": "上午搭西鐵到柳川撐篙遊河，在沖端下船吃若松屋的鰻魚蒸籠飯，逛一下老街。13:45 進御花看立花家史料館和松濤園，15:00 起兩場 Keynote，接著晚宴。晚宴後有官方巴士送回天神（ACROS），21:15 左右到。",
       "costEstimate": {
         "min": 6000,
         "max": 8800
@@ -795,7 +795,7 @@
         {
           "id": "d3-05",
           "time": "10:40",
-          "endTime": "11:40",
+          "endTime": "11:50",
           "segment": "morning",
           "kind": "sight",
           "status": "pick",
@@ -818,8 +818,8 @@
         },
         {
           "id": "d3-06",
-          "time": "11:55",
-          "endTime": "13:20",
+          "time": "12:00",
+          "endTime": "13:00",
           "segment": "noon",
           "kind": "meal",
           "status": "pick",
@@ -837,12 +837,15 @@
           "booking": {
             "required": false,
             "note": "190 席，不用訂位。備案本吉屋 沖端店"
-          }
+          },
+          "tips": [
+            "**要排隊的話，先縮短等一下的老街散步**，御花的參觀時間不要壓縮"
+          ]
         },
         {
           "id": "d3-07",
-          "time": "13:25",
-          "endTime": "14:40",
+          "time": "13:00",
+          "endTime": "13:45",
           "segment": "afternoon",
           "kind": "sight",
           "status": "normal",
@@ -851,6 +854,58 @@
           "cost": {
             "min": 400,
             "max": 600
+          },
+          "tips": [
+            "**13:45 往御花走**——最晚 14:00 一定要進御花"
+          ]
+        },
+        {
+          "id": "d3-07b",
+          "time": "13:45",
+          "endTime": "14:15",
+          "segment": "afternoon",
+          "kind": "sight",
+          "status": "pick",
+          "title": "御花：立花家史料館",
+          "spotId": "ohana",
+          "desc": "柳川藩主立花家的收藏館，約 3 萬件歷史資料，包括 1 件國寶、3 件重要文化財。",
+          "tips": [
+            "**在這裡買入場券**，同一張票等一下也能進松濤園",
+            "御花的參觀時間到 16:00，演講 17:00 才結束——**史料館和松濤園只能在 15:00 前看**"
+          ],
+          "cost": {
+            "min": 0,
+            "max": 1000
+          }
+        },
+        {
+          "id": "d3-07c",
+          "time": "14:15",
+          "endTime": "14:45",
+          "segment": "afternoon",
+          "kind": "sight",
+          "status": "pick",
+          "title": "御花：松濤園",
+          "spotId": "ohana",
+          "desc": "黑松和池塘組成的庭園，從「百疊大廣間」坐著看整片庭園。",
+          "tips": [
+            "用剛剛史料館的入場券進去"
+          ]
+        },
+        {
+          "id": "d3-07d",
+          "time": "14:45",
+          "endTime": "15:00",
+          "segment": "afternoon",
+          "kind": "transit",
+          "status": "normal",
+          "title": "走到演講會場（進門左手邊建築 2 樓）",
+          "spotId": "ohana",
+          "desc": "史料館、松濤園、演講會場都在御花同一個園區，走過去幾分鐘。",
+          "transit": {
+            "mode": "walk",
+            "detail": "園區內步行幾分鐘",
+            "minutes": 5
           }
         },
         {
@@ -889,18 +944,11 @@
           "time": "16:50",
           "endTime": "17:30",
           "segment": "afternoon",
-          "kind": "sight",
-          "status": "pick",
-          "title": "御花庭園散步（等晚宴開始）",
+          "kind": "free",
+          "status": "normal",
+          "title": "休息、等晚宴開始",
           "spotId": "ohana",
-          "desc": "Keynote 結束到 Banquet 開始還有 40 分鐘，人就在御花裡面，剛好走一趟松濤園。",
-          "tips": [
-            "不確定會議是否含庭園入場。若會場只用宴會廳，庭園要另外買票 ¥1,000——**到現場問一句就好**"
-          ],
-          "cost": {
-            "min": 0,
-            "max": 1000
-          }
+          "desc": "演講結束到晚宴開始有 40 分鐘，在會場附近休息、跟其他與會者聊聊。"
         },
         {
           "id": "d3-11",
