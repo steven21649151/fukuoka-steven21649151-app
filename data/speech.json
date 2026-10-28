@@ -2,9 +2,9 @@
  "_meta": {
   "note": "上台講稿。內容逐字取自投影片 C4L-E-5-2377.pptx 的備忘錄（只補了句號後漏掉的空格）。endSec 是以每分鐘 130 字估算、講完這頁時的累計秒數。",
   "source": "C4L-E-5-2377.pptx",
-  "updated": "2026-10-22",
+  "updated": "2026-10-28",
   "wpm": 130,
-  "totalWords": 1518,
+  "totalWords": 1556,
   "targetSec": 780
  },
  "slides": [
@@ -194,18 +194,19 @@
   {
    "n": 10,
    "title": "DFP12 Format (1/2)",
-   "words": 82,
+   "words": 120,
    "paragraphs": [
     [
      "The third technique is the data format underneath everything, DFP12.",
-     "As this figure shows, gradients are much smaller than weights, and their exponent range also shifts from layer to layer.",
+     "In language model fine-tuning, compared with the pre-trained weights and the activations, the gradients are the most sensitive to the data format, because their values change a lot from layer to layer.",
+     "As this figure shows, the gradient distribution is not uniform across layers, so it is hard to cover all of them with one fixed dynamic range.",
      "To handle this, DFP12 uses a five-bit exponent and a six-bit mantissa.",
      "More importantly, its exponent bias is dynamic: it is set by the largest exponent in each matrix.",
      "So, unlike the red box, which has a fixed range, the gray window moves with the data and covers almost the whole range."
     ]
    ],
    "skip": false,
-   "endSec": 437
+   "endSec": 455
   },
   {
    "n": 11,
@@ -221,7 +222,7 @@
     ]
    ],
    "skip": false,
-   "endSec": 471
+   "endSec": 488
   },
   {
    "n": 12,
@@ -242,7 +243,7 @@
     ]
    ],
    "skip": false,
-   "endSec": 517
+   "endSec": 534
   },
   {
    "n": 13,
@@ -260,7 +261,7 @@
     ]
    ],
    "skip": false,
-   "endSec": 555
+   "endSec": 572
   },
   {
    "n": 14,
@@ -279,7 +280,7 @@
     ]
    ],
    "skip": false,
-   "endSec": 618
+   "endSec": 635
   },
   {
    "n": 15,
@@ -296,7 +297,7 @@
     ]
    ],
    "skip": false,
-   "endSec": 659
+   "endSec": 677
   },
   {
    "n": 16,
@@ -311,7 +312,7 @@
     ]
    ],
    "skip": false,
-   "endSec": 696
+   "endSec": 713
   },
   {
    "n": 17,
@@ -319,7 +320,7 @@
    "words": 0,
    "paragraphs": [],
    "skip": true,
-   "endSec": 696
+   "endSec": 713
   },
   {
    "n": 18,
@@ -327,7 +328,7 @@
    "words": 0,
    "paragraphs": [],
    "skip": true,
-   "endSec": 696
+   "endSec": 713
   },
   {
    "n": 19,
@@ -340,7 +341,7 @@
     ]
    ],
    "skip": false,
-   "endSec": 701
+   "endSec": 718
   }
  ],
  "qa": {
