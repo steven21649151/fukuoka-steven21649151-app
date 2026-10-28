@@ -72,15 +72,25 @@ export function computeLayout(n, variant, W, H) {
 }
 
 // ---------- 繪製 ----------
-function drawCover(ctx, src, r) {
-  const iw = srcW(src), ih = srcH(src);
+// frame: { z, fx, fy }。z ≥ 1 是放大倍數，(fx, fy) 是格子中心對應到照片的位置（0–1）。沒給就是置中鋪滿
+export const MAX_ZOOM = 4;
+export function frameRect(iw, ih, r, frame) {
   const sc = Math.max(r.w / iw, r.h / ih);
-  const sw = r.w / sc, sh = r.h / sc;
-  ctx.drawImage(src, (iw - sw) / 2, (ih - sh) / 2, sw, sh, r.x, r.y, r.w, r.h);
+  const z = Math.min(MAX_ZOOM, Math.max(1, frame?.z || 1));
+  const sw = r.w / sc / z, sh = r.h / sc / z;
+  const fx = frame?.fx ?? 0.5, fy = frame?.fy ?? 0.5;
+  const sx = Math.min(iw - sw, Math.max(0, fx * iw - sw / 2));
+  const sy = Math.min(ih - sh, Math.max(0, fy * ih - sh / 2));
+  return { sx, sy, sw, sh, sc, z };
+}
+
+function drawCover(ctx, src, r, frame) {
+  const { sx, sy, sw, sh } = frameRect(srcW(src), srcH(src), r, frame);
+  ctx.drawImage(src, sx, sy, sw, sh, r.x, r.y, r.w, r.h);
 }
 
 // spec: { W, H, n, variant, getBitmap: async (index, cellRect) => bitmap, release?: bool,
-//         text?: { row, st, data } }   ← text 有給才加字（st 是加字編輯器的狀態）
+//         getFrame?: (index) => frame, text?: { row, st, data } }   ← text 有給才加字（st 是加字編輯器的狀態）
 // 回傳 { cells, gap, text: { eff, last } | null }（編輯器用來做點選交換、拖曳字、算自動顏色）
 export async function renderCollage(canvas, spec) {
   await ensureFonts();
@@ -96,7 +106,7 @@ export async function renderCollage(canvas, spec) {
     if (bmp) {
       ctx.save();
       ctx.beginPath(); ctx.rect(r.x, r.y, r.w, r.h); ctx.clip();
-      drawCover(ctx, bmp, r);
+      drawCover(ctx, bmp, r, spec.getFrame?.(i));
       ctx.restore();
       if (spec.release) bmp.close?.();
     }

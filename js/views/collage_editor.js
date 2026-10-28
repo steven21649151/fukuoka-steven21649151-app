@@ -4,7 +4,7 @@
 import { escapeHtml } from '../lib/md.js';
 import { loadBitmap, freeCanvas, ensureFonts, normalizeOverlay } from '../lib/overlay.js';
 import { jstParts } from '../lib/exif.js';
-import { RATIOS, OUT_SCALE, MAX_PHOTOS, renderCollage, variantCount } from '../lib/collage.js';
+import { RATIOS, OUT_SCALE, MAX_PHOTOS, MAX_ZOOM, renderCollage, variantCount, frameRect } from '../lib/collage.js';
 import { showProgress, toast, withLock, downloadBlob, shareFiles, safeName } from '../lib/ui.js';
 import { sortByTaken } from './share_sheet.js';
 import { toolsHtml, wireOverlayTools, attachTextPointer } from './overlay_editor.js';
@@ -33,6 +33,7 @@ export async function openCollageEditor({ rows, data, kind, day, spot }) {
   let lay = null;
   let closed = false, busy = false, dirty = false;
   const cache = new Map();    // id → 預覽用 ImageBitmap
+  const frames = new Map();   // id → { z, fx, fy }：這張照片在格子裡的取景（沒有就是置中鋪滿）
   const urls = [];
 
   // ---- 加字（記憶體內）----
@@ -78,9 +79,10 @@ export async function openCollageEditor({ rows, data, kind, day, spot }) {
         ${Object.entries(RATIOS).map(([k, v]) => `<button type="button" class="ove-tg${k === ratio ? ' on' : ''}" data-ratio="${k}">${escapeHtml(v.label)}</button>`).join('')}
         <span class="ove-sep"></span>
         <button type="button" class="ove-tg" data-a="variant">🔀 換版型</button>
+        <button type="button" class="ove-tg" data-a="reset-frames">↺ 取景重設</button>
         <button type="button" class="ove-tg" data-a="text">✍️ 加字</button>
       </div>
-      <div class="small faint col-hint col-main">點一格再點另一格可交換</div>
+      <div class="small faint col-hint col-main">拖曳照片調整取景，兩指縮放；點一格再點另一格可交換</div>
       <div class="col-strip col-main">
         ${all.map(r => {
           const u = URL.createObjectURL(r.thumb || r.blob); urls.push(u);
@@ -133,6 +135,7 @@ export async function openCollageEditor({ rows, data, kind, day, spot }) {
       lay = await renderCollage(tmp, {
         W, H, n: ids.length, variant,
         getBitmap: async (i) => bmps[i],
+        getFrame: (i) => frames.get(ids[i]),
         text: textSpec(),
       });
       canvas.width = W; canvas.height = H;
@@ -177,9 +180,87 @@ export async function openCollageEditor({ rows, data, kind, day, spot }) {
     enabled: () => txt.on && txt.panel,
   });
 
+  // ---- 拖曳照片調整取景、兩指縮放（加字展開時是拖曳文字，不動照片）----
+  const ptrs = new Map();       // pointerId → { x, y }
+  let grab = null;              // { idx, id, moved }
+  let swallowClick = false;     // 拖過就不要再當成「點格子交換」
+  const cellAt = (e) => {
+    const rc = canvas.getBoundingClientRect();
+    const x = (e.clientX - rc.left) * canvas.width / rc.width;
+    const y = (e.clientY - rc.top) * canvas.height / rc.height;
+    return lay ? lay.cells.findIndex((c, i) => i < order.length && x >= c.x && x <= c.x + c.w && y >= c.y && y <= c.y + c.h) : -1;
+  };
+  const frameOf = (id) => {
+    let f = frames.get(id);
+    if (!f) { f = { z: 1, fx: 0.5, fy: 0.5 }; frames.set(id, f); }
+    return f;
+  };
+  // 取景中心限制在照片範圍內，不會拖出空白
+  function clampFrame(id, cell) {
+    const f = frameOf(id), bmp = cache.get(id);
+    if (!bmp) return;
+    const iw = bmp.width, ih = bmp.height;
+    const { sw, sh } = frameRect(iw, ih, cell, f);
+    f.fx = Math.min(1 - sw / iw / 2, Math.max(sw / iw / 2, f.fx));
+    f.fy = Math.min(1 - sh / ih / 2, Math.max(sh / ih / 2, f.fy));
+    if (f.z <= 1.001 && Math.abs(f.fx - 0.5) < 1e-6 && Math.abs(f.fy - 0.5) < 1e-6) frames.delete(id);
+  }
+  const pdist = () => { const [a, b] = [...ptrs.values()]; return Math.hypot(a.x - b.x, a.y - b.y); };
+
+  canvas.addEventListener('pointerdown', (e) => {
+    if (txt.panel || !lay) return;
+    const idx = cellAt(e);
+    if (idx < 0) return;
+    try { canvas.setPointerCapture(e.pointerId); } catch { /* 抓不到就算了，照樣可以拖 */ }
+    ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (ptrs.size === 1) grab = { idx, id: order[idx], moved: false, sx: e.clientX, sy: e.clientY };
+    else if (grab) { grab.pinch = pdist(); grab.z0 = frameOf(grab.id).z; grab.moved = true; }
+  });
+  canvas.addEventListener('pointermove', (e) => {
+    const p = ptrs.get(e.pointerId);
+    if (!p || !grab || !lay) return;
+    const cell = lay.cells[grab.idx], bmp = cache.get(grab.id);
+    if (!cell || !bmp) return;
+    const rc = canvas.getBoundingClientRect();
+    const k = canvas.width / rc.width;                   // 螢幕像素 → 畫布像素
+    const dx = (e.clientX - p.x) * k, dy = (e.clientY - p.y) * k;
+    p.x = e.clientX; p.y = e.clientY;
+    if (!grab.moved && Math.hypot(e.clientX - grab.sx, e.clientY - grab.sy) < 6) return;
+    grab.moved = true;
+    const f = frameOf(grab.id);
+    if (ptrs.size >= 2 && grab.pinch) f.z = Math.min(MAX_ZOOM, Math.max(1, grab.z0 * pdist() / grab.pinch));
+    else {
+      const { sw, sh } = frameRect(bmp.width, bmp.height, cell, f);
+      // 手指往右拖，照片跟著往右 → 取景中心往左
+      f.fx -= dx * (sw / cell.w) / bmp.width;
+      f.fy -= dy * (sh / cell.h) / bmp.height;
+    }
+    clampFrame(grab.id, cell);
+    draw();
+  });
+  const endPtr = (e) => {
+    if (!ptrs.delete(e.pointerId)) return;
+    if (grab?.moved) { swallowClick = true; setTimeout(() => { swallowClick = false; }, 0); }
+    if (!ptrs.size) grab = null;
+    else if (grab) grab.pinch = 0;                        // 剩一指就繼續當拖曳
+  };
+  canvas.addEventListener('pointerup', endPtr);
+  canvas.addEventListener('pointercancel', endPtr);
+  canvas.addEventListener('wheel', (e) => {               // 電腦：滾輪縮放游標所在的那格
+    if (txt.panel || !lay) return;
+    const idx = cellAt(e);
+    if (idx < 0) return;
+    e.preventDefault();
+    const id = order[idx], f = frameOf(id);
+    f.z = Math.min(MAX_ZOOM, Math.max(1, f.z * (e.deltaY < 0 ? 1.1 : 1 / 1.1)));
+    clampFrame(id, lay.cells[idx]);
+    draw();
+  }, { passive: false });
+
   // ---- 點兩格交換（加字展開時是拖曳文字，不交換）----
   canvas.addEventListener('click', (e) => {
     if (!lay || txt.panel) return;
+    if (swallowClick) { swallowClick = false; return; }
     const rc = canvas.getBoundingClientRect();
     const x = (e.clientX - rc.left) * canvas.width / rc.width;
     const y = (e.clientY - rc.top) * canvas.height / rc.height;
@@ -201,10 +282,11 @@ export async function openCollageEditor({ rows, data, kind, day, spot }) {
     await renderCollage(c, {
       W, H, n: ids.length, variant, release: true,
       text: textSpec(),
+      getFrame: (i) => frames.get(ids[i]),
       getBitmap: async (i, cell) => {
         const r = byId.get(ids[i]);
         const iw = r.w || 1, ih = r.h || 1;
-        const sc = Math.max(cell.w / iw, cell.h / ih);
+        const sc = Math.max(cell.w / iw, cell.h / ih) * (frames.get(ids[i])?.z || 1);
         return loadBitmap(r.blob, Math.ceil(Math.max(iw, ih) * Math.min(1, sc) * 1.05), iw, ih);
       },
     });
@@ -255,6 +337,9 @@ export async function openCollageEditor({ rows, data, kind, day, spot }) {
       variant = (variant + 1) % Math.max(1, n);
       picked = -1; draw();
       if (n <= 1) toast('這個張數只有一種版型');
+    } else if (t.dataset.a === 'reset-frames') {
+      if (!frames.size) { toast('照片都還在預設取景'); return; }
+      frames.clear(); picked = -1; draw();
     } else if (t.dataset.a === 'text') {
       if (!txt.on) txt.on = true;
       setPanel(!txt.panel);
