@@ -4,7 +4,7 @@
   "source": "C4L-E-5-2377.pptx",
   "updated": "2026-10-28",
   "wpm": 130,
-  "totalWords": 1623,
+  "totalWords": 1580,
   "targetSec": 780
  },
  "slides": [
@@ -56,7 +56,7 @@
   {
    "n": 4,
    "title": "Motivation",
-   "words": 134,
+   "words": 91,
    "paragraphs": [
     [
      "Fine-tuning on edge devices faces three main challenges."
@@ -66,14 +66,12 @@
      "The second is nonlinearity: functions like SiLU and the exponential need dedicated hardware.",
      "And the third is compute: matrix multiplications take most of the MAC operations.",
      "So our goal is to build one framework that addresses all three challenges together.",
-     "In this work, for the memory, we build on QA-LoRA, which keeps the pretrained weights in integer and trains only small adapters.",
-     "For the nonlinearity, we replace SiLU with a multiplier-free approximation, SI-SiLU.",
-     "And for the compute, we use sparsity: the zeros induced by SI-SiLU are skipped, and the coarse-grained update stops backpropagation early.",
-     "Underneath all of these, the DFP12 format lowers the cost of each MAC."
+     "For the memory, we build on QA-LoRA, as introduced earlier.",
+     "For the nonlinearity, we use approximation, and for the compute, we use sparsity strategies."
     ]
    ],
    "skip": false,
-   "endSec": 136
+   "endSec": 116
   },
   {
    "n": 5,
@@ -102,7 +100,7 @@
     ]
    ],
    "skip": false,
-   "endSec": 200
+   "endSec": 180
   },
   {
    "n": 6,
@@ -124,7 +122,7 @@
     ]
    ],
    "skip": false,
-   "endSec": 249
+   "endSec": 229
   },
   {
    "n": 7,
@@ -146,7 +144,7 @@
     ]
    ],
    "skip": false,
-   "endSec": 298
+   "endSec": 278
   },
   {
    "n": 8,
@@ -174,7 +172,7 @@
     ]
    ],
    "skip": false,
-   "endSec": 378
+   "endSec": 358
   },
   {
    "n": 9,
@@ -193,7 +191,7 @@
     ]
    ],
    "skip": false,
-   "endSec": 430
+   "endSec": 410
   },
   {
    "n": 10,
@@ -210,7 +208,7 @@
     ]
    ],
    "skip": false,
-   "endSec": 486
+   "endSec": 466
   },
   {
    "n": 11,
@@ -226,7 +224,7 @@
     ]
    ],
    "skip": false,
-   "endSec": 519
+   "endSec": 499
   },
   {
    "n": 12,
@@ -247,7 +245,7 @@
     ]
    ],
    "skip": false,
-   "endSec": 565
+   "endSec": 546
   },
   {
    "n": 13,
@@ -265,7 +263,7 @@
     ]
    ],
    "skip": false,
-   "endSec": 603
+   "endSec": 583
   },
   {
    "n": 14,
@@ -284,7 +282,7 @@
     ]
    ],
    "skip": false,
-   "endSec": 666
+   "endSec": 646
   },
   {
    "n": 15,
@@ -301,7 +299,7 @@
     ]
    ],
    "skip": false,
-   "endSec": 708
+   "endSec": 688
   },
   {
    "n": 16,
@@ -316,7 +314,7 @@
     ]
    ],
    "skip": false,
-   "endSec": 744
+   "endSec": 724
   },
   {
    "n": 17,
@@ -324,7 +322,7 @@
    "words": 0,
    "paragraphs": [],
    "skip": true,
-   "endSec": 744
+   "endSec": 724
   },
   {
    "n": 18,
@@ -332,7 +330,7 @@
    "words": 0,
    "paragraphs": [],
    "skip": true,
-   "endSec": 744
+   "endSec": 724
   },
   {
    "n": 19,
@@ -345,7 +343,7 @@
     ]
    ],
    "skip": false,
-   "endSec": 749
+   "endSec": 729
   }
  ],
  "qa": {
