@@ -526,7 +526,7 @@
   {
    "n": 4,
    "title": "報告日 · 大濠公園＋運河城",
-   "summary": "早上散步的六個點全部免費、全在會場十分鐘圈內。**你的報告是 14:15，第 5 位講者**。報告完去大濠公園的日本庭園，再逛運河城到 18:50，搭地鐵到赤坂，19:30 在泰元 別館吃慶功燒肉。",
+   "summary": "早上散步的六個點全部免費、全在會場十分鐘圈內。**你的報告是 14:15，第 5 位講者**。報告完去大濠公園的日本庭園，再逛運河城、先買一部分伴手禮，回飯店放東西，19:30 在泰元 別館吃慶功燒肉。",
    "costEstimate": {
     "min": 13800,
     "max": 15500
@@ -660,7 +660,7 @@
     {
      "id": "d4-r18",
      "time": "17:00",
-     "endTime": "18:50",
+     "endTime": "18:15",
      "segment": "night",
      "kind": "shopping",
      "status": "normal",
@@ -668,9 +668,10 @@
      "spotId": "canal-city",
      "desc": "看建築、逛東棟。2nd STREET、3COINS+plus、GOOD MARKET KYUSHU 都是台灣沒有的店。",
      "tips": [
-      "主攻東棟：2nd STREET（1F）→ 3COINS+plus、GOOD MARKET KYUSHU（2F）",
-      "無印主攻消耗品（調理包咖哩、化妝水），同店同日未稅滿 ¥5,000 才免稅",
-      "**18:50 一定要走**，去中洲川端站搭地鐵"
+      "主攻東棟：2nd STREET（1F）→ 3COINS+plus（2F）",
+      "**伴手禮先買一部分**：東棟 2F 的 **GOOD MARKET KYUSHU**（九州各地的伴手禮），免稅要同一家店未稅滿 ¥5,000",
+      "無印主攻消耗品（調理包咖哩、化妝水）",
+      "**18:15 一定要走**，回飯店放東西"
      ],
      "booking": {
       "required": true,
@@ -679,16 +680,51 @@
     },
     {
      "id": "d4-r19",
-     "time": "18:50",
-     "endTime": "19:25",
+     "time": "18:15",
+     "endTime": "18:30",
      "segment": "night",
      "kind": "transit",
      "status": "normal",
-     "title": "運河城 → 泰元 別館",
+     "title": "運河城 → 飯店",
      "transit": {
       "mode": "subway",
-      "detail": "走到中洲川端站約 10 分 → 空港線 2 站到赤坂 → 1 號出口走 5 分",
-      "minutes": 25
+      "detail": "走到櫛田神社前站約 5 分 → 七隈線 1 站到天神南 → 出站走 3 分",
+      "minutes": 15
+     },
+     "cost": {
+      "min": 210,
+      "max": 210
+     },
+     "pay": "touch",
+     "mapQuery": "コンフォートイン福岡天神 福岡市中央区天神1-2-1"
+    },
+    {
+     "id": "d4-r20",
+     "time": "18:30",
+     "endTime": "18:50",
+     "segment": "night",
+     "kind": "hotel",
+     "status": "normal",
+     "title": "回飯店放東西",
+     "spotId": "hotel-comfort",
+     "desc": "把運河城買的和伴手禮放回房間，輕裝去吃燒肉。",
+     "tips": [
+      "**18:50 出門**",
+      "明天 **06:45 起床、07:10 退房**，晚上回來再打包"
+     ]
+    },
+    {
+     "id": "d4-r22",
+     "time": "18:50",
+     "endTime": "19:15",
+     "segment": "night",
+     "kind": "transit",
+     "status": "normal",
+     "title": "飯店 → 泰元 別館",
+     "transit": {
+      "mode": "subway",
+      "detail": "走天神地下街到空港線天神站約 6 分 → 1 站到赤坂 → 1 號出口走 5 分",
+      "minutes": 20
      },
      "cost": {
       "min": 210,
@@ -697,6 +733,7 @@
      "pay": "touch",
      "mapQuery": "泰元 別館 福岡市中央区舞鶴3-1-23",
      "tips": [
+      "趕不上就搭計程車，約 10 分、¥1,000 左右",
       "晚到就打電話 092-752-1567"
      ]
     },
